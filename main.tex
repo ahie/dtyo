@@ -1,0 +1,102 @@
+\RequirePackage{ifluatex, ifxetex} % these are for the portability of this example - can be omitted in any actual document made for a certain engine
+
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi>0
+\else
+  % only needed for using Greek letters outside math when running PDFLaTeX - leave out otherwise
+  %\PassOptionsToPackage{LGR}{fontenc}
+  %\RequirePackage{textgreek}
+\fi
+
+\documentclass[twoside,draftfooter]{tutthesis} % see appendix for list of options
+
+\pagestyle{headings} % Adds titles to the header
+
+% ifnameyear is defined to demonstrate both versions in a single file. You may leave it out and simply use one version throughout your file.
+\newif\ifnameyear
+\nameyearfalse
+
+% ==============
+% Basic packages
+% ==============
+% You should use these unless you really know what you're doing
+
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi>0
+\else\usepackage[utf8]{inputenc}
+\fi
+
+\usepackage[finnish,english]{babel} % The language of the thesis last
+
+% If you are working with a minimal LateX distribution, you may have to install some extra packages. Make sure that at least babel-finnish (available in e.g. texlive-lang-european) and the basic fonts (e.g. texlive-fonts-recommended) are installed.
+
+\usepackage[fixlanguage]{babelbib} % You should use this unless you are using biblatex. Add option fixlanguage if you're writing in English (the thesis writing guide is asymmetric, requiring Finnish theses to have e.g. 'eds.' for sources in English, while requiring English theses to have all such parts in English)
+
+\ifnameyear\usepackage{natbib} % add option longnamesfirst if you want to have full author list with first citation
+\else\providecommand{\citep}{\cite} % This template is written using \citep to get name-year citations right, and in numerical mode the command is here aliased to the standard \cite. If you use numbered citations, leave this out and use \cite
+\fi
+
+% ===============
+% Useful packages
+% ===============
+% Packages which are not required for a thesis that follows guidelines, but may be convenient or necessary in common cases
+
+\usepackage{microtype} % subtle but nice improvements to how text is printed
+\usepackage{textcase} % may be used to keep parts of title lowercase
+\usepackage{array}
+\usepackage{tabularx} % e.g. multiline cells
+%\usepackage{calc} %for performing length arithmetic such as column width = text width minus some other width
+%\usepackage{longtable} % for tables spanning multiple pages
+%\usepackage{psfrag} % editing ps files
+%\usepackage{subfig} % parallel small figures a,b,c,...
+%\usepackage{rotating} % for rotating e.g. full-page figures
+%\usepackage{siunitx} % nice formatting for combinations of number and unit
+\usepackage{amsopn} % For operator names; not necessary if amsmath is used
+%\usepackage[fleqn]{amsmath} %Extensions to math handling; if you use this, you should use e.g. gather instead of equation due to a hyperref bug
+\usepackage{listings} %Typesetting code
+\usepackage{color}
+\lstset{basicstyle=\footnotesize\ttfamily, numbers=left}
+\renewcommand{\lstlistingname}{Program} % Program if you're writing in English
+% If you want non-ASCII characters (e.g. in comments), check out the listingsutf8 package
+
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi>0
+  \usepackage[math-style=ISO]{unicode-math} %must not precede amsmath and most other math and font related packages
+\else
+  %\usepackage{bm} % The \bm command is used for bold italic variables used in some fields not to be used with unicode-math
+  %\usepackage[helvratio=1]{newtxtext} \usepackage{newtxmath}% some recommend the newtx fonts
+  \usepackage{textcomp} % symbols like \textdegree
+\fi
+
+% ===========================
+% Bibliographic information
+% ===========================
+% These must be set before loading pdfx or beginning document
+\author{Aleksi Hietanen}
+\title{Untitled}
+\datethesisapproved{2017}{10}{30} % year, month, day; no leading zeroes; submitted for bachelor's theses and thesisapproved for master’s
+\thesistype{Master’s thesis} % Do not use ASCII apostrophe ' as it will not be substituted with the correct one (’) in the PDF metadata. Note that there are both short version (this) and a long one - "Master’s" vs. "Master of Science"
+\major{Theoretical computer science}
+\programme{Master’s Degree Programme in Science and Engineering} % Note apostrophes on all fields for PDF metadata
+\keywords{}
+\examiner{} %\and for plural
+\datetopicapproved{2017}{9}{11}% only for master’s theses
+
+% Packages that need to be loaded late
+% ----------------------------------------------
+\usepackage[a-2u]{pdfx} % If you're using PDFLatex and your version of pdfx is not recent enough, you may run into the inputencoding bug. In that case, load inputenc after pdfx (and replace any non-ASCII characters in the metadata with e.g. \"{a})
+
+%\usepackage{hyperref} % This must (usually) be the last package you load - load this OR pdfx (which also loads hyperref). Usage of pdfx would be nice, but if you have issues with that you may fall back to just hyperref
+
+\begin{document}
+
+\maketitle
+
+\include{chapters/abstract-and-preface}
+\include{chapters/introduction}
+
+\ifnameyear
+  \bibliographystyle{babapaliktutnat}
+\else
+  \bibliographystyle{bababbrtut}
+\fi
+\bibliography{references}
+
+\end{document}
