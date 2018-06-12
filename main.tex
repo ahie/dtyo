@@ -81,9 +81,9 @@
 
 % Packages that need to be loaded late
 % ----------------------------------------------
-\usepackage[a-2u]{pdfx} % If you're using PDFLatex and your version of pdfx is not recent enough, you may run into the inputencoding bug. In that case, load inputenc after pdfx (and replace any non-ASCII characters in the metadata with e.g. \"{a})
+%\usepackage[a-2u]{pdfx} % If you're using PDFLatex and your version of pdfx is not recent enough, you may run into the inputencoding bug. In that case, load inputenc after pdfx (and replace any non-ASCII characters in the metadata with e.g. \"{a})
 
-%\usepackage{hyperref} % This must (usually) be the last package you load - load this OR pdfx (which also loads hyperref). Usage of pdfx would be nice, but if you have issues with that you may fall back to just hyperref
+\usepackage{hyperref} % This must (usually) be the last package you load - load this OR pdfx (which also loads hyperref). Usage of pdfx would be nice, but if you have issues with that you may fall back to just hyperref
 
 \begin{document}
 
@@ -91,6 +91,15 @@
 
 \include{chapters/abstract-and-preface}
 \include{chapters/introduction}
+\include{chapters/vae}
+\include{chapters/tsne}
+\include{chapters/methods}
+\include{chapters/results}
+\include{chapters/discussion}
+\include{chapters/conclusion}
+
+% Test bib
+\cite{batch_normalization, normalizing_flows, kernel_tsne, parametric_tsne, tsne, accelerated_tsne, stochastic_backpropagation, aevb, affinity_propagation, critical_assessment, phenograph, visne, flowmeans, householder_flow, inverse_autoregressive_flow}
 
 \ifnameyear
   \bibliographystyle{babapaliktutnat}
