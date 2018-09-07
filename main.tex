@@ -53,6 +53,11 @@
 %\usepackage[fleqn]{amsmath} %Extensions to math handling; if you use this, you should use e.g. gather instead of equation due to a hyperref bug
 \usepackage{listings} %Typesetting code
 \usepackage{color}
+\usepackage{mathtools}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage{tikzscale}
+\usetikzlibrary{bayesnet, patterns, decorations.pathreplacing}
 \lstset{basicstyle=\footnotesize\ttfamily, numbers=left}
 \renewcommand{\lstlistingname}{Program} % Program if you're writing in English
 % If you want non-ASCII characters (e.g. in comments), check out the listingsutf8 package
@@ -65,6 +70,12 @@
   \usepackage{textcomp} % symbols like \textdegree
 \fi
 
+\newcommand{\note}[1]{\textcolor{red}{[Note: #1]}}
+\DeclarePairedDelimiterX{\infdivx}[2]{(}{)}{%
+  #1\;\delimsize\|\;#2%
+}
+\newcommand{\dkl}{D_{\text{KL}}\infdivx}
+
 % ===========================
 % Bibliographic information
 % ===========================
@@ -75,8 +86,8 @@
 \thesistype{Master’s thesis} % Do not use ASCII apostrophe ' as it will not be substituted with the correct one (’) in the PDF metadata. Note that there are both short version (this) and a long one - "Master’s" vs. "Master of Science"
 \major{Theoretical computer science}
 \programme{Master’s Degree Programme in Science and Engineering} % Note apostrophes on all fields for PDF metadata
-\keywords{}
-\examiner{} %\and for plural
+\keywords{Key, Word, List}
+\examiner{John Doe} %\and for plural
 \datetopicapproved{2017}{9}{11} % only for master’s theses
 
 % Packages that need to be loaded late
@@ -89,23 +100,17 @@
 
 \maketitle
 
-\include{chapters/abstract-and-preface}
-\include{chapters/introduction}
-\include{chapters/vae}
-\include{chapters/tsne}
-\include{chapters/methods}
-\include{chapters/results}
-\include{chapters/discussion}
-\include{chapters/conclusion}
+\include{chapters/abstracts-and-preface}
+\include{chapters/body}
 
 % Test bib
-\cite{batch_normalization, normalizing_flows, kernel_tsne, parametric_tsne, tsne, accelerated_tsne, stochastic_backpropagation, aevb, affinity_propagation, critical_assessment, phenograph, visne, flowmeans, householder_flow, inverse_autoregressive_flow, trustworthiness, umap, mnist, relu, xavier_initializer, pca_first, pca_second, mass_cytometry, gan}
+\cite{batch_normalization, normalizing_flows, kernel_tsne, parametric_tsne, tsne, stochastic_backpropagation, aevb, affinity_propagation, critical_assessment, phenograph, visne, flowmeans, householder_flow, inverse_autoregressive_flow, trustworthiness, umap, mnist, relu, xavier_initializer, pca_first, pca_second, mass_cytometry, gan, how_batch_norm_works, accelerated_tsne_1, accelerated_tsne_2, stochastic_triplet_embedding, sne}
 
 \ifnameyear
   \bibliographystyle{babapaliktutnat}
 \else
   \bibliographystyle{bababbrtut}
 \fi
-\bibliography{references}
+\bibliography{main}
 
 \end{document}

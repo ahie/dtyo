@@ -74,6 +74,23 @@ archivePrefix = "arXiv",
   url =    {http://proceedings.mlr.press/v5/maaten09a.html},
 }
 
+@inproceedings{stochastic_triplet_embedding,
+  title={Stochastic triplet embedding},
+  author={Van Der Maaten, Laurens and Weinberger, Kilian},
+  booktitle={Machine Learning for Signal Processing (MLSP), 2012 IEEE International Workshop on},
+  pages={1--6},
+  year={2012},
+  organization={IEEE}
+}
+
+@inproceedings{sne,
+  title={Stochastic neighbor embedding},
+  author={Hinton, Geoffrey E and Roweis, Sam T},
+  booktitle={Advances in neural information processing systems},
+  pages={857--864},
+  year={2003}
+}
+
 @article{tsne,
   added-at = {2015-06-19T12:07:15.000+0200},
   author = {van der Maaten, Laurens and Hinton, Geoffrey},
@@ -90,7 +107,15 @@ archivePrefix = "arXiv",
   year = 2008
 }
 
-@article{accelerated_tsne,
+@inproceedings{accelerated_tsne_1,
+  title={Scalable optimization of neighbor embedding for visualization},
+  author={Yang, Zhirong and Peltonen, Jaakko and Kaski, Samuel},
+  booktitle={International Conference on Machine Learning},
+  pages={127--135},
+  year={2013}
+}
+
+@article{accelerated_tsne_2,
   author = "van der Maaten, Laurens",
   journal = "Journal of Machine Learning Research",
   pages = "3221--3245",
@@ -98,6 +123,18 @@ archivePrefix = "arXiv",
   url = "http://jmlr.org/papers/v15/vandermaaten14a.html",
   volume = "15",
   year = "2014"
+}
+
+@article{barnes_hut,
+  author = "{Barnes Josh} and {Hut Piet}",
+  doi = "http://dx.doi.org/10.1038/324446a0 10.1038/324446a0",
+  journal = "Nature",
+  month = "dec",
+  pages = "446",
+  publisher = "Nature Publishing Group",
+  title = "{A hierarchical O(N log N) force-calculation algorithm}",
+  volume = "324",
+  year = "1986"
 }
 
 @InProceedings{stochastic_backpropagation,
@@ -290,6 +327,16 @@ archivePrefix = "arXiv",
   booktitle = {Proceedings of the IEEE}
 }
 
+@online{fashion_mnist,
+  author       = {Han Xiao and Kashif Rasul and Roland Vollgraf},
+  title        = {Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms},
+  date         = {2017-08-28},
+  year         = {2017},
+  eprintclass  = {cs.LG},
+  eprinttype   = {arXiv},
+  eprint       = {cs.LG/1708.07747},
+}
+
 @inproceedings{relu,
      author = {Glorot, Xavier and Bordes, Antoine and Bengio, Yoshua},
       month = apr,
@@ -314,7 +361,7 @@ archivePrefix = "arXiv",
   url =    {http://proceedings.mlr.press/v9/glorot10a.html},
 }
 
-@article{pca_first,
+@article{pca_1,
   author = "F.R.S., Karl Pearson",
   doi = "10.1080/14786440109462720",
   eprint = "https://doi.org/10.1080/14786440109462720",
@@ -328,7 +375,7 @@ archivePrefix = "arXiv",
   year = "1901"
 }
 
-@article{pca_second,
+@article{pca_2,
  ISSN = {00063444},
  URL = {http://www.jstor.org/stable/2333955},
  author = {Harold Hotelling},
@@ -395,5 +442,192 @@ archivePrefix = "arXiv",
   timestamp = {Wed, 07 Jun 2017 14:40:52 +0200},
   biburl    = {https://dblp.org/rec/bib/journals/corr/KingmaB14},
   bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{on_the_convergence_of_adam,
+  title={On the Convergence of Adam and Beyond},
+  author={Sashank J. Reddi and Satyen Kale and Sanjiv Kumar},
+  booktitle={International Conference on Learning Representations},
+  year={2018},
+  url={https://openreview.net/forum?id=ryQu7f-RZ}
+}
+
+@inproceedings{largevis,
+  title={Visualizing Large-scale and High-dimensional Data},
+  author={Tang, Jian and Liu, Jingzhou and Zhang, Ming and Mei, Qiaozhu},
+  booktitle={Proceedings of the 25th International Conference on World Wide Web},
+  pages={287--297},
+  year={2016},
+  organization={International World Wide Web Conferences Steering Committee}
+}
+
+@article{hidden_talents_of_the_vae,
+  author    = {Bin Dai and
+               Yu Wang and
+               John Aston and
+               Gang Hua and
+               David P. Wipf},
+  title     = {Veiled Attributes of the Variational Autoencoder},
+  journal   = {CoRR},
+  volume    = {abs/1706.05148},
+  year      = {2017},
+  url       = {http://arxiv.org/abs/1706.05148},
+  archivePrefix = {arXiv},
+  eprint    = {1706.05148},
+  timestamp = {Mon, 13 Aug 2018 16:48:51 +0200},
+  biburl    = {https://dblp.org/rec/bib/journals/corr/DaiWAHW17},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{stacked_denoising_ae,
+  title={Stacked denoising autoencoders: Learning useful representations in a deep network with a local denoising criterion},
+  author={Vincent, Pascal and Larochelle, Hugo and Lajoie, Isabelle and Bengio, Yoshua and Manzagol, Pierre-Antoine},
+  journal={Journal of machine learning research},
+  volume={11},
+  number={Dec},
+  pages={3371--3408},
+  year={2010}
+}
+
+@inproceedings{denoising_vae,
+  author    = {Daniel Jiwoong Im and
+               Sungjin Ahn and
+               Roland Memisevic and
+               Yoshua Bengio},
+  title     = {Denoising Criterion for Variational Auto-Encoding Framework},
+  booktitle = {Proceedings of the Thirty-First {AAAI} Conference on Artificial Intelligence,
+               February 4-9, 2017, San Francisco, California, {USA.}},
+  pages     = {2059--2065},
+  year      = {2017},
+  crossref  = {DBLP:conf/aaai/2017},
+  url       = {http://aaai.org/ocs/index.php/AAAI/AAAI17/paper/view/14213},
+  timestamp = {Mon, 06 Mar 2017 11:36:24 +0100},
+  biburl    = {https://dblp.org/rec/bib/conf/aaai/ImAMB17},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{ais,
+  title={Annealed importance sampling},
+  author={Neal, Radford M},
+  journal={Statistics and computing},
+  volume={11},
+  number={2},
+  pages={125--139},
+  year={2001},
+  publisher={Springer}
+}
+
+@article{ais_vae,
+  author    = {Yuhuai Wu and
+               Yuri Burda and
+               Ruslan Salakhutdinov and
+               Roger B. Grosse},
+  title     = {On the Quantitative Analysis of Decoder-Based Generative Models},
+  journal   = {CoRR},
+  volume    = {abs/1611.04273},
+  year      = {2016},
+  url       = {http://arxiv.org/abs/1611.04273},
+  archivePrefix = {arXiv},
+  eprint    = {1611.04273},
+  timestamp = {Wed, 07 Jun 2017 01:00:00 +0200},
+  biburl    = {https://dblp.org/rec/bib/journals/corr/WuBSG16},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{rpca_1,
+  title={Robust principal component analysis?},
+  author={Cand{\`e}s, Emmanuel J and Li, Xiaodong and Ma, Yi and Wright, John},
+  journal={Journal of the ACM (JACM)},
+  volume={58},
+  number={3},
+  pages={11},
+  year={2011},
+  publisher={ACM}
+}
+
+@article{rpca_2,
+  title={Rank-sparsity incoherence for matrix decomposition},
+  author={Chandrasekaran, Venkat and Sanghavi, Sujay and Parrilo, Pablo A and Willsky, Alan S},
+  journal={SIAM Journal on Optimization},
+  volume={21},
+  number={2},
+  pages={572--596},
+  year={2011},
+  publisher={SIAM}
+}
+
+@inproceedings{tensorflow,
+  title={Tensorflow: a system for large-scale machine learning.},
+  author={Abadi, Mart{\'\i}n and Barham, Paul and Chen, Jianmin and Chen, Zhifeng and Davis, Andy and Dean, Jeffrey and Devin, Matthieu and Ghemawat, Sanjay and Irving, Geoffrey and Isard, Michael and others},
+  booktitle={OSDI},
+  volume={16},
+  pages={265--283},
+  year={2016}
+}
+
+@article{tensorflow_distributions,
+  title={TensorFlow Distributions},
+  author={Dillon, Joshua V and Langmore, Ian and Tran, Dustin and Brevdo, Eugene and Vasudevan, Srinivas and Moore, Dave and Patton, Brian and Alemi, Alex and Hoffman, Matt and Saurous, Rif A},
+  journal={arXiv preprint arXiv:1711.10604},
+  year={2017}
+}
+
+@article{cuda,
+ author = {Nickolls, John and Buck, Ian and Garland, Michael and Skadron, Kevin},
+ title = {Scalable Parallel Programming with CUDA},
+ journal = {Queue},
+ issue_date = {March/April 2008},
+ volume = {6},
+ number = {2},
+ month = mar,
+ year = {2008},
+ issn = {1542-7730},
+ pages = {40--53},
+ numpages = {14},
+ url = {http://doi.acm.org/10.1145/1365490.1365500},
+ doi = {10.1145/1365490.1365500},
+ acmid = {1365500},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+}
+
+@inproceedings{nn_descent,
+  title={Efficient k-nearest neighbor graph construction for generic similarity measures},
+  author={Dong, Wei and Moses, Charikar and Li, Kai},
+  booktitle={Proceedings of the 20th international conference on World wide web},
+  pages={577--586},
+  year={2011},
+  organization={ACM}
+}
+
+@article{universal_approximation_theorem,
+  title={Approximation capabilities of multilayer feedforward networks},
+  author={Hornik, Kurt},
+  journal={Neural networks},
+  volume={4},
+  number={2},
+  pages={251--257},
+  year={1991},
+  publisher={Elsevier}
+}
+
+@inproceedings{on_the_surprising_behavior_of_distance_metrics,
+  title={On the surprising behavior of distance metrics in high dimensional space},
+  author={Aggarwal, Charu C and Hinneburg, Alexander and Keim, Daniel A},
+  booktitle={International conference on database theory},
+  pages={420--434},
+  year={2001},
+  organization={Springer}
+}
+
+@article{jensens_inequality,
+  title={Sur les fonctions convexes et les in{\'e}galit{\'e}s entre les valeurs moyennes},
+  author={Jensen, Johan Ludwig William Valdemar},
+  journal={Acta mathematica},
+  volume={30},
+  number={1},
+  pages={175--193},
+  year={1906},
+  publisher={Springer}
 }
 
