@@ -1,57 +1,40 @@
 \chapter{Introduction}
 \label{ch:introduction}
 
-\begin{itemize}
-\item Dimensionality reduction
-\item High dimensional data visualization, explorative data analysis
-  \begin{itemize}
-  \item Common in fields such as ...
-  \item Unsupervised learning
-  \end{itemize}
-\item Previous work
-  \begin{itemize}
-  \item Describe common dimensionality reduction methods, pros and cons
-  \item Parametric vs non-parametric methods
-  \end{itemize}
-\item Contribution of this thesis
-  \begin{itemize}
-  \item Enhance parametric t-SNE, so that ...
-  \end{itemize}
-\item Layout of this thesis
-  \begin{itemize}
-  \item What is covered in each chapter
-  \item What background is expected from the reader
-  \end{itemize}
-\end{itemize}
-
 Dimensionality reduction is one of the key research areas in the field of machine learning. As real world data sets are usually of high dimensionality, such as ..., methods to reduce this dimensionality are sought to alleviate the problems arising when dealing with high dimensional data. 
 
-At present, much of the data being produced, gathered and analyzed is very high dimensional. As a consequence of high dimensional data, several problems arise
+At present, much of the data being produced, gathered and analyzed is very high dimensional. As a consequence, several challenges arise when analyses are being performed on these vast amounts of high dimensional data.
+At present, 
 
 Several problems arise when dealing with high dimensional data:
 - distances between pairs of points become less distinguished as dimensionality of the space increases \cite{on_the_surprising_behavior_of_distance_metrics}.
-- The volume of a space grows exponentially along with the number of dimensions. This leads to even large data sets appearing sparse in the feature space.
-- algorithms depend on dimensionality of the data being processed and large computational costs are accrued, especially sampling becomes 
+- The volume of a space grows exponentially along with the number of dimensions. This leads to even large data sets appearing sparse in the feature space. Efficient sampling requires a lot of points
+- algorithms depend on dimensionality of the data being processed and large computational costs are accrued, especially sampling becomes
+- need for more training data, k-means example \cite[p.~263]{understanding_machine_learning}
+- algorithm complexity depends on the dimensionality of data being processed, large costs are accrued
+- from a more practical perspective, high dimensional data by itself is hard to directly reason about and difficult to visualize in any meaningful sense
 - In literature, problems arising from high dimensionality are collectively referred to as the \textit{curse of dimensionality}.
-feature selection and feature extraction as solutions. in this work we focus on purely unsupervised feature extraction through 
+To tackle these problems associated with high dimensional data, reduction of the dimensionality of data is sought through various means of feature selection and feature extraction. Feature selection is ..., whereas feature extraction ... . In this work we focus on purely unsupervised feature extraction through 
 
-The manifold assumption and manifold learning. In general, dimensionality reduction aims to preserve as much information of the underlying data as possible. Several different methods for dimensionality reduction have been developed over the years. Arguably the most well known and applied method in practice is \textit{principal component analysis} (PCA), developed independently by ... \cite{pca_1} and ... \cite{pca_2} for the study of ... . PCA however suffers from the fact that it only aims to maximize the explained variance... thus local structure of the data is poorly preserved. Methods that aim to preserve local structure ...
+Fortunately, the so called manifold hypothesis \cite{manifold_hypothesis} often holds for real world data sets. The manifold hypothesis posits that the high dimensional data in question lies near a much lower dimensional manifold. As an example, take This in turn implies that learning  
+
+This, together with the classical Johnson-Lindenstrauss lemma \cite{johnson_lindenstrauss}, which gives bounds to the error 
+
+The manifold assumption and manifold learning. In general, dimensionality reduction aims to preserve as much information of the underlying data as possible. Several different methods for dimensionality reduction have been developed over the years. Arguably the most well known and applied method in practice is Principal Component Analysis (PCA), developed independently by ... \cite{pca_1} and ... \cite{pca_2} for the study of ... . Although very efficient to compute and easy to reason about, PCA however suffers from a few drawbacks, making it not ideal for data visualization purposes. the fact that it only aims to maximize the variance... thus local structure of the data is poorly preserved. On the other hand, methods that aim to preserve local structure of data typically suffer from the curse of dimensionality in several ways, such as ... .
 
 Dimensionality reduction is a tool commonly used in disciplines such as ... for visualization of high dimensional data as 2 or 3 dimensional scatter plots. 
 
-In exploratory data analysis, visualization of the characteristics of data sets plays a 
+In exploratory data analysis, visualization of the characteristics of data sets plays a key role.
 
-A further issue is the volume of data being gathered. Most methods scale poorly to large amounts of data, leaving
+In this work a method for improving the applicability of parametric t-SNE is proposed. In the proposed method a generative model in the form of a Variational Autoencoder is first trained and subsequently used to produce training data for the parametric t-SNE embedding. The benefits of this procedure are severalfold: . Further, each of these benefits are experimentally demonstrated on a variety of data sets, both quantitatively and qualitatively.
 
-In this work we demonstrate a method for improving the training of ptsne.
-
-The structure of this thesis is as follows. In Chapter~\ref{ch:background_and_related_work} the relevant background and related work to the contribution of this thesis is covered to give context to an audience not previously familiar with ... . The chapter is organized into two main sections, one that builds up to the theory and recent advances in variational autoencoders from the introduction of neural networks, and the other section presents the development of the t-Distributed Stochastic Neighbor Embedding algorithm (t-SNE) up to its parametrization with neural networks.
+The structure of this thesis is as follows. In Chapter~\ref{ch:background_and_related_work} the relevant background and related work to the contribution of this thesis is covered to give context to an audience not previously familiar with variational autoencoders or the t-SNE method for dimensionality reduction. The chapter is organized into two main sections, one that builds up to the theory and recent advances in variational autoencoders from the introduction of neural networks, and the other section presents the development of t-SNE up to its parametrization with neural networks.
 
 The method developed for this thesis is presented in Chapter~\ref{ch:method}. The proposed learning and inference algorithms are presented, together with discussion on extensions and further variations. In addition, relevant implementation details for the application built to produce the results for the experiments chapter are briefly covered.
 
 In Chapter~\ref{ch:experiments} the proposed method is tested experimentally for different properties presented in the previous chapter, as well as compared with existing methods. The experiments chapter includes descriptions for the various data sets being used and definitions for the metrics employed to quantitatively assess the quality of the produced low dimensional embeddings by our method and the methods under comparison.
 
-The final chapter presents discussion and conclusions for the work carried out for this thesis. Additionally, directions for future work are suggested.
+The final chapter presents discussion and conclusions for the work carried out in this thesis. Additionally, directions for future work are suggested.
 
 \chapter{Background and Related Work}
 \label{ch:background_and_related_work}
@@ -59,16 +42,38 @@ The final chapter presents discussion and conclusions for the work carried out f
 \section{Variational Autoencoders}
 \label{section:variational_autoencoders}
 
+Before moving on to specialized artificial neural network structures and learning objectives.
+
 \subsection{Artificial Neural Networks}
 \label{section:artificial_neural_networks}
 
-Before moving on to specialized artificial neural network structures and learning objectives.
+Artificial neural networks, or as commonly referred to simply as neural networks, are at the core of many recent advances in machine learning. Particularly, deep neural network architectures now hold many state-of-the-art results in fields including computer vision, natural language processing and speech recognition \cite{deep_learning}. More broadly, neural networks are applicable 
+
+Supervised learning, \cite{imagenet}.
+
+Unsupervised and semi-supervised learning, representation learning.
+
+Reinforcement learning, atari \cite{deep_atari}, go \cite{alphago} and later go \textit{tabula rasa} \cite{alphazero}.
+
+The development of ever faster hardware for accelerating the computations needed for deep learning has played a pivotal role in the resurgence of 
+
+A more simplistic view of neural networks would be to consider them as simply very powerful function approximators. The theoretical underpinning for this view is the universal approximation theorem \cite{universal_approximation_theorem}.
+
+\begin{figure}[!htb]
+  \centering
+  \resizebox{\textwidth}{!}{\input{tikz/nn.tikz}\unskip}
+  \caption{Feed-forward neural network with input dimension 3, output dimension 2 and 2 hidden layers of dimension 4 each.}
+  \label{fig:ae}
+\end{figure}
 
 \subsubsection{Basic Principles}
 \newpage \phantom{x}
 \newpage
 
 \subsubsection{Learning in Artificial Neural Networks}
+
+History of backprop (citations like/leading to \cite{nature_backprop}). SGD, Momentum, ... second order methods?
+
 \newpage \phantom{x}
 \newpage
 
@@ -94,13 +99,19 @@ Before moving on to specialized artificial neural network structures and learnin
 
 \subsubsection{Kullback-Leibler Divergence}
 
+The Kullback-Leibler divergence, or KL-divergence for short, is a measure of dissimilarity between two probability distributions.
+
 For continuous probability distributions $p$ and $q$ the Kullback-Leibler divergence is defined as
 
-$$\dkl{p}{q} = \int p(\mathbf{x}) \log \frac{p(\mathbf{x})}{q(\mathbf{x})} d\mathbf{x}$$
+$$\dkl{p}{q} = \int p(\mathbf{x}) \log \frac{p(\mathbf{x})}{q(\mathbf{x})} d\mathbf{x},$$
 
-and for discrete probability distributions
+and likewise for discrete probability distributions as
 
-$$\dkl{p}{q} = \sum_{i} p(i) \log \frac{p(i)}{q(i)}$$
+$$\dkl{p}{q} = \sum_{i} p(i) \log \frac{p(i)}{q(i)}.$$
+
+The following properties hold for 
+
+One must note however that KL-divergence is asymmetric, i.e. $\dkl{p}{q} \neq \dkl{q}{p}$, and thus cannot readily be used as a metric.
 
 \subsubsection{The Evidence Lower Bound}
 
@@ -141,11 +152,15 @@ The objective of VAEs is to model the data as well as possible, i.e. maximize th
 \end{aligned}
 \end{equation}
 
-This bound is better known as the \textit{evidence lower bound}, or ELBO for short. In many cases the KL-divergence can be integrated analytically, for instance in the case of two Gaussian distributions. In cases where the KL term cannot be solved analytically, Monte Carlo methods are used to approximate the expectation.
+This bound is better known as the \textit{evidence lower bound}, or ELBO for short. An interpretation for the terms of the last equation is that the objective is to have the posterior $\qphi(\bz \vert \bxi)$ match the prior $p(\bz)$ as accurately as 
+
+In many cases the KL-divergence can be integrated analytically, for instance in the case of two Gaussian distributions. In cases where the KL term cannot be solved analytically, Monte Carlo methods are used to approximate the expectation.
+
+Several modifications to this objective have been proposed, e.g. the $\beta$-VAE \cite{beta_vae, understanding_beta_vae}, $\beta$-TCVAE \cite{beta_tcvae} and InfoVAE \cite{infovae}.
 
 \subsubsection{Obtaining Differentiable Monte Carlo Estimates}
 
-To optimize the parameters $\mathbf{\theta}$ and $\mathbf{\phi}$ of our neural network using backpropagation we require a way to compute the gradient of the expectations of random variables. By introducing a random noise variable as input we are able to obtain samples from the latent distribution by using the \texit{reparameterization trick}.
+To optimize the parameters $\mathbf{\theta}$ and $\mathbf{\phi}$ of our neural network using backpropagation we require a way to compute the gradient of the expectations of random variables. By introducing a random noise variable as input we are able to obtain samples from the latent distribution by using the \textit{reparameterization trick}.
 
 $$\widetilde{\mathbf{z}} = g_{\mathbf{\phi}}(\mathbf{\epsilon}, \mathbf{z})$$
 
