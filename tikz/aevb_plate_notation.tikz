@@ -1,0 +1,14 @@
+\begin{tikzpicture}
+  \node[obs]                (x) {$\mathbf{x}$};
+  \node[latent, left=of x]  (z) {$\mathbf{z}$};
+  \node[latent, above=of x] (t) {$\mathbf{\theta}$};
+  \node[latent, above=of z] (p) {$\mathbf{\phi}$};
+  
+  \edge[bend left]          {z} {x};
+  \edge[bend left, dashed]  {x} {z};
+  \edge                     {t} {z};
+  \edge                     {t} {x};
+  \edge[dashed]             {p} {z};
+  
+  \plate {zx} {(x)(z)}      {$N$};
+\end{tikzpicture}

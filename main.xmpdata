@@ -1,0 +1,1 @@
+\if@author@given \Author {\@author }\fi \if@title@given \Title {\@title }\fi \if@keywords@given \Keywords {\@XMPKeywords }\fi \if@subjectcomplete \Subject {\@Subject }\fi \@metadatawritehook \pdfxEnableCommands {\let \NoCaseChange \@firstofone } 
