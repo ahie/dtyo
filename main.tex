@@ -50,7 +50,7 @@
 %\usepackage{rotating} % for rotating e.g. full-page figures
 %\usepackage{siunitx} % nice formatting for combinations of number and unit
 \usepackage{amsopn} % For operator names; not necessary if amsmath is used
-%\usepackage[fleqn]{amsmath} %Extensions to math handling; if you use this, you should use e.g. gather instead of equation due to a hyperref bug
+\usepackage[fleqn]{amsmath} %Extensions to math handling; if you use this, you should use e.g. gather instead of equation due to a hyperref bug
 \usepackage{listings} %Typesetting code
 \usepackage{color}
 \usepackage{mathtools}
@@ -76,6 +76,7 @@
   #1\;\delimsize\|\;#2%
 }
 \newcommand{\dkl}{D_{\text{KL}}\infdivx}
+\newcommand\norm[1]{\left\lVert#1\right\rVert}
 
 % ===========================
 % Bibliographic information

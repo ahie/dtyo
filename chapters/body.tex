@@ -191,6 +191,16 @@ Taking a slight departure from the preceding discussion on neural networks, the 
 
 The Stochastic Neighbor Embedding (SNE) algorithm \cite{sne}, developed by Hinton and Roweis in 2003, serves as the precursor to the later improved t-SNE algorithm. As such, SNE shares many similarities in its construction with t-SNE, and thus by first developing an understanding of SNE and its pitfalls the motivation behind the t-SNE algorithm become more apparent.
 
+As the algorithm's name suggests, the approach SNE takes to perform dimensionality reduction is probabilistic in nature. Without delving directly into the mathematical details, an intuitive overview of the algorithm 
+
+$$p_{ij} = \frac{exp(-\norm{\mathbf{x}_i - \mathbf{x}_j}^2 / 2 \sigma_i^2)}{\sum_{k \neq i} exp(-\norm{\mathbf{x}_i - \mathbf{x}_k}^2 / 2 \sigma_i^2)}$$
+
+$$q_{ij} = \frac{exp(-\norm{\mathbf{y}_i - \mathbf{y}_j}^2)}{\sum_{k \neq i} exp(-\norm{\mathbf{y}_i - \mathbf{y}_k}^2)}$$
+
+$$C = \sum_i \sum_j p_{ij} \log \frac{p_{ij}}{q_{ij}} = \sum_i \dkl{P_i}{Q_i}$$
+
+$$\frac{\partial C}{\partial \mathbf{y}_i} = 2 \sum_j (\mathbf{y}_i - \mathbf{y}_j)(p_{ij} - q_{ij} + p_{ji} - q_{ij})$$
+
 \newpage
 
 \subsection{t-SNE}
@@ -198,13 +208,13 @@ The Stochastic Neighbor Embedding (SNE) algorithm \cite{sne}, developed by Hinto
 
 $$2^{H(p(\mathbf{x}))} = 2^{-\sum_{i=1}^{N} p(\mathbf{x}^{(i)}) \log_2 p(\mathbf{x}^{(i)})}$$
 
-$$q_{ij} = \frac{(1 + \mathbf{y}_i - \mathbf{y}_j)^{-1}}{\sum_{k \neq l} (1 + \mathbf{y}_k - \mathbf{y}_l)^{-1}}$$
-
 $$p_{ij} = \frac{p_{j \vert i} + p_{i \vert j}}{2 N}$$
 
-$$C = \dkl{P}{Q} = \sum_i \sum_j p_{ij} \log \frac{p_{ij}}{q_{ij}}$$
+$$q_{ij} = \frac{(1 + \mathbf{y}_i - \mathbf{y}_j)^{-1}}{\sum_{k \neq l} (1 + \mathbf{y}_k - \mathbf{y}_l)^{-1}}$$
 
-$$\frac{\partial C}{\partial \mathbf{y}_i} = $$
+$$C_{\text{t-SNE}} = $$
+
+$$\frac{\partial C_{\text{t-SNE}}}{\partial \mathbf{y}_i} = $$
 
 \newpage \phantom{x}
 \newpage \phantom{x}
