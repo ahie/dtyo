@@ -1,9 +1,8 @@
 \begin{tikzpicture}[x=1em,y=1em]
-\draw[->] (-2,0) -- (2,0) coordinate (x axis);
-\draw[->] (0,-2) -- (0,2) coordinate (y axis);
-\draw[step=0.75,gray,very thin] (-1.9,-1.9) grid (1.9, 1.9);
-\fill[green, fill opacity=0.5, rotate around={45:(0,0)}, very thick] (0,0) ellipse (2.0 and 0.5);
-\fill[red, fill opacity=0.5, very thick] (0,0) circle (0.7);
-%\draw[very thick, green, opacity=0.5] (2, -2.0) -- node {Exact} (2,-1.9);
-%\draw[very thick, red, opacity=0.5] (2, -1.85) -- node {Approximate} (2,-1.75);
+  \draw[->] (-2,0) -- (2,0) coordinate (x axis);
+  \draw[->] (0,-2) -- (0,2) coordinate (y axis);
+  \draw[step=0.75,gray,very thin] (-1.9,-1.9) grid (1.9, 1.9);
+  \fill[green, fill opacity=0.5, rotate around={45:(0,0)}, very thick] (0,0) ellipse (2.0 and 0.5);
+  \fill[red, fill opacity=0.5, very thick] (0,0) circle (0.7);
+  \node[draw, align=left,fill=white,scale=0.3] at (1.5,-1.5) {\textcolor{green}{Exact}\\ \textcolor{red}{Approximate}};
 \end{tikzpicture}

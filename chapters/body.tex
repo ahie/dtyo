@@ -183,8 +183,14 @@ $$\widetilde{\mathbf{z}} = g_{\mathbf{\phi}}(\mathbf{\epsilon}, \mathbf{z})$$
 
 \section{t-Distributed Stochastic Neighbor Embedding}
 \label{section:tsne}
+
+Taking a slight departure from the preceding discussion on neural networks, the theory, and development leading to the acclaimed dimensionality reduction algorithm t-SNE will be presented. At the end of this section, a way to utilize the t-SNE objective to train an embedding function parameterized by a neural network will be shown, thereby connecting this section with the previous in a natural way, as well as covering the final preliminaries to the contribution of this thesis.
+
 \subsection{SNE}
 \label{subsection:sne}
+
+The Stochastic Neighbor Embedding (SNE) algorithm \cite{sne}, developed by Hinton and Roweis in 2003, serves as the precursor to the later improved t-SNE algorithm. As such, SNE shares many similarities in its construction with t-SNE, and thus by first developing an understanding of SNE and its pitfalls the motivation behind the t-SNE algorithm become more apparent.
+
 \newpage
 
 \subsection{t-SNE}
@@ -267,16 +273,16 @@ To quantitatively evaluate the quality of embeddings two different measures are 
 
 \subsection{k-Nearest Neighbor Classifier}
 
-Given a labeled data set, a k-nearest neighbor (k-NN) classifier can be used to roughly assess how well different classes are separated in the output space of an embedding. A k-NN classifier works by 
+Given a labeled data set a k-nearest neighbor (k-NN) classifier can be used to roughly assess how well different classes are separated in the output space of an embedding. A k-NN classifier works simply by returning the majority label of a given point's k-nearest neighbors in the training data set. For example in the 1-NN classifier case, the decision boundary can be geometrically visualized as a Voronoi diagram as in Figure~\ref{fig:voronoi}.
 
-Throughout the experiments, the performance of nearest neighbor classifiers in the output space of embeddings will be evaluated. More precisely, a 1-nearest neighbor classifier is used, i.e. the 
+Throughout the experiments, the performance of nearest neighbor classifiers in the output space of embeddings will be evaluated. More precisely, the accuracy of a 1-nearest neighbor classifier with the Euclidean metric for determining neighbor distance is used.
 
-For parametric methods, the classifier can be trained on the embedded data points and separately tested on the training set. This enables evaluating the ability of the embedding function to generalize to unseen data. On the other hand, for non-parametric methods, the final embedded data points need to be split into train and test sets for the 1-NN classifier.
+For parametric methods, the classifier can be trained on the embedding of training data points and separately tested on the training set. This enables evaluating the ability of the embedding function to generalize to unseen data. On the other hand, for non-parametric methods, the final embedded data points need to be split into train and test sets for the 1-NN classifier.
 
 \begin{figure}[!htb]
   \centering
   \resizebox{0.5\textwidth}{!}{\input{tikz/voronoi.tikz}\unskip}
-  \caption{Voronoi diagram illustrating the decision boundaries of 10 different classes of an 1-NN classifier.}
+  \caption{Voronoi diagram illustrating the decision boundaries of 10 different classes of a 1-NN classifier. Black dots represent the training data points, and the different colors correspond to the label of the data point for that region. Any point to be classified would receive the label corresponding to the location in the tesselation it lies on. The distance metric used in this example is the Euclidean distance.}
   \label{fig:voronoi}
 \end{figure}
 
@@ -284,13 +290,11 @@ For parametric methods, the classifier can be trained on the embedded data point
 
 Trustworthiness, introduced by Venna et al. \cite{trustworthiness}, is a measure of the degree to which local structure is preserved in the output space relative to the input space after dimensionality reduction is performed. Trustworthiness has been used to compare multiple dimensionality reduction methods for the purposes of visualization of high dimensional data sets such as gene expression data \cite{trustworthiness_gene_expression} and gene interaction graphs \cite{trustworthiness_gene_interaction}.
 
-Computation of trustworthiness is done by considering how the rank order for each point's $k$ nearest neighbors changes. Formally, for a chosen $k$ neighbors it is given by the following 
+Computation of trustworthiness is done by comparing how the rank order for each point's $k$ nearest neighbors in the output space match that of the input space. Formally, for a chosen number $k$ of neighbors it is given by the following 
 
 $$T(k) = 1 - \frac{2}{nk (2n - 3k - 1)} \sum^{n}_{i=1} \sum_{j \in \mathcal{N}_{i}^{k}} (r(i, j) - k),$$
 
-where $n$ is the total number of data points under consideration, $\mathcal{N}_{i}^{k}$ is the set of $k$ neighbors of data point $i$ and $r(i, j)$ is the function giving the rank order of...
-
-When evaluating parametric dimensionality reduction methods, trustworthiness can be computed for held out data points.
+where $n$ is the total number of data points under consideration, $\mathcal{N}_{i}^{k}$ is the set of $k$ nearest neighbors in the output space of data point $i$, and $r(i, j)$ is a function giving the rank of node $j$ in the nearest neighbor ordering of node $i$. The possible values for trustworthiness range from 0 to 1, indicating complete loss of local structure and perfect preservation of local structure, respectively.
 
 \section{Network Structure and Parameters}
 
