@@ -193,48 +193,66 @@ The Stochastic Neighbor Embedding (SNE) algorithm \cite{sne}, developed by Hinto
 
 As the algorithm's name suggests, the approach SNE takes to perform dimensionality reduction is probabilistic in nature. Without delving directly into the mathematical details, an intuitive overview of the algorithm is that it assigns a probability to the event that each pair of points gets picked in the input space, after which the distribution of points in the output space is attempted to be matched with that of the input space under a similar probability measure. The natural way to match two distributions is familiar from the discussion on variational bayes methods, namely the KL-divergence between these two is used as a loss function for the embedding of data points, which can be optimized with various methods, including the previously covered gradient descent.
 
-To formalize these notions, we begin with how the probability distribution in the input space is defined. 
+To formalize these notions, we begin with how the conditional probability distribution $p_{j \vert i}$ in the input space is defined by the equation
 
-$$p_{ij} = \frac{exp(-\norm{\mathbf{x}_i - \mathbf{x}_j}^2 / 2 \sigma_i^2)}{\sum_{k \neq i} exp(-\norm{\mathbf{x}_i - \mathbf{x}_k}^2 / 2 \sigma_i^2)}$$
+$$p_{j \vert i} = \frac{exp(-\norm{\mathbf{x}_i - \mathbf{x}_j}^2 / 2 \sigma_i^2)}{\sum_{k \neq i} exp(-\norm{\mathbf{x}_i - \mathbf{x}_k}^2 / 2 \sigma_i^2)},$$
 
-where $\sigma_i$ is determined separately for each data point $i$ by forcing the perplexity of $P_i$ equal to some preset value. Perplexity is defined as
+where $\sigma_i$ is determined separately for each data point $i$ by forcing the perplexity of $P_i$ equal to some preset value. Perplexity is an information theoretic measure of how well a distribution predicts its samples. For a given probability distribution, perplexity is defined as the exponentiation of the distribution's Shannon entropy, e.g. in the case of our discrete $P_i$:
 
-$$2^{H(p(\mathbf{x}))} = 2^{-\sum_{i=1}^{N} p(\mathbf{x}^{(i)}) \log_2 p(\mathbf{x}^{(i)})}.$$
+$$b^{H(P_i)} = b^{-\sum_{j=1}^{n} p_{j \vert i} \log_b p_{j \vert i}},$$
 
-From the definition we can see that a larger $\sigma$ will be chosen in low density areas and a smaller $\sigma$ will be used in high density areas. Effectively, $\sigma$ is adapted to fit the core assumption that the data points lie on a uniformly sampled manifold within the high dimensional ambient manifold $\mathbb{R}^d$. Perplexity is thus a value proportional to the number of effective local neighbors considered by the algorithm when the embedding is being optimized.
+where $b$ is the unit used to measure entropy in, typically chosen to be either $2$ or $e$, for bits or nats, respectively. From the definition we can see that larger $\sigma$ will be chosen in low density areas and smaller $\sigma$ will be used in high density areas. Effectively, $\sigma$ is adapted to fit the core assumption that the data points lie on a uniformly sampled manifold within the high dimensional ambient manifold $\mathbb{R}^d$. Perplexity is thus a value proportional to the number of effective local neighbors considered by the algorithm when the embedding is being optimized.
 
-The joint distribution in the output space is similarly defined with a Gaussian kernel:
+The conditional distribution in the output space is similarly defined with a Gaussian kernel:
 
-$$q_{ij} = \frac{exp(-\norm{\mathbf{y}_i - \mathbf{y}_j}^2)}{\sum_{k \neq i} exp(-\norm{\mathbf{y}_i - \mathbf{y}_k}^2)},$$
+$$q_{j \vert i} = \frac{exp(-\norm{\mathbf{y}_i - \mathbf{y}_j}^2)}{\sum_{k \neq i} exp(-\norm{\mathbf{y}_i - \mathbf{y}_k}^2)},$$
 
-where each $\mathbf{y}_i$ represents the point in the embedding for data point $i$. A notable difference is the absence of the variance term $2 \sigma_i^2$, which can be interpreted as having been set to $1$ throughout.
+where each $\mathbf{y}_i$ represents the point in the embedding for data point $\mathbf{x}_i$. A notable difference is the absence of the variance term $2 \sigma_i^2$, which can be interpreted as having been set to $1$ throughout.
 
-Now that we have defined both the output and input distributions for points, the cost function can be formulated as the sum of KL-divergences between each.
+Now that we have defined both the output and input distributions for points, the objective function can be formulated as the sum of KL-divergences between each input-output distribution pair
 
-$$C = \sum_i \dkl{P_i}{Q_i} = \sum_i \sum_j p_{ij} \log \frac{p_{ij}}{q_{ij}}$$
+\begin{equation}
+C = \sum_i \dkl{P_i}{Q_i} = \sum_i \sum_j p_{j \vert i} \log \frac{p_{j \vert i}}{q_{j \vert i}}.
+\label{eq:c_sne}
+\end{equation}
 
-An important fact to note is that the cost function is in fact non-convex, which implies the unfortunate property of the cost function having multiple local minima, i.e. the optimization of the function is not guaranteed to terminate at the global optimum. With random restarts and other optimization methods, such as stochastic gradient descent and gradient descent with momentum, it is possible to attempt to escape poor local minima.
+An important fact to note is that the objective function is in fact non-convex, which implies the unfortunate property that the optimization of the objective function is not guaranteed to terminate at the global optimum due to the potential existence of multiple local minima. With random restarts and other optimization methods, such as gradient descent with momentum, it is possible to attempt to escape poor local minima.
 
-Gradient descent is typically used to optimize the embedding. The partial derivatives w.r.t. each point in the embedding is given by 
+Another important observation to make is how the non-symmetry of the KL-divergence plays a role in penalizing the embedding. \note{Explain how.}
 
-$$\frac{\partial C}{\partial \mathbf{y}_i} = 2 \sum_j (\mathbf{y}_i - \mathbf{y}_j)(p_{ij} - q_{ij} + p_{ji} - q_{ij})$$
+Gradient descent is typically used to optimize the embedding. The partial derivatives w.r.t. each point in the embedding is given by
 
-This has the intuitive interpretation of a force directed layouting algorithm, where each pair of points is either pushing or pulling on each other, depending on whether they are less or more likely to be neighbors under the output's joint distribution than the input's.
+\begin{equation}
+\frac{\partial C}{\partial \mathbf{y}_i} = 2 \sum_j (\mathbf{y}_i - \mathbf{y}_j)(p_{j \vert i} - q_{j \vert i} + p_{i \vert j} - q_{i \vert j})
+\label{eq:c_sne_grad}
+\end{equation}
 
-\newpage
+This has the intuitive interpretation of a force directed layouting algorithm, where each pair of points is either pushing or pulling on each other, depending on whether they are less or more likely to be neighbors under the output's conditional distribution than the input's.
 
 \subsection{t-SNE}
 \label{subsection:tsne}
 
-One of the main issues t-SNE aims to address in SNE is the so called \textit{crowding problem}. The crowding problem arises as a consequence of ....
+The t-SNE algorithm aims to address two issues of the original SNE algorithm. First, through considering joint distributions, instead of conditional distributions, the form of the gradient of the objective function becomes easier to compute. Second, one of the main issues with plain SNE is the so called \textit{crowding problem}, which is addressed by considering a heavier tailed probability distribution function in the output space, namely Student's t-Distribution. Together these improvements enable better separation of natural clusters in the output space of the algorithm, as compared to the original SNE method.
+
+Symmetric SNE \cite{symmetric_sne} aims to provide an objective function whose gradient is easier to compute than the one of Equation~\ref{eq:c_sne_grad}. 
 
 $$p_{ij} = \frac{p_{j \vert i} + p_{i \vert j}}{2 N}$$
 
-$$q_{ij} = \frac{(1 + \mathbf{y}_i - \mathbf{y}_j)^{-1}}{\sum_{k \neq l} (1 + \mathbf{y}_k - \mathbf{y}_l)^{-1}}$$
+$$q_{ij} = \frac{(1 + \norm{\mathbf{y}_i - \mathbf{y}_j}^2)^{-1}}{\sum_{k \neq l} (1 + \norm{\mathbf{y}_k - \mathbf{y}_l}^2)^{-1}}$$
 
-$$C_{\text{t-SNE}} = $$
+The t-SNE objective function is defined similarly to the SNE objective (cf. Equation~\ref{eq:c_sne}), except the sum is taken over KL-divergences of the joint probabilities:
+
+$$C_{\text{t-SNE}} = \sum_i \dkl{P_i}{Q_i} = \sum_i \sum_j p_{ij} \log \frac{p_{ij}}{q_{ij}}.$$
+
+For which the following gradient can be derived, w.r.t. each $\mathbf{y}_i$:
 
 $$\frac{\partial C_{\text{t-SNE}}}{\partial \mathbf{y}_i} = $$
+
+To alleviate the crowding problem, 
+
+Methods to improve the runtime of t-SNE have been subsequently proposed: \cite{accelerated_tsne_1, accelerated_tsne_2}. The use of the fast multipole method \cite{fast_multipole} has not been explored due to no suitable expansion for the t-Distributed forces in the output space exist.
+
+Worth a mention is the Stochastic Triplet Embedding \cite{stochastic_triplet_embedding} and Multiple Maps t-SNE \cite{multiple_maps_tsne} methods developed on top of t-SNE, developed to handle non-metric similarities present in the data.
 
 \newpage \phantom{x}
 \newpage \phantom{x}
@@ -242,6 +260,11 @@ $$\frac{\partial C_{\text{t-SNE}}}{\partial \mathbf{y}_i} = $$
 
 \subsection{Parametric t-SNE}
 \label{subsection:parametric_tsne}
+
+t-SNE does not directly enable out of sample extension, but random-walk t-SNE has been developed for this purpose. Although the following pitfalls are present in this method: ...
+
+A natural extension to t-SNE would be to learn a function parameterizing the embedding from input space to output space.
+
 \newpage
 
 \chapter{Method}
