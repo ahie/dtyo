@@ -122,22 +122,20 @@ and likewise for discrete probability distributions as
 
 $$\dkl{p}{q} = \sum_{i} p(i) \log \frac{p(i)}{q(i)}.$$
 
-The following properties hold for 
+The following properties hold for KL-divergence:
 
-One must note however that KL-divergence is asymmetric, i.e. $\dkl{p}{q} \neq \dkl{q}{p}$, and thus cannot readily be used as a metric.
+\begin{enumerate}
+\item $\dkl{p}{q} \geq 0$ (non-negativity)
+\item $\dkl{p}{q} = 0 \iff p = q$ (identity of indeiscernibles).
+\end{enumerate}
+
+One must note however that KL-divergence is asymmetric, i.e. $\dkl{p}{q} \neq \dkl{q}{p}$, and does not obey the triangle inequality, thus cannot readily be used as a metric. Especially asymmetry is important to take into account when interpreting the use of KL-divergence.
 
 \subsubsection{The Evidence Lower Bound}
 
 \newpage
 
 \subsection{Auto Encoding Variational Bayes}
-
-\begin{figure}[!htb]
-  \centering
-  \resizebox{\textwidth}{!}{\input{tikz/vae.tikz}\unskip}
-  \caption{Variational Autoencoder}
-  \label{fig:vae}
-\end{figure}
 
 \begin{figure}[!htb]
   \centering
@@ -177,6 +175,15 @@ To optimize the parameters $\mathbf{\theta}$ and $\mathbf{\phi}$ of our neural n
 
 $$\widetilde{\mathbf{z}} = g_{\mathbf{\phi}}(\mathbf{\epsilon}, \mathbf{z})$$
 
+\subsubsection{Network Structure}
+
+\begin{figure}[!htb]
+  \centering
+  \resizebox{\textwidth}{!}{\input{tikz/vae.tikz}\unskip}
+  \caption{Variational Autoencoder}
+  \label{fig:vae}
+\end{figure}
+
 \newpage \phantom{x}
 \newpage \phantom{x}
 \newpage
@@ -189,45 +196,47 @@ Taking a slight departure from the preceding discussion on neural networks, the 
 \subsection{SNE}
 \label{subsection:sne}
 
-The Stochastic Neighbor Embedding (SNE) algorithm \cite{sne}, developed by Hinton and Roweis in 2003, serves as the precursor to the later improved t-SNE algorithm. As such, SNE shares many similarities in its construction with t-SNE, and thus by first developing an understanding of SNE and its pitfalls the motivation behind the t-SNE algorithm become more apparent.
+The Stochastic Neighbor Embedding (SNE) algorithm \cite{sne}, developed by Hinton and Roweis in 2003, serves as the precursor to the later improved t-SNE algorithm. As such, SNE shares many similarities in its definition with t-SNE, and thus by first developing an understanding of SNE and its pitfalls the motivation behind the t-SNE algorithm become more apparent.
 
-As the algorithm's name suggests, the approach SNE takes to perform dimensionality reduction is probabilistic in nature. Without delving directly into the mathematical details, an intuitive overview of the algorithm is that it assigns a probability to the event that each pair of points gets picked in the input space, after which the distribution of points in the output space is attempted to be matched with that of the input space under a similar probability measure. The natural way to match two distributions is familiar from the discussion on variational bayes methods, namely the KL-divergence between these two is used as a loss function for the embedding of data points, which can be optimized with various methods, including the previously covered gradient descent.
+\note{FIXME: As the algorithm's name suggests, the approach SNE takes to perform dimensionality reduction is probabilistic in nature. Without delving directly into the mathematical details, an intuitive overview of the algorithm is that it attempts to embed data points in a lower dimension by preserving probability distributions defining . More concretely, the algorithm proceeds as follows. First, for all data points a probability distribution ... . After these probability distributions have been formed, the actual embedding is performed by attempting to distribute the points in the output space such that similarly defined probability distributions in the output space match those of the input space as closely as possible. The natural way to match two distributions is familiar from the discussion on variational bayes methods, namely the KL-divergence between the input and output space distributions is used as the objective function for the embedding of data points, which can be optimized with various methods, including the previously covered gradient descent.}
 
-To formalize these notions, we begin with how the conditional probability distribution $p_{j \vert i}$ in the input space is defined by the equation
+To formalize these notions, we begin with how the conditional probability of data point $i$ picking data point $j$ in the input space is defined by the equation
 
 $$p_{j \vert i} = \frac{exp(-\norm{\mathbf{x}_i - \mathbf{x}_j}^2 / 2 \sigma_i^2)}{\sum_{k \neq i} exp(-\norm{\mathbf{x}_i - \mathbf{x}_k}^2 / 2 \sigma_i^2)},$$
 
-where $\sigma_i$ is determined separately for each data point $i$ by forcing the perplexity of $P_i$ equal to some preset value. Perplexity is an information theoretic measure of how well a distribution predicts its samples. For a given probability distribution, perplexity is defined as the exponentiation of the distribution's Shannon entropy, e.g. in the case of our discrete $P_i$:
+where the probability can be seen as being derived as if a Gaussian was centered on $\mathbf{x}_i$ and an appropriate normalizing term is used to scale the individual probabilities so that they sum to $1$. The variance (denoted by $\sigma_i$ in the equation) is determined separately for each data point $i$ by forcing the perplexity of the conditional distribution over all other data points (later denoted as $P_i$) to equal some preset value.
+
+Perplexity is an information theoretic measure of how well a distribution predicts its samples. For a given probability distribution, perplexity is defined as the exponentiation of the distribution's entropy $H$, e.g. in the case of our discrete $P_i$:
 
 $$b^{H(P_i)} = b^{-\sum_{j=1}^{n} p_{j \vert i} \log_b p_{j \vert i}},$$
 
-where $b$ is the unit used to measure entropy in, typically chosen to be either $2$ or $e$, for bits or nats, respectively. From the definition we can see that larger $\sigma$ will be chosen in low density areas and smaller $\sigma$ will be used in high density areas. Effectively, $\sigma$ is adapted to fit the core assumption that the data points lie on a uniformly sampled manifold within the high dimensional ambient manifold $\mathbb{R}^d$. Perplexity is thus a value proportional to the number of effective local neighbors considered by the algorithm when the embedding is being optimized.
+where $b$ is the unit used to measure entropy, typically chosen to be either $2$ or $e$, for bits or nats, respectively. From the definition, we can see that larger variance will be chosen for the Gaussians in areas of the input space where the density of data points is low and smaller variance will be used in high density areas. Effectively, variance is adapted to fit the core assumption that the data points lie on a uniformly sampled manifold within the input space. Perplexity is thus a value proportional to the number of effective local neighbors considered by the algorithm when the embedding is being optimized. In practice, the correct $\sigma_i$ for each $i$ is numerically sought using the bisection method, up to a small error tolerance in the resulting perplexity.
 
 The conditional distribution in the output space is similarly defined with a Gaussian kernel:
 
 $$q_{j \vert i} = \frac{exp(-\norm{\mathbf{y}_i - \mathbf{y}_j}^2)}{\sum_{k \neq i} exp(-\norm{\mathbf{y}_i - \mathbf{y}_k}^2)},$$
 
-where each $\mathbf{y}_i$ represents the point in the embedding for data point $\mathbf{x}_i$. A notable difference is the absence of the variance term $2 \sigma_i^2$, which can be interpreted as having been set to $1$ throughout.
+where each $\mathbf{y}_i$ represents the point in the embedding for data point $\mathbf{x}_i$. A notable difference is the absence of the variance term $2 \sigma_i^2$, which can be interpreted as having been set to $1$ throughout. This choice of fixed variance can, in turn, be interpreted as smoothing out the manifold of the input space when performing the embedding.
 
-Now that we have defined both the output and input distributions for points, the objective function can be formulated as the sum of KL-divergences between each input-output distribution pair
+Now that we have defined both the output and input distributions for points, the objective function can be formulated as the sum of KL-divergences between each input-output distribution pair:
 
 \begin{equation}
 C = \sum_i \dkl{P_i}{Q_i} = \sum_i \sum_j p_{j \vert i} \log \frac{p_{j \vert i}}{q_{j \vert i}}.
 \label{eq:c_sne}
 \end{equation}
 
-An important fact to note is that the objective function is in fact non-convex, which implies the unfortunate property that the optimization of the objective function is not guaranteed to terminate at the global optimum due to the potential existence of multiple local minima. With random restarts and other optimization methods, such as gradient descent with momentum, it is possible to attempt to escape poor local minima.
-
-Another important observation to make is how the non-symmetry of the KL-divergence plays a role in penalizing the embedding. \note{Explain how.}
-
-Gradient descent is typically used to optimize the embedding. The partial derivatives w.r.t. each point in the embedding is given by
+To optimize this objective gradient descent is typically used to update the positions of the embedded data points. The partial derivative of the objective w.r.t. a point $i$ in the embedding is given by
 
 \begin{equation}
-\frac{\partial C}{\partial \mathbf{y}_i} = 2 \sum_j (\mathbf{y}_i - \mathbf{y}_j)(p_{j \vert i} - q_{j \vert i} + p_{i \vert j} - q_{i \vert j})
+\frac{\partial C}{\partial \mathbf{y}_i} = 2 \sum_j (\mathbf{y}_i - \mathbf{y}_j)(p_{j \vert i} - q_{j \vert i} + p_{i \vert j} - q_{i \vert j}).
 \label{eq:c_sne_grad}
 \end{equation}
 
 This has the intuitive interpretation of a force directed layouting algorithm, where each pair of points is either pushing or pulling on each other, depending on whether they are less or more likely to be neighbors under the output's conditional distribution than the input's.
+
+An important fact to note is that the objective function is in fact non-convex, which implies the unfortunate property that the optimization of the objective function is not guaranteed to terminate at the global optimum due to the potential existence of multiple local minima. With random restarts and other optimization methods, such as gradient descent with momentum, it is possible to attempt to escape poor local minima.
+
+Another important observation to make is how the non-symmetry of the KL-divergence plays a role in penalizing the embedding. \note{Explain how.}
 
 \subsection{t-SNE}
 \label{subsection:tsne}
@@ -242,7 +251,7 @@ $$q_{ij} = \frac{(1 + \norm{\mathbf{y}_i - \mathbf{y}_j}^2)^{-1}}{\sum_{k \neq l
 
 The t-SNE objective function is defined similarly to the SNE objective (cf. Equation~\ref{eq:c_sne}), except the sum is taken over KL-divergences of the joint probabilities:
 
-$$C_{\text{t-SNE}} = \sum_i \dkl{P_i}{Q_i} = \sum_i \sum_j p_{ij} \log \frac{p_{ij}}{q_{ij}}.$$
+$$C_{\text{t-SNE}} = \sum_i \dkl{P}{Q} = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}}.$$
 
 For which the following gradient can be derived, w.r.t. each $\mathbf{y}_i$:
 
@@ -270,7 +279,10 @@ A natural extension to t-SNE would be to learn a function parameterizing the emb
 \chapter{Method}
 \label{ch:method}
 
+The method proposed in this work involves combining the VAE model with Parametric t-SNE to produce a general framework for improved parametric dimensionality reduction for visualization. In this chapter the 
+
 \section{Learning a Parametric Embedding Using VAE Sampling}
+
 \newpage \phantom{x}
 \newpage \phantom{x}
 \newpage
