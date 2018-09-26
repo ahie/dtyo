@@ -126,7 +126,7 @@ The following properties hold for KL-divergence:
 
 \begin{enumerate}
 \item $\dkl{p}{q} \geq 0$ (non-negativity)
-\item $\dkl{p}{q} = 0 \iff p = q$ (identity of indeiscernibles).
+\item $\dkl{p}{q} = 0 \iff p = q$ (identity of indiscernibles).
 \end{enumerate}
 
 One must note however that KL-divergence is asymmetric, i.e. $\dkl{p}{q} \neq \dkl{q}{p}$, and does not obey the triangle inequality, thus cannot readily be used as a metric. Especially asymmetry is important to take into account when interpreting the use of KL-divergence.
@@ -204,7 +204,7 @@ To formalize these notions, we begin with how the conditional probability of dat
 
 $$p_{j \vert i} = \frac{exp(-\norm{\mathbf{x}_i - \mathbf{x}_j}^2 / 2 \sigma_i^2)}{\sum_{k \neq i} exp(-\norm{\mathbf{x}_i - \mathbf{x}_k}^2 / 2 \sigma_i^2)},$$
 
-where the probability can be seen as being derived as if a Gaussian was centered on $\mathbf{x}_i$ and an appropriate normalizing term is used to scale the individual probabilities so that they sum to $1$. The variance (denoted by $\sigma_i$ in the equation) is determined separately for each data point $i$ by forcing the perplexity of the conditional distribution over all other data points (later denoted as $P_i$) to equal some preset value.
+where the probability can be seen as being derived as if a Gaussian were centered on $\mathbf{x}_i$ and an appropriate normalizing term is used to scale the individual probabilities so that they sum to $1$. The variance (denoted by $\sigma_i$ in the equation) is determined separately for each data point $i$ by forcing the perplexity of the conditional distribution over all other data points (later denoted as $P_i$) to equal some preset value.
 
 Perplexity is an information theoretic measure of how well a distribution predicts its samples. For a given probability distribution, perplexity is defined as the exponentiation of the distribution's entropy $H$, e.g. in the case of our discrete $P_i$:
 
@@ -221,14 +221,14 @@ where each $\mathbf{y}_i$ represents the point in the embedding for data point $
 Now that we have defined both the output and input distributions for points, the objective function can be formulated as the sum of KL-divergences between each input-output distribution pair:
 
 \begin{equation}
-C = \sum_i \dkl{P_i}{Q_i} = \sum_i \sum_j p_{j \vert i} \log \frac{p_{j \vert i}}{q_{j \vert i}}.
+C_{\text{SNE}} = \sum_i \dkl{P_i}{Q_i} = \sum_i \sum_{j \neq i} p_{j \vert i} \log \frac{p_{j \vert i}}{q_{j \vert i}}.
 \label{eq:c_sne}
 \end{equation}
 
 To optimize this objective gradient descent is typically used to update the positions of the embedded data points. The partial derivative of the objective w.r.t. a point $i$ in the embedding is given by
 
 \begin{equation}
-\frac{\partial C}{\partial \mathbf{y}_i} = 2 \sum_j (\mathbf{y}_i - \mathbf{y}_j)(p_{j \vert i} - q_{j \vert i} + p_{i \vert j} - q_{i \vert j}).
+\frac{\partial C_{\text{SNE}}}{\partial \mathbf{y}_i} = 2 \sum_{j \neq i} (\mathbf{y}_i - \mathbf{y}_j)(p_{j \vert i} - q_{j \vert i} + p_{i \vert j} - q_{i \vert j}).
 \label{eq:c_sne_grad}
 \end{equation}
 
@@ -241,7 +241,7 @@ Another important observation to make is how the non-symmetry of the KL-divergen
 \subsection{t-SNE}
 \label{subsection:tsne}
 
-The t-SNE algorithm aims to address two issues of the original SNE algorithm. First, through considering joint distributions, instead of conditional distributions, the form of the gradient of the objective function becomes easier to compute. Second, one of the main issues with plain SNE is the so called \textit{crowding problem}, which is addressed by considering a heavier tailed probability distribution function in the output space, namely Student's t-Distribution. Together these improvements enable better separation of natural clusters in the output space of the algorithm, as compared to the original SNE method.
+The t-SNE algorithm aims to address two issues of the original SNE algorithm. First, one of the main issues with plain SNE is the so called \textit{crowding problem}, which is addressed by considering a heavier tailed probability distribution function in the output space, namely the Student's t-Distribution. Second, through considering joint distributions, instead of conditional distributions, the non-convex objective function becomes easier to optimize. Together these improvements enable better separation of natural clusters in the output space of the algorithm, as compared to the original SNE method.
 
 Symmetric SNE \cite{symmetric_sne} aims to provide an objective function whose gradient is easier to compute than the one of Equation~\ref{eq:c_sne_grad}. 
 
@@ -255,7 +255,10 @@ $$C_{\text{t-SNE}} = \sum_i \dkl{P}{Q} = \sum_{i \neq j} p_{ij} \log \frac{p_{ij
 
 For which the following gradient can be derived, w.r.t. each $\mathbf{y}_i$:
 
-$$\frac{\partial C_{\text{t-SNE}}}{\partial \mathbf{y}_i} = $$
+\begin{equation}
+\frac{\partial C_{\text{t-SNE}}}{\partial \mathbf{y}_i} = 4 \sum_{j \neq i} (\mathbf{y}_i - \mathbf{y}_j)(p_{ij} - q_{ij})(1 + \norm{\mathbf{y}_i - \mathbf{y}_j}^2)^{-1}
+\label{eq:c_tsne_grad}
+\end{equation}
 
 To alleviate the crowding problem, 
 
@@ -270,9 +273,17 @@ Worth a mention is the Stochastic Triplet Embedding \cite{stochastic_triplet_emb
 \subsection{Parametric t-SNE}
 \label{subsection:parametric_tsne}
 
-t-SNE does not directly enable out of sample extension, but random-walk t-SNE has been developed for this purpose. Although the following pitfalls are present in this method: ...
+A major drawback of most non-linear dimensionality reduction methods is that they do not directly enable out-of-sample extensions.
 
 A natural extension to t-SNE would be to learn a function parameterizing the embedding from input space to output space.
+
+The basic idea behind PTSNE is very straightforward. A feed-forward neural network is used to parameterize a function $f_\mathbf{W}: X \mapsto Y$, which maps points from input space to output space in such a way as to minimize the t-SNE objective. Once the parameters of the mapping are learned, performing dimensionality reduction on any given point is simply done by running it through the neural network.
+
+By application of the chain rule, we can write the gradient w.r.t. the parameters of the neural network as
+
+$$\frac{\partial C_{\text{t-SNE}}}{\partial \mathbf{W}} = \frac{\partial C_{\text{t-SNE}}}{\partial f_{\mathbf{W}}(\mathbf{x}_i)} \frac{\partial f_{\mathbf{W}}(\mathbf{x}_i)}{\partial \mathbf{W}}.$$
+
+As $f_{\mathbf{W}}(\mathbf{x}_i) = \mathbf{y}_i$, Equation~\ref{eq:c_tsne_grad} is used to compute the first term of the product, while standard backpropagation can be applied to the rest of the network.
 
 \newpage
 
