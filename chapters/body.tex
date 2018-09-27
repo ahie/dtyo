@@ -202,7 +202,10 @@ The Stochastic Neighbor Embedding (SNE) algorithm \cite{sne}, developed by Hinto
 
 To formalize these notions, we begin with how the conditional probability of data point $i$ picking data point $j$ in the input space is defined by the equation
 
-$$p_{j \vert i} = \frac{exp(-\norm{\mathbf{x}_i - \mathbf{x}_j}^2 / 2 \sigma_i^2)}{\sum_{k \neq i} exp(-\norm{\mathbf{x}_i - \mathbf{x}_k}^2 / 2 \sigma_i^2)},$$
+\begin{equation}
+p_{j \vert i} = \frac{exp(-\norm{\mathbf{x}_i - \mathbf{x}_j}^2 / 2 \sigma_i^2)}{\sum_{k \neq i} exp(-\norm{\mathbf{x}_i - \mathbf{x}_k}^2 / 2 \sigma_i^2)},
+\label{eq:p_j_c_i}
+\end{equation}
 
 where the probability can be seen as being derived as if a Gaussian were centered on $\mathbf{x}_i$ and an appropriate normalizing term is used to scale the individual probabilities so that they sum to $1$. The variance (denoted by $\sigma_i$ in the equation) is determined separately for each data point $i$ by forcing the perplexity of the conditional distribution over all other data points (later denoted as $P_i$) to equal some preset value.
 
@@ -243,7 +246,13 @@ Another important observation to make is how the non-symmetry of the KL-divergen
 
 The t-SNE algorithm aims to address two issues of the original SNE algorithm. First, one of the main issues with plain SNE is the so called \textit{crowding problem}, which is addressed by considering a heavier tailed probability distribution function in the output space, namely the Student's t-Distribution. Second, through considering joint distributions, instead of conditional distributions, the non-convex objective function becomes easier to optimize. Together these improvements enable better separation of natural clusters in the output space of the algorithm, as compared to the original SNE method.
 
-Symmetric SNE \cite{symmetric_sne} aims to provide an objective function whose gradient is easier to compute than the one of Equation~\ref{eq:c_sne_grad}. 
+The crowding problem is named after the phenomenon where distances in a high dimensional space cannot faithfully be modelled in a lower dimensional space, causing the SNE algorithm to collapse points together in the embedding and thus preventing the formation of natural clusters. One can easily verify that it is not possible in the general case to preserve distances perfectly when performing dimensionality reduction, as a space of $n$ dimensions allows for a maximum of $n+1$ equidistant points. How the crowding problem manifests itself is related to this effect by considering the exponential increase in the volume of a sphere as more dimensions are added. In addition to SNE, the crowding problem is also present in other non-linear dimensionality reduction methods based on preservation of pairwise distances of points, such as Sammon mapping \cite{tsne}.
+
+Unintuitively, as the number of dimensions increase, the concentration of a Gaussian distribution's density shifts from its mean to a shell around its mean \cite[p.~50]{high_dimensional_probability}. When SNE attempts to match probabilities derived from Gaussian kernels in different dimensionalities, the moderately distant points in the high dimensional space (those which are close to the shell of high density concentration) will have a disproportionately large force attracting them to the center of the lower dimensional kernel.
+
+To address the crowding problem the t-SNE algorithm switches the Gaussian kernels of the output space to ones formed with the Student's t-Distribution. The benefit a t-Distribution has over a Gaussian is that it places more of its probability density in its tails. This property of the distribution allows moderate distances in the input space to be modeled further apart in the output space, alleviating the crowding problem by reducing the attractive forces between moderately distant points and thereby facilitating the formation of more distinct clusters in the embedding. In addition, using a t-Distribution has the computational advantage of not having to perform exponentiation when computing probabilities.
+
+Similarly to Symmetric SNE \cite{symmetric_sne}, instead of matching conditional distributions in the input and output spaces, t-SNE forms a joint distribution over all pairs of points in both the input and output space, which it attempts to match. The joint distribution over the input points is formed by using Equation~\ref{eq:p_j_c_i}:
 
 $$p_{ij} = \frac{p_{j \vert i} + p_{i \vert j}}{2 N}$$
 
@@ -262,7 +271,7 @@ For which the following gradient can be derived, w.r.t. each $\mathbf{y}_i$:
 
 To alleviate the crowding problem, 
 
-Methods to improve the runtime of t-SNE have been subsequently proposed: \cite{accelerated_tsne_1, accelerated_tsne_2}. The use of the fast multipole method \cite{fast_multipole} has not been explored due to no suitable expansion for the t-Distributed forces in the output space exist.
+Methods to improve the runtime of t-SNE have been subsequently proposed: \cite{accelerated_tsne_1, accelerated_tsne_2}. Use of the fast multipole method \cite{fast_multipole} has not been explored due to no suitable expansion for the t-Distributed forces in the output space exist.
 
 Worth a mention is the Stochastic Triplet Embedding \cite{stochastic_triplet_embedding} and Multiple Maps t-SNE \cite{multiple_maps_tsne} methods developed on top of t-SNE, developed to handle non-metric similarities present in the data.
 
@@ -374,7 +383,7 @@ where $n$ is the total number of data points under consideration, $\mathcal{N}_{
 
 \section{Network Structure and Parameters}
 
-To parameterize the embedding $f(\mathbf{\hat{x}})$ a feed-forward neural network with layers of hidden units with dimensions $d - 500 - 500 - 2000 - 2$ were used, where $d$ is the input dimensionality and rectifier linear unit (ReLU) activations are applied to the hidden unit outputs to induce nonlinearity to the network. The hidden unit dimensions were chosen to match those of the final combined network used in \citep{parametric_tsne}, although we have substituted the sigmoid activations with ReLU activations. Furthermore, we do not perform stacked restricted Boltzmann machine pretraining on the hidden layer weigths as in \citep{parametric_tsne}. However we do benchmark the performance of our network against the original parametric t-SNE implementation. Since we are not considering RBM pretraining and are instead relying on the property of ReLUs reducing the vanishing gradient problem \citep{relu} and better initialization \citep{xavier_initializer}. Running the original implementation shows little benefit in performing this costly initialization. We could instead reuse the trained encoder weights of the VAE as a starting point for the optimization of our embedding network.
+To parameterize the embedding $f(\mathbf{\hat{x}})$ a feed-forward neural network with layers of hidden units with dimensions $d - 500 - 500 - 2000 - 2$ were used, where $d$ is the input dimensionality and rectifier linear unit (ReLU) activations are applied to the hidden unit outputs to induce nonlinearity to the network. The hidden unit dimensions were chosen to match those of the final combined network used in \citep{parametric_tsne}, although we have substituted the sigmoid activations with ReLU activations. Furthermore, we do not perform stacked restricted Boltzmann machine pretraining on the hidden layer weights as in \citep{parametric_tsne}. However we do benchmark the performance of our network against the original parametric t-SNE implementation. Since we are not considering RBM pretraining and are instead relying on the property of ReLUs reducing the vanishing gradient problem \citep{relu} and better initialization \citep{xavier_initializer}. Running the original implementation shows little benefit in performing this costly initialization. We could instead reuse the trained encoder weights of the VAE as a starting point for the optimization of our embedding network.
 
 For optimization of the neural network \cite{parametric_tsne} use nonlinear conjugate gradient descent, whereas Adam \citep{adam} is used as the optimizer in the results presented here. Updates with Adam are considerably faster to compute than with conjugate gradient descent. Throughout all experiments standard parameters for Adam were chosen, i.e. a learning rate of $0.001$ and the exponential decay rates of the 1st and 2nd moments were set to $0.9$ and $0.999$ respectively.
 
