@@ -228,56 +228,54 @@ C_{\text{SNE}} = \sum_i \dkl{P_i}{Q_i} = \sum_i \sum_{j \neq i} p_{j \vert i} \l
 \label{eq:c_sne}
 \end{equation}
 
-To optimize this objective gradient descent is typically used to update the positions of the embedded data points. The partial derivative of the objective w.r.t. a point $i$ in the embedding is given by
+To optimize this objective, gradient descent is typically used to update the positions of the embedded data points. The partial derivative of the objective w.r.t. a point $i$ in the embedding is given by
 
 \begin{equation}
-\frac{\partial C_{\text{SNE}}}{\partial \mathbf{y}_i} = 2 \sum_{j \neq i} (\mathbf{y}_i - \mathbf{y}_j)(p_{j \vert i} - q_{j \vert i} + p_{i \vert j} - q_{i \vert j}).
+\frac{\partial C_{\text{SNE}}}{\partial \mathbf{y}_i} = 2 \sum_{j \neq i} (\mathbf{y}_i - \mathbf{y}_j)(p_{j \vert i} - q_{j \vert i} + p_{i \vert j} - q_{i \vert j}),
 \label{eq:c_sne_grad}
 \end{equation}
 
-This has the intuitive interpretation of a force directed layouting algorithm, where each pair of points is either pushing or pulling on each other, depending on whether they are less or more likely to be neighbors under the output's conditional distribution than the input's.
+which can be used to form the gradient. This has the intuitive interpretation of a force directed layouting algorithm, where each pair of points is either pushing or pulling on each other, depending on whether they are less or more likely to be neighbors under the output's conditional distribution than the input's.
 
-An important fact to note is that the objective function is in fact non-convex, which implies the unfortunate property that the optimization of the objective function is not guaranteed to terminate at the global optimum due to the potential existence of multiple local minima. With random restarts and other optimization methods, such as gradient descent with momentum, it is possible to attempt to escape poor local minima.
-
-Another important observation to make is how the non-symmetry of the KL-divergence plays a role in penalizing the embedding. \note{Explain how.}
+An important fact to note is that the objective function is in fact non-convex, which implies the unfortunate property that the optimization of the objective function is not guaranteed to terminate at the global optimum due to the potential existence of multiple local minima. One of the main drawbacks of SNE is how it easily ends up in poor local minima. A common way to attempt to avoid poor local minima is to add Gaussian noise to the points in the embedding which is gradually reduced during optimization. This however adds more tunable hyperparameters to the algorithm. In addition to adding this jitter to the embedding points, random restarts are recommended in practice, which become very costly to run when dealing with large data sets.
 
 \subsection{t-SNE}
 \label{subsection:tsne}
 
-The t-SNE algorithm aims to address two issues of the original SNE algorithm. First, one of the main issues with plain SNE is the so called \textit{crowding problem}, which is addressed by considering a heavier tailed probability distribution function in the output space, namely the Student's t-Distribution. Second, through considering joint distributions, instead of conditional distributions, the non-convex objective function becomes easier to optimize. Together these improvements enable better separation of natural clusters in the output space of the algorithm, as compared to the original SNE method.
+The t-SNE algorithm aims to address two issues of the original SNE algorithm. First, one of the main issues with plain SNE is the so called \textit{crowding problem}, which is addressed by considering a heavier tailed probability distribution function in the output space, namely the Student's t-Distribution. Second, through considering joint distributions instead of conditional distributions and the use of a different distribution in the output space lead to an objective function that is easier to optimize than that of SNE. Together these improvements enable better separation of natural clusters in the output space of the algorithm, as compared to the original SNE method.
 
-The crowding problem is named after the phenomenon where distances in a high dimensional space cannot faithfully be modelled in a lower dimensional space, causing the SNE algorithm to collapse points together in the embedding and thus preventing the formation of natural clusters. One can easily verify that it is not possible in the general case to preserve distances perfectly when performing dimensionality reduction, as a space of $n$ dimensions allows for a maximum of $n+1$ equidistant points. How the crowding problem manifests itself is related to this effect by considering the exponential increase in the volume of a sphere as more dimensions are added. In addition to SNE, the crowding problem is also present in other non-linear dimensionality reduction methods based on preservation of pairwise distances of points, such as Sammon mapping \cite{tsne}.
-
-Unintuitively, as the number of dimensions increase, the concentration of a Gaussian distribution's density shifts from its mean to a shell around its mean \cite[p.~50]{high_dimensional_probability}. When SNE attempts to match probabilities derived from Gaussian kernels in different dimensionalities, the moderately distant points in the high dimensional space (those which are close to the shell of high density concentration) will have a disproportionately large force attracting them to the center of the lower dimensional kernel.
+The crowding problem is named after the phenomenon where distances in a high dimensional space cannot faithfully be modelled in a lower dimensional space, causing the SNE algorithm to collapse points together in the embedding and thus preventing the formation of natural clusters. One can easily verify that it is not possible in the general case to preserve distances perfectly when performing dimensionality reduction, as a space of $n$ dimensions allows for a maximum of $n+1$ equidistant points. How the crowding problem manifests can be seen by considering how the volumes of objects, and by extension the densities of probability distributions, are concentrated in high dimensional space. Unintuitively, as the number of dimensions increase, the concentration of a Gaussian distribution's density shifts from its mean to a shell around its mean \cite[p.~50]{high_dimensional_probability}. When SNE attempts to match probabilities derived from Gaussian kernels in different dimensionalities, moderately distant points in the high dimensional space will have a disproportionately large force attracting them to the center of the lower dimensional kernel. In addition to SNE, the crowding problem is also present in other non-linear dimensionality reduction methods which are based on preservation of pairwise distances of points, such as Sammon mapping \cite{tsne}.
 
 To address the crowding problem the t-SNE algorithm switches the Gaussian kernels of the output space to ones formed with the Student's t-Distribution. The benefit a t-Distribution has over a Gaussian is that it places more of its probability density in its tails. This property of the distribution allows moderate distances in the input space to be modeled further apart in the output space, alleviating the crowding problem by reducing the attractive forces between moderately distant points and thereby facilitating the formation of more distinct clusters in the embedding. In addition, using a t-Distribution has the computational advantage of not having to perform exponentiation when computing probabilities.
+
+The probability density function of a t-Distribution with $\nu$ degrees of freedom is given by
+
+$$f(x \vert \nu) = \frac{\Gamma(\frac{\nu + 1}{2})}{\sqrt{\nu \pi} \Gamma(\frac{\nu}{2})} (1 + \frac{x^2}{\nu})^{-\frac{\nu + 1}{2}},$$
+
+which can be recognized to be closely related to the Gaussian distribution, in fact as $\nu \lim \infty$ the probability density approaches that of the standard normal distribution. One can observe that the number of degrees of freedom controls how much probability density is placed in the tails of the distribution. The standard choice for t-SNE is to choose $\nu = 1$ when reducing to a very low number of dimensions, such as 2 or 3 for visualization of a data set as a scatter plot. However, more generally it is suggested to consider higher degrees of freedom when embedding to higher dimensional spaces, as the crowding problem becomes less prominent and thus the required amount of compensation is reduced.
 
 Similarly to Symmetric SNE \cite{symmetric_sne}, instead of matching conditional distributions in the input and output spaces, t-SNE forms a joint distribution over all pairs of points in both the input and output space, which it attempts to match. The joint distribution over the input points is formed by using Equation~\ref{eq:p_j_c_i}:
 
 $$p_{ij} = \frac{p_{j \vert i} + p_{i \vert j}}{2 N}$$
 
-$$q_{ij} = \frac{(1 + \norm{\mathbf{y}_i - \mathbf{y}_j}^2)^{-1}}{\sum_{k \neq l} (1 + \norm{\mathbf{y}_k - \mathbf{y}_l}^2)^{-1}}$$
+
+
+$$q_{ij} = \frac{(1 + \norm{\mathbf{y}_i - \mathbf{y}_j}^2 / \nu)^{-\frac{\nu + 1}{2}}}{\sum_{k \neq l} (1 + \norm{\mathbf{y}_k - \mathbf{y}_l}^2 / \nu)^{-\frac{\nu + 1}{2}}}$$
 
 The t-SNE objective function is defined similarly to the SNE objective (cf. Equation~\ref{eq:c_sne}), except the sum is taken over KL-divergences of the joint probabilities:
 
-$$C_{\text{t-SNE}} = \sum_i \dkl{P}{Q} = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}}.$$
+$$C_{\text{t-SNE}} = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}}.$$
 
-For which the following gradient can be derived, w.r.t. each $\mathbf{y}_i$:
+For which the following gradient can be derived:
 
 \begin{equation}
-\frac{\partial C_{\text{t-SNE}}}{\partial \mathbf{y}_i} = 4 \sum_{j \neq i} (\mathbf{y}_i - \mathbf{y}_j)(p_{ij} - q_{ij})(1 + \norm{\mathbf{y}_i - \mathbf{y}_j}^2)^{-1}
+\frac{\partial C_{\text{t-SNE}}}{\partial \mathbf{y}_i} = 4 \sum_{j \neq i} (\mathbf{y}_i - \mathbf{y}_j)(p_{ij} - q_{ij})(1 + \norm{\mathbf{y}_i - \mathbf{y}_j}^2 / \nu)^{-\frac{\nu + 1}{2}}
 \label{eq:c_tsne_grad}
 \end{equation}
-
-To alleviate the crowding problem, 
 
 Methods to improve the runtime of t-SNE have been subsequently proposed: \cite{accelerated_tsne_1, accelerated_tsne_2}. Use of the fast multipole method \cite{fast_multipole} has not been explored due to no suitable expansion for the t-Distributed forces in the output space exist.
 
 Worth a mention is the Stochastic Triplet Embedding \cite{stochastic_triplet_embedding} and Multiple Maps t-SNE \cite{multiple_maps_tsne} methods developed on top of t-SNE, developed to handle non-metric similarities present in the data.
-
-\newpage \phantom{x}
-\newpage \phantom{x}
-\newpage
 
 \subsection{Parametric t-SNE}
 \label{subsection:parametric_tsne}
@@ -385,15 +383,15 @@ where $n$ is the total number of data points under consideration, $\mathcal{N}_{
 
 To parameterize the embedding $f(\mathbf{\hat{x}})$ a feed-forward neural network with layers of hidden units with dimensions $d - 500 - 500 - 2000 - 2$ were used, where $d$ is the input dimensionality and rectifier linear unit (ReLU) activations are applied to the hidden unit outputs to induce nonlinearity to the network. The hidden unit dimensions were chosen to match those of the final combined network used in \citep{parametric_tsne}, although we have substituted the sigmoid activations with ReLU activations. Furthermore, we do not perform stacked restricted Boltzmann machine pretraining on the hidden layer weights as in \citep{parametric_tsne}. However we do benchmark the performance of our network against the original parametric t-SNE implementation. Since we are not considering RBM pretraining and are instead relying on the property of ReLUs reducing the vanishing gradient problem \citep{relu} and better initialization \citep{xavier_initializer}. Running the original implementation shows little benefit in performing this costly initialization. We could instead reuse the trained encoder weights of the VAE as a starting point for the optimization of our embedding network.
 
-For optimization of the neural network \cite{parametric_tsne} use nonlinear conjugate gradient descent, whereas Adam \citep{adam} is used as the optimizer in the results presented here. Updates with Adam are considerably faster to compute than with conjugate gradient descent. Throughout all experiments standard parameters for Adam were chosen, i.e. a learning rate of $0.001$ and the exponential decay rates of the 1st and 2nd moments were set to $0.9$ and $0.999$ respectively.
-
-\textcolor{red}{[Note: Should mention recent work on Adam, i.e. the updated version by \cite{on_the_convergence_of_adam}?]}
+For optimization of the neural network \cite{parametric_tsne} use nonlinear conjugate gradient descent, whereas Adam \citep{adam} is used as the optimizer in the results presented here. Updates with Adam are considerably faster to compute than with conjugate gradient descent. Throughout all experiments standard parameters for Adam were chosen, i.e. a learning rate of $0.001$ and the exponential decay rates of the 1st and 2nd moments were set to $0.9$ and $0.999$ respectively. The more recent optimizer AMSGrad \cite{on_the_convergene_of_adam} was considered, but due to little evidence of its benefit over Adam when used in non-synthetic optimization problems its use was left for future work.
 
 We apply batch normalization \citep{batch_normalization} to the hidden layers of the VAE networks, while omitting batch normalization from the embedding network. This is to validate the training procedure on as simple an embedding network as possible. We note that applying batch normalization to the embedding network improves the results marginally.
 
 To further emphasize the universality of our approach we restrict ourselves to use a simple VAE structure, without complicating the model architecture with more recently proposed advances, such as normalizing flows \citep{normalizing_flows} (\textcolor{red}{[Note: could show that better models improve performance in the supplement]}). Throughout all experiments the VAE architecture is fixed to $d - 256 - 128 - 32 - \mu, \log \sigma^2 - 32 - 128 - 256 - d$, where $\mu$ and $\sigma$ parameterize a normal distribution acting as the posterior $q_{\phi}(\mathbf{z} \vert \mathbf{x}^{(i)})$ and the final layer output was used to parameterize a Bernoulli distribution for MNIST as well as Fashion-MNIST, and a normal distribution with a fixed standard deviation of 0.1 for cytometry data. In all experiments, each VAE was trained with a batch size of 1000 for 10000 iterations.
 
 For MNIST and Fashion-MNIST perplexities were set to 30, which is in line with the value used by \cite{parametric_tsne}, whereas for the cytometry data sets a perplexity of 10 was chosen. \textcolor{red}{[Note: Perplexity should really be chosen relative to the batch size. For example training VPTSNE on MNIST with batch size 200 and perplexity 10 gives far better results than with perplexity 30. However, with PTSNE the results are actually worse as the training fails to converge properly, even with small learning rates. An example embedding of MNIST with low perplexity and small batch size has been included in the appendix (figure \ref{fig:low_perp_small_bs}), which also achieves better trustworthiness (0.935) and 1-NN (0.812) than the 600 batch size, 30 perplexity runs. Analysis of why PTSNE fails to converge and VPTSNE does not should be included, since this is a clear advantage of the method we're demonstrating.]}
+
+Degrees of freedom of the t-Distribution for the PTSNE objective is set to 1 throughout all experiments, as all embeddings performed are two-dimensional.
 
 \section{Learning}
 \label{subsection:learning}
@@ -432,8 +430,6 @@ Qualitatively the embeddings trained on the original data remain noisier than th
   \caption{Embeddings of the Fashion-MNIST data set trained with batch size 400. \textcolor{red}{[Note: could include UMAP embedding of this data set here for comparison. It is remarkably similar and this would reinforce the claim that small batch size training is actually very effective.]}}
   \label{fig:fashion_mnist_comparison}
 \end{figure}
-
-\textcolor{red}{??? Plot like Figure~\ref{fig:mnist_knn_trustworthiness} for VPTSNE vs PTSNE with batch size on x to show that VPTSNE does not suffer that much from small batch sizes? This would imply that it can be trained with smaller batch sizes, which means better asymptotic performance. ???} 
 
 \section{Comparisons}
 \label{subsection:comparisons}
@@ -520,13 +516,11 @@ As real world data is generally not perfectly clean, an important property for a
 
 Here we aim to back up this assumption by running experiments on artificially corrupted MNIST data sets. As the corruption process in our experiments we consider \textit{masking noise} as in \cite{stacked_denoising_ae}, where a predetermined fraction of randomly chosen elements of a data point are set to 0. We test robustness by applying masking noise to 10\%, 20\%, 30\% and 40\% fractions of the training and test sets. The results of our experiments (cf. figure \ref{fig:corrupted_data}) show a clear advantage to using our method when dealing with noisy data as both evaluation metrics can be observed to decrease considerably for PTSNE as the training data is progressively corrupted, whereas VPTSNE maintains its performance throughout the experiments.
 
-\noindent \textcolor{red}{[Note: Results look good, but could they be further improved by denoising variational autoencoders \citep{denoising_vae}?]}
+As an example of real world data corrupted in this fashion, in single-cell RNA sequencing (scRNA-seq) so called \textit{dropout events}, which cause incomplete sequence data to be captured due to technical and biological noise, can be viewed as a form of masking noise. The results presented here would indicate that the proposed method is potentially a good fit for exploratory analysis of scRNA-seq data.
 
-\noindent \textcolor{red}{[Note: In scRNA-seq dropout events can be viewed as masking noise. The results here would indicate applying the method to scRNA-seq data could produce good results.]}
+\todo{find citations for scrna-seq/dropout}
 
-\noindent \textcolor{red}{[Note: Should other corruption processes be considered here or is masking noise sufficient?]}
-
-\noindent \textcolor{red}{[Note: Could add scatter plot of the best scoring embeddings PTSNE vs VPTSNE to the supplement for e.g. the 30\% corrupted runs. The difference is quite striking.]}
+Even with the standard VAE structure, the obtained results are encouraging. As future work it would be interesting to test whether making use of denoising variational autoencoders \cite{denoising_vae}, which are an extension of denoising autoencoders \cite{stacked_denoising_ae} that are directly trained to correct corrupted data. Additionally of interest is how our model fares when other corruption processes are present.
 
 \begin{figure}[!htb]
   \centering
@@ -534,8 +528,6 @@ Here we aim to back up this assumption by running experiments on artificially co
   \caption{ 1-NN and trustworthiness scores obtained for PTSNE and VPTSNE trained on MNIST data with different levels of masking noise applied. Error bars indicate the 95\% confidence intervals of the mean for each corruption level, obtained from 20 repeated runs.}
   \label{fig:corrupted_data}
 \end{figure}
-
-\textcolor{red}{ Again, I would want more points on the graphs. Noise level on x axis and score on y. }
 
 \section{Obtaining Reconstructions from Hidden Layers}
 
