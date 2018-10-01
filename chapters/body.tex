@@ -7,22 +7,21 @@ At present, much of the data being produced, gathered and analyzed is very high 
 At present, 
 
 Several problems arise when dealing with high dimensional data:
-- distances between pairs of points become less distinguished as dimensionality of the space increases \cite{on_the_surprising_behavior_of_distance_metrics}.
+- distances between pairs of points become less distinguished as dimensionality of the space increases \cite{on_the_surprising_behavior_of_distance_metrics}, rendering methods based on distance metrics at a disadvantage.
 - The volume of a space grows exponentially along with the number of dimensions. This leads to even large data sets appearing sparse in the feature space. Efficient sampling requires a lot of points
-- algorithms depend on dimensionality of the data being processed and large computational costs are accrued, especially sampling becomes
 - need for more training data, k-means example \cite[p.~263]{understanding_machine_learning}
 - algorithm complexity depends on the dimensionality of data being processed, large costs are accrued
-- from a more practical perspective, high dimensional data by itself is hard to directly reason about and difficult to visualize in any meaningful sense
+- from a more practical perspective, high dimensional data by itself is hard to directly reason about and difficult to visualize in any meaningful sense. Simple statistics will not be able to capture e.g. multimodality of the data
 - In literature, problems arising from high dimensionality are collectively referred to as the \textit{curse of dimensionality}, as first coined by Richard Bellman in the context of his work on dynamic programming \cite{bellman_curse_of_dimensionality}.
 To tackle these problems associated with high dimensional data, reduction of the dimensionality of data is sought through various means of feature selection and feature extraction. Feature selection is ..., whereas feature extraction ... . In this work we focus on purely unsupervised feature extraction through 
 
-Several methods for dimensionality reduction have been developed and attempting to cover a majority of them would be greatly out of scope of the work for this thesis. For comprehensive reviews on other prominent methods the reader is referred to \cite{first_dimensionality_reduction_review, second_dimensionality_reduction_review}.
+Several methods for dimensionality reduction have been developed and attempting to cover all of them would be greatly out of scope for this thesis. For comprehensive reviews on other prominent methods the reader is referred to \cite{first_dimensionality_reduction_review, second_dimensionality_reduction_review}.
 
 Fortunately, the so called manifold hypothesis \cite{manifold_hypothesis} often holds for real world data sets. The manifold hypothesis posits that the high dimensional data in question lies near a much lower dimensional manifold. As an example, take This in turn implies that learning  
 
 This, together with the classical Johnson-Lindenstrauss lemma \cite{johnson_lindenstrauss}, which gives bounds to the error 
 
-The manifold assumption and manifold learning. In general, dimensionality reduction aims to preserve as much information of the underlying data as possible. Several different methods for dimensionality reduction have been developed over the years. Arguably the most well known and applied method in practice is Principal Component Analysis (PCA), developed independently by ... \cite{pca_1} and ... \cite{pca_2} for the study of ... . Although very efficient to compute and easy to reason about, PCA however suffers from a few drawbacks, making it not ideal for data visualization purposes. the fact that it only aims to maximize the variance... thus local structure of the data is poorly preserved. On the other hand, methods that aim to preserve local structure of data typically suffer from the curse of dimensionality in several ways, such as ... .
+The manifold assumption and manifold learning. In general, dimensionality reduction aims to preserve as much information of the underlying data as possible. Several different methods for dimensionality reduction have been developed over the years. Arguably the most well known and applied dimensionality reduction method in practice is Principal Component Analysis (PCA), developed independently by Karl Pearson \cite{pca_1} and Harold Hotelling \cite{pca_2} in the early 1900s. Although very efficient to compute and providing easily interpretable results, PCA however suffers from the fact that it only takes into account linear relationships in the data it is given, making it nonideal for manifold learning of complex non-linear and heteroscedastic data. the fact that it only aims to maximize the variance... thus local structure of the data is poorly preserved. On the other hand, methods that aim to preserve local structure of data typically suffer from the curse of dimensionality in several ways, such as ... .
 
 Dimensionality reduction is a tool commonly used in disciplines such as ... for visualization of high dimensional data as 2 or 3 dimensional scatter plots. 
 
@@ -44,9 +43,13 @@ The final chapter presents discussion and conclusions for the work carried out i
 \section{Variational Autoencoders}
 \label{section:variational_autoencoders}
 
-\note{Briefly about unsupervised learning in general.}
+A key component of the method presented in this work are Variational Autoencoders (VAEs). VAEs belong to a class called deep generative models. 
 
-Before moving on to specialized artificial neural network structures and learning objectives, a brief review of the relevant background literature is presented. First, a general introduction to artificial neural networks is given, after which autoencoder neural networks are discussed in more detail. The theory and purpose of variational Bayesian methods are discussed to finally arrive at the precise definition of a variational autoencoder by bringing together the contents of the preceding chapters.
+\note{Generative models, mention others like GAN \cite{gan} and RBM/DBN \cite{deep_belief_nets, hinton_deep_belief_nets}.}
+
+Thorough review of deep generative models mentioned here, but which are out of scope for this work, can be found in \cite[Chapter~20]{deep_learning_book}.
+
+Before moving on to specialized artificial neural network structures and learning objectives, a brief review of the relevant background literature is presented. First, a general introduction to artificial neural networks is given, after which autoencoder neural networks are discussed in more detail. The theory and purpose of variational Bayesian methods are discussed to finally arrive at the full definition of a variational autoencoder by bringing together the contents of the preceding sections.
 
 \subsection{Artificial Neural Networks}
 \label{section:artificial_neural_networks}
@@ -57,7 +60,7 @@ Neural networks are at the core of many recent advances in machine learning. Par
 
 Advances in supervised learning for computer vision have arguably played an important role in the development of modern machine learning. \cite{imagenet}.
 
-Unsupervised and semi-supervised learning, representation learning.
+Unsupervised and semi-supervised learning, representation learning. Deep belief networks, or rather unsupervised pretraining by stacking RBMs is one of the most important results in reviving interest in deep learning, as it was one of the first generally applicable results to enable learning of deep networks. 
 
 Reinforcement learning, atari \cite{deep_atari}, go \cite{alphago} and later go \textit{tabula rasa} \cite{alphazero}.
 
@@ -83,6 +86,8 @@ A more simplistic view of neural networks would be to consider them as merely ve
 
 History of backprop (citations like/leading to \cite{nature_backprop}). SGD, Momentum, ... second order methods?
 
+\cite{nature_backprop, how_batch_norm_works, dropout}
+
 \newpage \phantom{x}
 \newpage
 
@@ -92,6 +97,8 @@ History of backprop (citations like/leading to \cite{nature_backprop}). SGD, Mom
 
 \subsection{Autoencoders}
 \label{subsection:autoencoders}
+
+\cite{hinton_autoencoder}
 
 \begin{figure}[!htb]
   \centering
@@ -190,6 +197,8 @@ $$\widetilde{\mathbf{z}} = g_{\mathbf{\phi}}(\mathbf{\epsilon}, \mathbf{z})$$
   \caption{Variational Autoencoder}
   \label{fig:vae}
 \end{figure}
+
+\cite{normalizing_flows, inverse_autoregressive_flow, householder_flow}
 
 \newpage \phantom{x}
 \newpage \phantom{x}
@@ -390,7 +399,7 @@ where $n$ is the total number of data points under consideration, $\mathcal{N}_{
 
 To parameterize the embedding $f(\mathbf{\hat{x}})$ a feed-forward neural network with layers of hidden units with dimensions $d - 500 - 500 - 2000 - 2$ were used, where $d$ is the input dimensionality and rectifier linear unit (ReLU) activations are applied to the hidden unit outputs to induce nonlinearity to the network. The hidden unit dimensions were chosen to match those of the final combined network used in \citep{parametric_tsne}, although we have substituted the sigmoid activations with ReLU activations. Furthermore, we do not perform stacked restricted Boltzmann machine pretraining on the hidden layer weights as in \citep{parametric_tsne}. However we do benchmark the performance of our network against the original parametric t-SNE implementation. Since we are not considering RBM pretraining and are instead relying on the property of ReLUs reducing the vanishing gradient problem \citep{relu} and better initialization \citep{xavier_initializer}. Running the original implementation shows little benefit in performing this costly initialization. We could instead reuse the trained encoder weights of the VAE as a starting point for the optimization of our embedding network.
 
-For optimization of the neural network \cite{parametric_tsne} use nonlinear conjugate gradient descent, whereas Adam \citep{adam} is used as the optimizer in the results presented here. Updates with Adam are considerably faster to compute than with conjugate gradient descent. Throughout all experiments standard parameters for Adam were chosen, i.e. a learning rate of $0.001$ and the exponential decay rates of the 1st and 2nd moments were set to $0.9$ and $0.999$ respectively. The more recent optimizer AMSGrad \cite{on_the_convergene_of_adam} was considered, but due to little evidence of its benefit over Adam when used in non-synthetic optimization problems its use was left for future work.
+For optimization of the neural network \cite{parametric_tsne} use nonlinear conjugate gradient descent, whereas Adam \citep{adam} is used as the optimizer in the results presented here. Updates with Adam are considerably faster to compute than with conjugate gradient descent. Throughout all experiments standard parameters for Adam were chosen, i.e. a learning rate of $0.001$ and the exponential decay rates of the 1st and 2nd moments were set to $0.9$ and $0.999$ respectively. The more recent optimizer AMSGrad \cite{on_the_convergence_of_adam} was considered, but due to little evidence of its benefit over Adam when used in non-synthetic optimization problems its use was left for future work.
 
 We apply batch normalization \citep{batch_normalization} to the hidden layers of the VAE networks, while omitting batch normalization from the embedding network. This is to validate the training procedure on as simple an embedding network as possible. We note that applying batch normalization to the embedding network improves the results marginally.
 
@@ -592,4 +601,20 @@ To distinguish between outlier and inlier points in the mapping we obtain we set
 
 \chapter{Conclusions}
 \label{ch:conclusions}
+
+\ifnameyear
+  \bibliographystyle{babapaliktutnat}
+\else
+  \bibliographystyle{bababbrtut}
+\fi
+\bibliography{main}
+
+\appendix
+
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=\textwidth]{images/mnist_vptsne_bs_200_perp_10.png} 
+  \caption{Effect of the choice of perplexity w.r.t. batch size. MNIST VPTSNE embedding trained with batch size 200 and perplexity 10. Trustworthiness: 0.935, 1-NN: 0.812.}
+  \label{fig:low_perp_small_bs}
+\end{figure}
 
