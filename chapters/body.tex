@@ -1,8 +1,6 @@
 \chapter{Introduction}
 \label{ch:introduction}
 
-Dimensionality reduction is one of the key research areas in the field of machine learning. As real world data sets are usually of high dimensionality, such as ..., methods to reduce this dimensionality are sought to alleviate the problems arising when dealing with high dimensional data. 
-
 At present, ever larger sets of increasingly higher dimensional data are being produced, gathered and analyzed. As a consequence, several challenges arise when analyses are carried out on these vast amounts of high dimensional data. This recent surge of data prompts not only for the development of methods for data analysis capable of scaling to massive data sets but ones which are simultaneously capable of dealing with challenges inherent to high dimensional data.
 
 In literature, problems arising from high dimensionality are collectively referred to as the \textit{curse of dimensionality}, a term first coined by Richard Bellman in the context of his work in dynamic programming \cite{bellman_curse_of_dimensionality}. Particularly in machine learning the following aspects of high dimensional data pose 
@@ -15,9 +13,9 @@ In literature, problems arising from high dimensionality are collectively referr
 \item from a more practical perspective, high dimensional data by itself is hard to directly reason about and difficult to visualize in any meaningful sense. Simple statistics will often not capture 
 \end{itemize}
 
-To tackle problems associated with high dimensional data, a common approach is to seek for a lower dimensional representation of the data which retains its salient features. As a key research area in the field of machine learning, dimensionality reduction is 
+To tackle problems associated with high dimensional data a common approach is to seek for a lower dimensional representation of the data which retains the salient features of the data. This process, known as dimensionality reduction, can be split into two different approaches. 
 
-Fortunately, the so called manifold hypothesis \cite{manifold_hypothesis} often holds for real world data sets. The manifold hypothesis posits that the high dimensional data in question lies near a much lower dimensional manifold. As an example, take ... . This in turn implies that if it is possible to learn this manifold, the original data could be described in far fewer dimensions with minimal loss of information. This, together with the classical Johnson-Lindenstrauss lemma \cite{johnson_lindenstrauss}, which provides general bounds to the error associated with dimensionality reduction between points of two Euclidean spaces, give a strong indication that for many data sets substantial dimensionality reduction is not only feasible, but that most of the information within the data can be captured with fewer parameters.
+Fortunately, the so-called manifold hypothesis \cite{manifold_hypothesis} often holds for real-world data sets. The manifold hypothesis posits that the high dimensional data in question lies near a much lower dimensional manifold. As an example, take ... . This in turn implies that if it is possible to learn this manifold, the original data could be described in far fewer dimensions with minimal loss of information. This, together with the classical Johnson-Lindenstrauss lemma \cite{johnson_lindenstrauss}, which provides general bounds to the error associated with dimensionality reduction between points of two Euclidean spaces, give a strong indication that for many data sets substantial dimensionality reduction is not only feasible, but that most of the information within the data can be captured with fewer parameters.
 
 Several different methods for dimensionality reduction have been developed over the years. Arguably the most well known and applied dimensionality reduction method in practice is Principal Component Analysis (PCA), developed independently by Karl Pearson \cite{pca_1} and Harold Hotelling \cite{pca_2} in the early 1900s. Although very efficient to compute and providing easily interpretable results, PCA however suffers from the fact that it only takes into account linear relationships in the data it is given, making it nonideal for manifold learning of complex non-linear and heteroscedastic data. the fact that it only aims to maximize the variance... thus local structure of the data is poorly preserved. On the other hand, methods that aim to preserve local structure of data typically suffer from the curse of dimensionality in several ways, such as ... .
 
@@ -27,7 +25,7 @@ Dimensionality reduction is a tool commonly used in disciplines such as ... for 
 
 In exploratory data analysis, visualization of the characteristics of data sets plays a key role.
 
-In this work a method for improving the applicability of parametric t-SNE is proposed. In the proposed method a generative model in the form of a Variational Autoencoder is first trained and subsequently used to produce training data for the parametric t-SNE embedding. The benefits of this procedure are severalfold: . Further, each of these benefits are experimentally demonstrated on a variety of data sets, both quantitatively and qualitatively.
+In this work, a method for improving the applicability of parametric t-SNE is proposed. In the proposed method a generative model in the form of a Variational Autoencoder is first trained and subsequently used to produce training data for the parametric t-SNE embedding. The benefits of this procedure are severalfold: . Further, each of these benefits are experimentally demonstrated on a variety of data sets, both quantitatively and qualitatively.
 
 The structure of this thesis is as follows. In Chapter~\ref{ch:background_and_related_work} the relevant background and related work to the contribution of this thesis is covered to give context to an audience not previously familiar with variational autoencoders or the t-SNE method for dimensionality reduction. The chapter is organized into two main sections, one that builds up to the theory and recent advances in variational autoencoders from the introduction of neural networks, and the other section presents the development of t-SNE up to its parametrization with neural networks.
 
@@ -43,7 +41,7 @@ The final chapter presents discussion and conclusions for the work carried out i
 \section{Variational Autoencoders}
 \label{section:variational_autoencoders}
 
-A key component of the method presented in this work are Variational Autoencoders (VAEs). VAEs belong to a class called deep generative models. 
+A key component of the method presented in this work are Variational Autoencoders (VAEs). VAEs belong to a broad class of models called deep generative models, which have in recent years played a pivotal role in research ... . 
 
 \note{Generative models, mention others like GAN \cite{gan} and RBM/DBN \cite{deep_belief_nets, hinton_deep_belief_nets}.}
 
@@ -62,9 +60,9 @@ Advances in supervised learning for computer vision have arguably played an impo
 
 Unsupervised and semi-supervised learning, representation learning. Deep belief networks, or rather unsupervised pretraining by stacking RBMs is one of the most important results in reviving interest in deep learning, as it was one of the first generally applicable results to enable learning of deep networks. 
 
-Reinforcement learning, atari \cite{deep_atari}, go \cite{alphago} and later go \textit{tabula rasa} \cite{alphazero}.
+Reinforcement learning, atari \cite{deep_atari}, go \cite{alphago} and shortly after, go \textit{tabula rasa} \cite{alphazero}.
 
-The development of ever faster hardware for accelerating the computations needed for deep learning has played a pivotal role in the resurgence of research interest in neural networks. Originally built to accelerate the linear algebra operations required to produce 3D computer graphics, graphics programming units (GPUs) offer immense parallel computing capabilities compared to traditional central processing units (CPUs). With the advent of programming languages and APIs targeting GPUs, general-purpose computing on this specialized hardware was made possible and has been subsequently taken advantage of in research and development of applications making use of neural networks. Recently, development of hardware specialized solely for use with deep learning has been developed \cite{tpu} and microarchitectures of modern GPUs have begun to incorporate specialized computing units for deep learning \cite{nvidia_tensor_core}, indicating a strong and growing interest in both academia and industry towards deep learning.
+The development of ever faster hardware for accelerating the computations needed for deep learning has played a pivotal role in the resurgence of research interest in neural networks. Originally built to accelerate the linear algebra operations required to produce 3D computer graphics, graphics programming units (GPUs) offer immense parallel computing capabilities compared to traditional central processing units (CPUs). With the advent of programming languages and APIs targeting GPUs, general-purpose computing on this specialized hardware has been made possible and has been subsequently taken advantage of in research and development of applications making use of neural networks. Recently, hardware specialized solely for use with deep learning has been developed \cite{tpu} and microarchitectures of modern GPUs have begun to incorporate specialized computing units for deep learning \cite{nvidia_tensor_core}, indicating a strong and growing interest towards deep learning in both academia and industry alike.
 
 \subsubsection{Structure of Neural Networks}
 
@@ -86,7 +84,7 @@ A more simplistic view of neural networks would be to consider them as merely ve
 
 History of backprop (citations like/leading to \cite{nature_backprop}). SGD, Momentum, ... second order methods?
 
-\cite{nature_backprop, how_batch_norm_works, dropout}
+\cite{batch_normalization, how_batch_norm_works, dropout, relu, resnet}
 
 \newpage \phantom{x}
 \newpage
@@ -98,7 +96,9 @@ History of backprop (citations like/leading to \cite{nature_backprop}). SGD, Mom
 \subsection{Autoencoders}
 \label{subsection:autoencoders}
 
-\cite{hinton_autoencoder}
+First discussed in \cite{encoding_problem} as "the encoding problem".
+
+Efficient training via stacking RBMs described in \cite{hinton_autoencoder}, as well as its capabilities for dimensionality reduction.
 
 \begin{figure}[!htb]
   \centering
@@ -106,6 +106,8 @@ History of backprop (citations like/leading to \cite{nature_backprop}). SGD, Mom
   \caption{Autoencoder}
   \label{fig:ae}
 \end{figure}
+
+Connection with pca demonstrated in \cite{autoencoder_pca} when activation functions are linear.
 
 \newpage \phantom{x}
 \newpage
@@ -258,7 +260,7 @@ An important fact to note is that the objective function is in fact non-convex, 
 \subsection{t-SNE}
 \label{subsection:tsne}
 
-The t-SNE algorithm aims to address two issues of the original SNE algorithm. First, one of the main issues with plain SNE is the so called \textit{crowding problem}, which is addressed by considering a heavier tailed probability distribution function in the output space, namely the Student's t-Distribution. Second, through considering joint distributions instead of conditional distributions and the use of a different distribution in the output space lead to an objective function that is easier to optimize than that of SNE. Together these improvements enable better separation of natural clusters in the output space of the algorithm, as compared to the original SNE method.
+The t-SNE algorithm aims to address two issues of the original SNE algorithm. First, one of the main issues with plain SNE is the so-called \textit{crowding problem}, which is addressed by considering a heavier tailed probability distribution function in the output space, namely the Student's t-Distribution. Second, through considering joint distributions instead of conditional distributions and the use of a different distribution in the output space lead to an objective function that is easier to optimize than that of SNE. Together these improvements enable better separation of natural clusters in the output space of the algorithm, as compared to the original SNE method.
 
 The crowding problem is named after the phenomenon where distances in a high dimensional space cannot faithfully be modelled in a lower dimensional space, causing the SNE algorithm to collapse points together in the embedding and thus preventing the formation of natural clusters. One can easily verify that it is not possible in the general case to preserve distances perfectly when performing dimensionality reduction, as a space of $n$ dimensions allows for a maximum of $n+1$ equidistant points. How the crowding problem manifests can be seen by considering how the volumes of objects, and by extension the densities of probability distributions, are concentrated in high dimensional space. Unintuitively, as the number of dimensions increase, the concentration of a Gaussian distribution's density shifts from its mean to a shell around its mean \cite[p.~50]{high_dimensional_probability}. When SNE attempts to match probabilities derived from Gaussian kernels in different dimensionalities, moderately distant points in the high dimensional space will have a disproportionately large force attracting them to the center of the lower dimensional kernel. In addition to SNE, the crowding problem is also present in other non-linear dimensionality reduction methods which are based on preservation of pairwise distances of points, such as Sammon mapping \cite{tsne}.
 
@@ -528,11 +530,11 @@ As discussed in section \textcolor{red}{[todo and ref. the correct section in me
 
 \section{Robustness to Noisy Data}
 
-As real world data is generally not perfectly clean, an important property for any machine learning method is its capability to handle data containing artifacts. Considering VAEs are inherently robust to corrupted data due to the regularization provided by the stochastic latent code (\textcolor{red}{[should be discussed in a previous section more thoroughly, connection with VAE and RPCA \citep{rpca_1, rpca_2} shown in \citep{hidden_talents_of_the_vae}]}) it is reasonable to assume that a training procedure for a low dimensional mapping taking advantage of this property would perform better on corrupted data than one that is subjected only to the raw data.
+As real-world data is generally not perfectly clean, an important property for any machine learning method is its capability to handle data containing artifacts. Considering VAEs are inherently robust to corrupted data due to the regularization provided by the stochastic latent code (\textcolor{red}{[should be discussed in a previous section more thoroughly, connection with VAE and RPCA \citep{rpca_1, rpca_2} shown in \citep{hidden_talents_of_the_vae}]}) it is reasonable to assume that a training procedure for a low dimensional mapping taking advantage of this property would perform better on corrupted data than one that is subjected only to the raw data.
 
 Here we aim to back up this assumption by running experiments on artificially corrupted MNIST data sets. As the corruption process in our experiments we consider \textit{masking noise} as in \cite{stacked_denoising_ae}, where a predetermined fraction of randomly chosen elements of a data point are set to 0. We test robustness by applying masking noise to 10\%, 20\%, 30\% and 40\% fractions of the training and test sets. The results of our experiments (cf. figure \ref{fig:corrupted_data}) show a clear advantage to using our method when dealing with noisy data as both evaluation metrics can be observed to decrease considerably for PTSNE as the training data is progressively corrupted, whereas VPTSNE maintains its performance throughout the experiments.
 
-As an example of real world data corrupted in this fashion, in single-cell RNA sequencing (scRNA-seq) so called \textit{dropout events}, which cause incomplete sequence data to be captured due to technical and biological noise, can be viewed as a form of masking noise. The results presented here would indicate that the proposed method is potentially a good fit for exploratory analysis of scRNA-seq data.
+As an example of real-world data corrupted in this fashion, in single-cell RNA sequencing (scRNA-seq) so-called \textit{dropout events}, which cause incomplete sequence data to be captured due to technical and biological noise, can be viewed as a form of masking noise. The results presented here would indicate that the proposed method is potentially a good fit for exploratory analysis of scRNA-seq data.
 
 \todo{find citations for scrna-seq/dropout}
 
