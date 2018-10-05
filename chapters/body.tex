@@ -3,7 +3,7 @@
 
 At present, ever larger sets of increasingly higher dimensional data are being produced, gathered and analyzed. As a consequence, several challenges arise when analyses are carried out on these vast amounts of high dimensional data. This recent surge of data prompts not only for the development of methods for data analysis capable of scaling to massive data sets but ones which are simultaneously capable of dealing with challenges inherent to high dimensional data.
 
-In literature, problems arising from high dimensionality are collectively referred to as the \textit{curse of dimensionality}, a term first coined by Richard Bellman in the context of his work in dynamic programming \cite{bellman_curse_of_dimensionality}. Particularly in machine learning the following aspects of high dimensional data pose 
+In literature, problems arising from high dimensionality are collectively referred to as the \textit{curse of dimensionality}, a term first coined by Richard Bellman in the context of dynamic programming \cite{bellman_curse_of_dimensionality}. Particularly in machine learning the following aspects of high dimensionality 
 
 \begin{itemize}
 \item distances between pairs of points become less distinguished as dimensionality of the space increases \cite{on_the_surprising_behavior_of_distance_metrics}, rendering methods based on distance metrics at a disadvantage.
@@ -13,7 +13,9 @@ In literature, problems arising from high dimensionality are collectively referr
 \item from a more practical perspective, high dimensional data by itself is hard to directly reason about and difficult to visualize in any meaningful sense. Simple statistics will often not capture 
 \end{itemize}
 
-To tackle problems associated with high dimensional data a common approach is to seek for a lower dimensional representation of the data which retains the salient features of the data. This process, known as dimensionality reduction, can be split into two different approaches. 
+The given listing is not exhaustive, but to serve as an illustration for the variety of issues that can be faced.
+
+To tackle problems associated with high dimensional data a common approach is to seek for a lower dimensional representation of the data which retains its salient features. This process, known as dimensionality reduction, can be split into two different approaches, namely \textit{feature selection} and \textit{feature extraction}.
 
 Fortunately, the so-called manifold hypothesis \cite{manifold_hypothesis} often holds for real-world data sets. The manifold hypothesis posits that the high dimensional data in question lies near a much lower dimensional manifold. As an example, take ... . This in turn implies that if it is possible to learn this manifold, the original data could be described in far fewer dimensions with minimal loss of information. This, together with the classical Johnson-Lindenstrauss lemma \cite{johnson_lindenstrauss}, which provides general bounds to the error associated with dimensionality reduction between points of two Euclidean spaces, give a strong indication that for many data sets substantial dimensionality reduction is not only feasible, but that most of the information within the data can be captured with fewer parameters.
 
@@ -41,7 +43,7 @@ The final chapter presents discussion and conclusions for the work carried out i
 \section{Variational Autoencoders}
 \label{section:variational_autoencoders}
 
-A key component of the method presented in this work are Variational Autoencoders (VAEs). VAEs belong to a broad class of models called deep generative models, which have in recent years played a pivotal role in research ... . 
+An essential component of the method presented in this work are Variational Autoencoders (VAEs). VAEs belong to a broad class of models called deep generative models, which have in recent years played a pivotal role in machine learning research. As their name suggests, generative models attempt to model the process by which a given set of data has been generated.
 
 \note{Generative models, mention others like GAN \cite{gan} and RBM/DBN \cite{deep_belief_nets, hinton_deep_belief_nets}.}
 
@@ -115,7 +117,28 @@ Connection with pca demonstrated in \cite{autoencoder_pca} when activation funct
 \subsection{Variational Bayesian Methods}
 \label{subsection:variational_inference}
 
-Strategies for computing these intractable integrals 
+In Bayesian inference one of the core challenges is the difficulty of computing the posterior of statistical models. Even for only moderately complex statistical models exact computation of the posterior is often intractable and an approximation is sought instead. The dominant paradigm for obtaining these approximates has been through various methods of sampling.
+
+The Bayes theorem states
+
+$$p(\bz \vert \bx) = \frac{p(\bz, \bx)}{p(\bx)} = \frac{p(\bz, \bx)}{\int p(\bz, \bx) d\bz}.$$
+
+Bayesian mixture of Gaussians as example of simple hierarchical model with intractable marginalization:
+
+$$\mu_k \sim \mathcal{N}(0, \sigma^2)$$
+$$c_i \sim \text{Categorical}(\frac{1}{K}, \dots, \frac{1}{K})$$
+$$x_i \vert c_i, \mathbf{\mu} \sim \mathcal{N}(c^{\top}_i \mathbf{\mu}, 1)$$
+$$p(\mathbf{\mu}, \mathbf{c}, \bx) = p(\mathbf{\mu}) \prod_{i=1}^{n} p(c_i) p(x_i \vert c_i \mathbf{\mu})$$
+
+Now when marginalizing out $\mathbf{\mu}$ and $\mathbf{c}$ we arrive at the following integral
+
+$$p(\mathbf{x}) = \int p(\mathbf{\mu}) \prod_{i=1}{n} \sum_{c_i} p(c_i) p(x_i \vert c_i \mathbf{\mu}) d\mathbf{mu}.$$
+
+As the time complexity of evaluating this integral is $\mathcal{O}(K^n)$, it is evident that direct computation quickly becomes infeasible even for relatively small $K$ and $n$.
+
+Variational inference takes a different approach to approximating the posterior. Instead of sampling, in variational inference the approximation problem is turned into an optimization problem. By considering a family of distributions $\mathcal{Q}$ 
+
+$$q^{*}(\mathbf{z}) = \argmin_{q(\mathbf{z}) \in \mathcal{Q}} \dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \mathbf{x})}$$
 
 Further, it is possible to combine automatic differentiation with variational inference to further ease statistical model building and computational efficiency \cite{advi}.
 
@@ -151,7 +174,7 @@ One must note however that KL-divergence is asymmetric, i.e. $\dkl{p}{q} \neq \d
 
 \newpage
 
-\subsection{Auto Encoding Variational Bayes}
+\subsection{Autoencoding Variational Bayes}
 
 \begin{figure}[!htb]
   \centering
@@ -159,11 +182,6 @@ One must note however that KL-divergence is asymmetric, i.e. $\dkl{p}{q} \neq \d
   \caption{The VAE graphical model, in plate notation. Adapted from \cite{aevb}, Figure 1.}
   \label{fig:aevb_plate_notation}
 \end{figure}
-
-\newcommand{\ptheta}{p_{\mathbf{\theta}}}
-\newcommand{\qphi}{q_{\mathbf{\phi}}}
-\newcommand{\bxi}{\mathbf{x}^{(i)}}
-\newcommand{\bz}{\mathbf{z}}
 
 \subsubsection{Derivation of the VAE Objective Function}
 
@@ -201,6 +219,8 @@ $$\widetilde{\mathbf{z}} = g_{\mathbf{\phi}}(\mathbf{\epsilon}, \mathbf{z})$$
 \end{figure}
 
 \cite{normalizing_flows, inverse_autoregressive_flow, householder_flow}
+
+\cite{semi_supervised_vae, adversarial_autoencoders}
 
 \newpage \phantom{x}
 \newpage \phantom{x}
