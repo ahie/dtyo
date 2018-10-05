@@ -114,25 +114,32 @@ Connection with pca demonstrated in \cite{autoencoder_pca} when activation funct
 \newpage \phantom{x}
 \newpage
 
-\subsection{Variational Bayesian Methods}
+\subsection{Variational Inference}
 \label{subsection:variational_inference}
 
-In Bayesian inference one of the core challenges is the difficulty of computing the posterior of statistical models. Even for only moderately complex statistical models exact computation of the posterior is often intractable and an approximation is sought instead. The dominant paradigm for obtaining these approximates has been through various methods of sampling.
+In modern statistics and machine learning a need to approximate highly complex probability distributions is a problem that often arises as
+Highly complex probability densities often arise in modern statistics and machine learning. 
+A core challenge that arises in modern statistics and machine learning is that of approximating 
 
-The Bayes theorem states
+A domain where such complex distributions are often encountered is Bayesian inference, where the posterior 
+
+The Bayes theorem states that the posterior distribution is given by
 
 $$p(\bz \vert \bx) = \frac{p(\bz, \bx)}{p(\bx)} = \frac{p(\bz, \bx)}{\int p(\bz, \bx) d\bz}.$$
 
-Bayesian mixture of Gaussians as example of simple hierarchical model with intractable marginalization:
+Even for only moderately complex models exact computation of the posterior is often intractable due to the required marginalization over all possible latent values $\mathbf{z}$. To illustrate this problem we will consider the Bayesian mixture of Gaussians model as in \cite{variational_inference_review}. The model under consideration is univariate and consists of $K$ unit variance Gaussian mixture components. This 
 
-$$\mu_k \sim \mathcal{N}(0, \sigma^2)$$
-$$c_i \sim \text{Categorical}(\frac{1}{K}, \dots, \frac{1}{K})$$
-$$x_i \vert c_i, \mathbf{\mu} \sim \mathcal{N}(c^{\top}_i \mathbf{\mu}, 1)$$
+$$\mu_k \sim \mathcal{N}(0, \sigma^2),$$
+$$c_i \sim \text{Categorical}(\frac{1}{K}, \dotsc, \frac{1}{K}),$$
+$$x_i \vert c_i, \mathbf{\mu} \sim \mathcal{N}(c^{\top}_i \mathbf{\mu}, 1).$$
+
 $$p(\mathbf{\mu}, \mathbf{c}, \bx) = p(\mathbf{\mu}) \prod_{i=1}^{n} p(c_i) p(x_i \vert c_i \mathbf{\mu})$$
 
-Now when marginalizing out $\mathbf{\mu}$ and $\mathbf{c}$ we arrive at the following integral
+Now, when marginalizing out $\mathbf{\mu}$ and $\mathbf{c}$, we arrive at the following integral
 
-$$p(\mathbf{x}) = \int p(\mathbf{\mu}) \prod_{i=1}{n} \sum_{c_i} p(c_i) p(x_i \vert c_i \mathbf{\mu}) d\mathbf{mu}.$$
+$$p(\mathbf{x}) = \int p(\mathbf{\mu}) \prod_{i=1}^{n} \sum_{c_i} p(c_i) p(x_i \vert c_i \mathbf{\mu}) d\mathbf{\mu}.$$
+
+The dominant paradigm for obtaining these approximates has been through various methods of sampling.
 
 As the time complexity of evaluating this integral is $\mathcal{O}(K^n)$, it is evident that direct computation quickly becomes infeasible even for relatively small $K$ and $n$.
 
