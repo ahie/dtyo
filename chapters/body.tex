@@ -70,7 +70,7 @@ The development of ever faster hardware for accelerating the computations needed
 
 \subsubsection{Structure of Neural Networks}
 
-Neural networks can be thought of as being large function compositions. Each neuron that is part of the network acts as a single function, taking as input the weighted output of other neurons connected to it and outputting the value of the neuron's \textit{activation function}. Neural networks can be classified into two main categories: feedforward and recurrent neural networks. With feedforward networks, 
+Neural networks can be thought of as being large function compositions. Each neuron that is part of the network acts as a single function, taking as input the weighted output of other neurons connected to it and outputting the value of the neuron's \textit{activation function}. Neural networks can be classified into two main categories: feedforward and recurrent neural networks. Thinking of neurons and their connections in terms of graphs, these categories correspond to acyclic directed graphs and directed graphs that may contain cycles, respectively. 
 
 The purpose of an activation function is to alter the incoming signal to induce non-linearity into the network, enabling the learning of more complex functions. 
 
@@ -89,14 +89,9 @@ A simplistic view of neural networks would be to consider them as merely very po
 
 Learning in neural networks boils down to the efficient finding of correct weights for the network to produce desired outputs for given inputs. How well a given network performs is evaluated by computing the value of its \textit{objective function}, given the knowledge of the input and output values. Finding weights for a given network thus becomes a problem of optimizing the value of its objective function.
 
-Early on in the development of neural networks the simple yet powerful backpropagation algorithm was developed independently by multiple researchers and later popularized by Rumelhart et al. \cite{nature_backprop} to enable the efficient training of neural networks. 
+Early on in the development of neural networks the simple yet powerful backpropagation algorithm was developed independently by multiple researchers and later popularized by Rumelhart et al. \cite{nature_backprop} to enable the efficient training of neural networks. In essence, backpropagation is an algorithm to perform gradient descent to optimize neural network weights by exploiting the compositional structure of neural networks and the chain rule of derivatives.
 
-History of backprop (citations like/leading to \cite{nature_backprop}). SGD, Momentum, ... second order methods?
-
-\cite{batch_normalization, how_batch_norm_works, dropout, relu, resnet}
-
-
-\subsubsection{Modern Advances and Best Practices}
+Several difficulties still arise in the optimization of neural networks. \note{explain some of the recent research regarding convergence, vanishing gradients, momentum based methods, regularization, training deeper networks ... \cite{batch_normalization, dropout, relu, resnet}, and how there still isn't consensus on why some established methods seem to work (\cite{how_batch_norm_works}) (learning rate/batch size choice for optimization \cite{large_batch_size_generalization, learning_rate_vs_batch_size}) (worse generalization of adaptive gradient methods, such as AdaGrad, RMSProp, Adam \cite{marginal_value_of_adaptive_gradient_methods})}
 
 \subsection{Autoencoders}
 \label{subsection:autoencoders}
