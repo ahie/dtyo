@@ -72,9 +72,13 @@ The development of ever faster hardware for accelerating the computations needed
 
 Neural networks can be thought of as being large function compositions. Each neuron that is part of the network acts as a single function, taking as input the weighted output of other neurons connected to it and outputting the value of the neuron's \textit{activation function}. Neural networks can be classified into two main categories: feedforward and recurrent neural networks. Thinking of neurons and their connections in terms of graphs, these categories correspond to acyclic directed graphs and directed graphs that may contain cycles, respectively. 
 
-The purpose of an activation function is to alter the incoming signal to induce non-linearity into the network, enabling the learning of more complex functions. 
+The purpose of an activation function is to alter incoming signals to induce non-linearity into the network as well as impose constraints on the values that flow through specific neurons, enabling the learning of more complex functions with desired properties. 
 
-A common representation of a simple neural network is a graph where the output-input neuron pairs are visualized with directed edges. As an example, Figure~\ref{fig:nn} depicts a feedforward neural network\footnote{Note that bias nodes are omitted from the figure for simplicity.} taking input vectors $\mathbf{x}^{(i)}$ of length $3$ and outputting vectors $\mathbf{y}^{(i)}$ of length $2$.
+A common representation of a simple neural network is a graph where the output-input neuron pairs are visualized with directed edges. As an example, Figure~\ref{fig:nn} depicts a feedforward neural network\footnote{Note that bias nodes are omitted from the figure for simplicity.} taking input vectors $\mathbf{x}$ of length $3$ and outputting vectors $\mathbf{y}$ of length $2$. The output of the depicted neural network can be expressed with the equation
+
+$$\mathbf{y} = f_3(\mathbf{W}_3 f_2(\mathbf{W}_2 f_1(\mathbf{W}_1 \mathbf{x} + \mathbf{b}_1) + \mathbf{b}_2) + \mathbf{b}_3),$$
+
+where $f_i$ are the activation functions, $\mathbf{W}_i$ the weights, and $\mathbf{b}_i$ the biases of the $i$th layer.
 
 \begin{figure}[!htb]
   \centering
@@ -85,9 +89,11 @@ A common representation of a simple neural network is a graph where the output-i
 
 \subsubsection{Learning in Neural Networks}
 
-A simplistic view of neural networks would be to consider them as merely very powerful function approximators. The theoretical underpinning for this view is the universal approximation theorem \cite{universal_approximation_theorem}, which states that under mild conditions on the activation function, single layer neural networks with a finite number of units can arbitrarily well approximate any continuous function on compact subsets of $\mathbb{R}^n$. However, the universal approximation theorem does not state anything about the algorithmic challenges associated with the learnability of the parameters for these approximations, which is where many of the practical challenges associated with neural networks lie.
+A simplistic view of neural networks would be to consider them as merely very powerful function approximators. The theoretical underpinning for this view is the universal approximation theorem \cite{universal_approximation_theorem}, which states that under mild conditions on the activation function, neural networks with a single hidden layer can arbitrarily well approximate any continuous function.\footnote{The universal approximation theorem requires that the activation function is nonconstant, bounded and continuous, which highlights the importance of non-linear activation functions.}$^{,}$\footnote{To be precise, this approximation applies to continuous functions defined on compact subsets of $\mathbb{R}^n$.} However, the universal approximation theorem does not state anything about the challenges associated with the learnability of the parameters for these approximations, which is where many of the practical challenges associated with neural networks lie.
 
 Learning in neural networks boils down to the efficient finding of correct weights for the network to produce desired outputs for given inputs. How well a given network performs is evaluated by computing the value of its \textit{objective function}, given the knowledge of the input and output values. Finding weights for a given network thus becomes a problem of optimizing the value of its objective function.
+
+Neural networks can be trained for various different computational tasks by simply choosing the correct objective function. Perhaps the most common use case for neural networks is to use them for classification.
 
 Early on in the development of neural networks the simple yet powerful backpropagation algorithm was developed independently by multiple researchers and later popularized by Rumelhart et al. \cite{nature_backprop} to enable the efficient training of neural networks. In essence, backpropagation is an algorithm to perform gradient descent to optimize neural network weights by exploiting the compositional structure of neural networks and the chain rule of derivatives.
 
