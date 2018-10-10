@@ -70,15 +70,13 @@ The development of ever faster hardware for accelerating the computations needed
 
 \subsubsection{Structure of Neural Networks}
 
-Neural networks can be thought of as being large function compositions. Each neuron that is part of the network acts as a single function, taking as input the weighted output of other neurons connected to it and outputting the value of the neuron's \textit{activation function}. Neural networks can be classified into two main categories: feedforward and recurrent neural networks. Thinking of neurons and their connections in terms of graphs, these categories correspond to acyclic directed graphs and directed graphs that may contain cycles, respectively. 
+Neural networks can be thought of as being large function compositions. Each neuron that is part of the network acts as a single function, taking as input the weighted output of other neurons connected to it and outputting the value of the neuron's \textit{activation function}. Neural networks can be classified into two main categories: feedforward and recurrent neural networks. Thinking of neurons and their connections in terms of graphs, where neurons represent vertices and edges represent the flow of data from one neuron to another, these two categories correspond to acyclic directed graphs and directed graphs that may contain cycles. In this work we will limit our focus to feedforward neural networks as the methods discussed do not make use of recurrent neural network structures.
 
-The purpose of an activation function is to alter incoming signals to induce non-linearity into the network as well as impose constraints on the values that flow through specific neurons, enabling the learning of more complex functions with desired properties. 
-
-A common representation of a simple neural network is a graph where the output-input neuron pairs are visualized with directed edges. As an example, Figure~\ref{fig:nn} depicts a feedforward neural network\footnote{Note that bias nodes are omitted from the figure for simplicity.} taking input vectors $\mathbf{x}$ of length $3$ and outputting vectors $\mathbf{y}$ of length $2$. The output of the depicted neural network can be expressed with the equation
+A common representation of a simple neural network is a graph where the output-input neuron pairs are visualized with directed edges. As an example, Figure~\ref{fig:nn} depicts a feedforward neural network\footnote{Note that bias neurons are omitted from the figure for simplicity.} taking input vectors $\mathbf{x}$ of length $3$ and outputting vectors $\mathbf{y}$ of length $2$. The network can be seen to be split into three functionally distinct parts: an input layer, hidden layers, and an output layer. The input layer is directly fed the values to be run through the network. The hidden layers are formed by neurons connecting the input to the output layer. The output layer represents the result of the computation performed by the network. What this depicted neural network computes can be expressed with the equation
 
 $$\mathbf{y} = f_3(\mathbf{W}_3 f_2(\mathbf{W}_2 f_1(\mathbf{W}_1 \mathbf{x} + \mathbf{b}_1) + \mathbf{b}_2) + \mathbf{b}_3),$$
 
-where $f_i$ are the activation functions, $\mathbf{W}_i$ the weights, and $\mathbf{b}_i$ the biases of the $i$th layer.
+where $f_i$ are the activation functions, $\mathbf{W}_i$ the matrices of weights, and $\mathbf{b}_i$ the biases of the $i$th layer. The purpose of an activation function is to alter incoming signals to induce non-linearity into the network as well as impose constraints on the values that flow through specific neurons, enabling the learning of more complex functions with desired properties. Bias neurons enable the shifting of activation function outputs. Weights of the network control the signal strengths from one neuron to the other.
 
 \begin{figure}[!htb]
   \centering
@@ -128,27 +126,29 @@ The Bayes theorem states that the posterior distribution is given by
 
 $$p(\bz \vert \bx) = \frac{p(\bz, \bx)}{p(\bx)} = \frac{p(\bz, \bx)}{\int p(\bz, \bx) d\bz}.$$
 
-Even for only moderately complex models exact computation of the posterior is often intractable due to the required marginalization over all possible latent values $\mathbf{z}$. To illustrate this problem we will consider the Bayesian mixture of Gaussians model as in \cite{variational_inference_review}. The model under consideration is univariate and consists of $K$ unit variance Gaussian mixture components. This 
+Even for only moderately complex models exact computation of the posterior is often intractable due to the required marginalization over all possible latent values $\mathbf{z}$. To illustrate this problem we will consider the Bayesian mixture of Gaussians model as in \cite{variational_inference_review}. The model under consideration is univariate and consists of $K$ unit variance Gaussian mixture components. The full hierarchical model is given by the following
 
 $$\mu_k \sim \mathcal{N}(0, \sigma^2),$$
 $$c_i \sim \text{Categorical}(\frac{1}{K}, \dotsc, \frac{1}{K}),$$
 $$x_i \vert c_i, \mathbf{\mu} \sim \mathcal{N}(c^{\top}_i \mathbf{\mu}, 1).$$
 
-$$p(\mathbf{\mu}, \mathbf{c}, \bx) = p(\mathbf{\mu}) \prod_{i=1}^{n} p(c_i) p(x_i \vert c_i \mathbf{\mu})$$
+From these definitions, the joint distribution factorizes as
+
+$$p(\mathbf{\mu}, \mathbf{c}, \bx) = p(\mathbf{\mu}) \prod_{i=1}^{n} p(c_i) p(x_i \vert c_i \mathbf{\mu}).$$
 
 Now, when marginalizing out $\mathbf{\mu}$ and $\mathbf{c}$, we arrive at the following integral
 
 $$p(\mathbf{x}) = \int p(\mathbf{\mu}) \prod_{i=1}^{n} \sum_{c_i} p(c_i) p(x_i \vert c_i \mathbf{\mu}) d\mathbf{\mu}.$$
 
-The dominant paradigm for obtaining these approximates has been through various methods of sampling.
-
 As the time complexity of evaluating this integral is $\mathcal{O}(K^n)$, it is evident that direct computation quickly becomes infeasible even for relatively small $K$ and $n$.
+
+The dominant paradigm for obtaining these approximates has been through various methods of sampling.
 
 Variational inference takes a different approach to approximating the posterior. Instead of sampling, in variational inference the approximation problem is turned into an optimization problem. By considering a family of distributions $\mathcal{Q}$ 
 
 $$q^{*}(\mathbf{z}) = \argmin_{q(\mathbf{z}) \in \mathcal{Q}} \dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \mathbf{x})}$$
 
-Further, it is possible to combine automatic differentiation with variational inference to further ease statistical model building and computational efficiency \cite{advi}.
+\note{It is possible to combine automatic differentiation with variational inference to further ease statistical model building and computational efficiency \cite{advi}. (Brief discussion on probabilistic programming)}
 
 \begin{figure}[!htb]
   \centering
@@ -420,7 +420,7 @@ We apply batch normalization \citep{batch_normalization} to the hidden layers of
 
 To further emphasize the universality of our approach we restrict ourselves to use a simple VAE structure, without complicating the model architecture with more recently proposed advances, such as normalizing flows \citep{normalizing_flows} (\textcolor{red}{[Note: could show that better models improve performance in the supplement]}). Throughout all experiments the VAE architecture is fixed to $d - 256 - 128 - 32 - \mu, \log \sigma^2 - 32 - 128 - 256 - d$, where $\mu$ and $\sigma$ parameterize a normal distribution acting as the posterior $q_{\phi}(\mathbf{z} \vert \mathbf{x}^{(i)})$ and the final layer output was used to parameterize a Bernoulli distribution for MNIST as well as Fashion-MNIST, and a normal distribution with a fixed standard deviation of 0.1 for cytometry data. In all experiments, each VAE was trained with a batch size of 1000 for 10000 iterations.
 
-For MNIST and Fashion-MNIST perplexities were set to 30, which is in line with the value used by \cite{parametric_tsne}, whereas for the cytometry data sets a perplexity of 10 was chosen. \textcolor{red}{[Note: Perplexity should really be chosen relative to the batch size. For example training VPTSNE on MNIST with batch size 200 and perplexity 10 gives far better results than with perplexity 30. However, with PTSNE the results are actually worse as the training fails to converge properly, even with small learning rates. An example embedding of MNIST with low perplexity and small batch size has been included in the appendix (figure \ref{fig:low_perp_small_bs}), which also achieves better trustworthiness (0.935) and 1-NN (0.812) than the 600 batch size, 30 perplexity runs. Analysis of why PTSNE fails to converge and VPTSNE does not should be included, since this is a clear advantage of the method we're demonstrating.]}
+For MNIST and Fashion-MNIST perplexities were set to 30, which is in line with the value used by \cite{parametric_tsne}, whereas for the cytometry data sets a perplexity of 10 was chosen. It should be noted that a more correct way to choose perplexity would take into account the batch size, as perplexity controls the number of neighbors each point is considered to have. For example training VPTSNE on MNIST with batch size 200 and perplexity 10 gives far better results than with perplexity 30. However, with PTSNE the results are actually worse as the training fails to converge even with small learning rates. An example embedding of MNIST with low perplexity and small batch size has been included in Appendix~\ref{appendix:low_perp_small_bs}, which achieves better trustworthiness (0.935) and 1-NN (0.812) than the 600 batch size, 30 perplexity runs. Why PTSNE fails to converge and VPTSNE does not is an important question to explore in future work, as this demonstrates a clear advantage of the method being proposed.
 
 Degrees of freedom of the t-Distribution for the PTSNE objective is set to 1 throughout all experiments, as all embeddings performed are two-dimensional.
 
@@ -571,7 +571,7 @@ Instead of training the embedding network on the final output of the observation
 \item Given that the number of dimensions can be chosen to be considerably lower than in the original input space, computing the t-SNE loss also becomes proportionally cheaper.
 \end{itemize}
 
-To show the efficacy of this modification to the learning procedure we train an embedding using the latent code directly. As we choose the dimensionality of the latent code to be more than two orders of magnitude smaller than that of the original data's it is possible for us to use batches of far greater size to train the embedding network, without incurring additional computation cost over training with smaller batches on data of the original dimensionality. The latent dimensionality of the VAE was chosen to be $7$ and the batch size for training the embedding was set to $5000$, as in the original parametric t-SNE paper by \cite{parametric_tsne}. We have additionally included the embedding of data points obtained with the original implementation of parametric t-SNE for comparison in figure \ref{fig:hidden_layer}. Qualitatively and quantitatively we achieve an overall better embedding with less computation using our method.
+To show the efficacy of this modification to the learning procedure we train an embedding using the latent code directly. As we choose the dimensionality of the latent code to be more than two orders of magnitude smaller than that of the original data's it is possible for us to use batches of far greater size to train the embedding network, without incurring additional computation cost over training with smaller batches on data of the original dimensionality. The latent dimensionality of the VAE was chosen to be $7$ and the batch size for training the embedding was set to $5000$, as in the original parametric t-SNE paper by \cite{parametric_tsne}. The choice of $7$ as the VAE latent dimensionality was deliberately made so that it would correspond to the largest number which is two orders of magnitude smaller than the original dimensionality. We have additionally included the embedding of data points obtained with the original implementation of parametric t-SNE for comparison in figure \ref{fig:hidden_layer}. Qualitatively and quantitatively an overall better embedding is achieved with less computation using our method.
 
 When considering precomputed $P_{ij}$ matrices for each batch the gain in computational advantage does however diminish significantly, although the following caveats apply to the precomputation: Storing the precomputed matrices will require considerable space for large batch sizes and data sets. A way to circumvent the need for large storage space is to employ a KNN approximation when computing $P_{ij}$, i.e. only considering a small number of neighbors when computing the conditional probabilities for each pair of points, which will result in a sparse matrix. This however increases the error in the computed gradient and relies on an efficient KNN algorithm in practice. Additionally, fixing the batches in advance hinders the performance of SGD as the gradient estimates become biased. Moreover, relying on precomputed $P_{ij}$ matrices for fixed batches prevents the use of infinite sample generation from the VAE.
 
@@ -581,8 +581,6 @@ When considering precomputed $P_{ij}$ matrices for each batch the gain in comput
   \caption{Embedding produced by training on a 7 dimensional latent representation of the MNIST data set contrasted with the original implementation of \cite{parametric_tsne} run on the original data. VPTSNE trustworthiness: 0.927, 1-NN: 0.910. PTSNE trustworthiness: 0.926, 1-NN 0.887.}
   \label{fig:hidden_layer}
 \end{figure}
-
-\textcolor{red}{[Note: The choice of 7 as the latent dimensionality right now seems unjustified. It was simply chosen to be the largest number for which "more than two orders of magnitude smaller" holds true. Should work that into the text.]}
 
 \section{Inference with the Generative Model}
 
@@ -625,6 +623,8 @@ To distinguish between outlier and inlier points in the mapping we obtain we set
 \bibliography{main}
 
 \appendix
+\chapter{Small Batch Size Low Perplexity Embedding}
+\label{appendix:low_perp_small_bs}
 
 \begin{figure}[!htb]
   \centering
