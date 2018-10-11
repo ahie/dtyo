@@ -10,22 +10,20 @@ In literature, problems arising from high dimensionality are collectively referr
 \item The volume of a space grows exponentially along with the number of dimensions. This leads to even large data sets appearing sparse in the feature space. Efficient sampling requires a lot of points
 \item need for more training data, k-means example \cite[p.~263]{understanding_machine_learning}
 \item algorithm complexity depends on the dimensionality of data being processed, large costs are accrued
-\item from a more practical perspective, high dimensional data by itself is hard to directly reason about and difficult to visualize in any meaningful sense. Simple statistics will often not capture 
+\item from a more practical perspective, high dimensional data by itself is hard to directly reason about and difficult to visualize in any meaningful sense. Simple statistics will often not be able to capture adequate information.
 \end{itemize}
 
-The given listing is not exhaustive, but to serve as an illustration for the variety of issues that can be faced.
+The given listing is not exhaustive, but rather serves as an illustration for the variety of issues that can be encountered when working with high dimensional data.
 
 To tackle problems associated with high dimensional data a common approach is to seek for a lower dimensional representation of the data which retains its salient features. This process, known as dimensionality reduction, can be split into two different approaches, namely \textit{feature selection} and \textit{feature extraction}.
 
-Fortunately, the so-called manifold hypothesis \cite{manifold_hypothesis} often holds for real-world data sets. The manifold hypothesis posits that the high dimensional data in question lies near a much lower dimensional manifold. As an example, take ... . This in turn implies that if it is possible to learn this manifold, the original data could be described in far fewer dimensions with minimal loss of information. This, together with the classical Johnson-Lindenstrauss lemma \cite{johnson_lindenstrauss}, which provides general bounds to the error associated with dimensionality reduction between points of two Euclidean spaces, give a strong indication that for many data sets substantial dimensionality reduction is not only feasible, but that most of the information within the data can be captured with fewer parameters.
+The so-called manifold hypothesis \cite{manifold_hypothesis} often holds for real-world data sets. The manifold hypothesis posits that the high dimensional data in question lies near a much lower dimensional manifold. As an example, take ... . This in turn implies that if it is possible to learn this manifold, the original data could be described in far fewer dimensions with minimal loss of information. This, together with the classical Johnson-Lindenstrauss lemma \cite{johnson_lindenstrauss}, which provides general bounds to the error associated with dimensionality reduction between points of two Euclidean spaces, give a strong indication that for many data sets substantial dimensionality reduction is not only feasible, but that most of the information within the data can be captured with fewer parameters.
 
-Several different methods for dimensionality reduction have been developed over the years. Arguably the most well known and applied dimensionality reduction method in practice is Principal Component Analysis (PCA), developed independently by Karl Pearson \cite{pca_1} and Harold Hotelling \cite{pca_2} in the early 1900s. Although very efficient to compute and providing easily interpretable results, PCA however suffers from the fact that it only takes into account linear relationships in the data it is given, making it nonideal for manifold learning of complex non-linear and heteroscedastic data. the fact that it only aims to maximize the variance... thus local structure of the data is poorly preserved. On the other hand, methods that aim to preserve local structure of data typically suffer from the curse of dimensionality in several ways, such as ... .
+Several different methods for dimensionality reduction have been developed over the years. Arguably the most well known and applied dimensionality reduction method in practice is Principal Component Analysis (PCA), developed independently by Karl Pearson \cite{pca_1} and Harold Hotelling \cite{pca_2} in the early 1900s. Although very efficient to compute and providing easily interpretable results, PCA however suffers from the fact that it only takes into account linear relationships in the data it is given, making it nonideal for ... . The fact that PCA only aims to find an orthogonal projection that maximizes the variance... local structure of the data is poorly preserved. On the other hand, methods that aim to preserve local structure of data typically suffer from poor scalability to large data sets and the curse of dimensionality in several ways, such as ... .
 
 As a wealth of dimensionality reduction methods have been developed, attempting to cover all of them would be greatly out of the scope of this thesis, in which the focus is on improving an existing method for primarily data visualization purposes. For comprehensive reviews on other prominent methods the reader is referred to \cite{first_dimensionality_reduction_review, second_dimensionality_reduction_review}.
 
-Dimensionality reduction is a tool commonly used in disciplines such as ... for visualization of high dimensional data as 2 or 3 dimensional scatter plots. 
-
-In exploratory data analysis, visualization of the characteristics of data sets plays a key role.
+In exploratory data analysis, visualization of the characteristics of data sets plays a key role. Being able to project high dimensional data into meaningful low dimensional representations enables researchers and data analysts to generate hypotheses.
 
 In this work, a method for improving the applicability of parametric t-SNE is proposed. In the proposed method a generative model in the form of a Variational Autoencoder is first trained and subsequently used to produce training data for the parametric t-SNE embedding. The benefits of this procedure are severalfold: . Further, each of these benefits are experimentally demonstrated on a variety of data sets, both quantitatively and qualitatively.
 
@@ -313,9 +311,9 @@ For which the following gradient can be derived:
 \label{eq:c_tsne_grad}
 \end{equation}
 
-Methods to improve the runtime of t-SNE have been subsequently proposed: \cite{accelerated_tsne_1, accelerated_tsne_2}. Use of the fast multipole method \cite{fast_multipole} has not been explored due to no suitable expansion for the t-Distributed forces in the output space exist.
+\note{Methods to improve the runtime of t-SNE have been subsequently proposed: \cite{accelerated_tsne_1, accelerated_tsne_2}. Use of the fast multipole method \cite{fast_multipole} has not been explored due to no suitable expansion for the t-Distributed forces in the output space exist.}
 
-Worth a mention is the Stochastic Triplet Embedding \cite{stochastic_triplet_embedding} and Multiple Maps t-SNE \cite{multiple_maps_tsne} methods developed on top of t-SNE, developed to handle non-metric similarities present in the data.
+\note{Worth a mention is the Stochastic Triplet Embedding \cite{stochastic_triplet_embedding} and Multiple Maps t-SNE \cite{multiple_maps_tsne} methods developed on top of t-SNE, developed to handle non-metric similarities present in the data.}
 
 \subsection{Parametric t-SNE}
 \label{subsection:parametric_tsne}
@@ -335,24 +333,37 @@ As $f_{\mathbf{W}}(\mathbf{x}_i) = \mathbf{y}_i$, Equation~\ref{eq:c_tsne_grad} 
 \chapter{Method}
 \label{ch:method}
 
-The method proposed in this work involves combining the VAE model with Parametric t-SNE to produce a general framework for improved parametric dimensionality reduction for visualization. In this chapter the 
+The method proposed in this work involves combining the VAE model with Parametric t-SNE to produce a general framework for improved parametric dimensionality reduction for visualization. In this chapter the learning algorithm is described. 
 
 \section{Learning a Parametric Embedding Using VAE Sampling}
-
-\section{Robustness to Sparse and Noisy Data}
-\label{section:robustness_to_sparse_and_noisy_data}
 
 \section{Sampling from Hidden Layers}
 \label{section:sampling_from_hidden_layers}
 
 \section{Inference with the Generative Model}
+\label{section:inference_with_the_generative_model}
+
+From the underlying generative model we can approximately compute the marginal $p(\mathbf{x})$ for each data point $\mathbf{x}$. An approximation can be retrieved by importance sampling \citep{stochastic_backpropagation}:
+
+$$p(\mathbf{x}) \approx \frac{1}{N} \sum_{i=1}^{N} \frac{p(\mathbf{x} \vert \mathbf{z}^{(i)}) p(\mathbf{z}^{(i)})}{q_{\theta}(\mathbf{z}^{(i)} \vert \mathbf{x})},$$
+
+where $\mathbf{z}^{(i)} \sim q_{\theta}(\mathbf{z} \vert \mathbf{x})$.
+
+Using the obtained marginals as feedback we can inform the user of potentially anomalous points in the data set. This feedback can then further be used in downstream analysis. From a data visualization perspective points that do not fit the model well correspond to points that are likely to be mapped poorly, thus removing such outliers from the final mapping serves to highlight the natural clusters in the data more clearly.
+
+\textcolor{red}{[Note: discuss the more accurate but computationally costly marginal estimation method: annealed importance sampling \citep{ais, ais_vae}?]}
+
+\textcolor{red}{[Note: could discuss, experiment with modification to the algorithm: if p(x) (or even more simply just the reconstruction error) is high (above some threshold), pass the original data point and not the reconstruction to the mapping. This proved to work for the small subset experiment when limiting the latent dimension to $\leq 3$. Reason for this being that the VAE trained on only 600 samples poorly reconstructed the test set (basically just corrupting many of them).]}
+
+\section{Robustness to Sparse and Noisy Data}
+\label{section:robustness_to_sparse_and_noisy_data}
 
 \section{Implementation}
 \label{section:implementation}
 
-An accompanying implementation of the method has been made available at \url{https://github.com/ahie/vptsne}. The implementation is built on top of Tensorflow \citep{tensorflow} and takes advantage of the Tensorflow Distributions \citep{tensorflow_distributions} library. To take full advantage of the computation graph architecture of Tensorflow and the paralellism provided by GPGPUs, both the t-SNE loss and its gradient computation were implemented as custom CUDA \citep{cuda} kernel operations.
+An accompanying implementation of the method has been made available at \url{https://github.com/ahie/vptsne}. The implementation is built on top of TensorFlow \citep{tensorflow} and takes advantage of the TensorFlow Distributions \citep{tensorflow_distributions} library. To take full advantage of the dataflow architecture of TensorFlow and the paralellism provided by GPUs, both the t-SNE loss and its gradient computation were implemented as custom CUDA \citep{cuda} kernel operations.
 
-\note{Describe that it also includes fast parallel implementation of NN-Descent \citep{nn_descent}?}
+The implementation has been made as extensible as possible by allowing the full specification of the neural network structures parameterizing the VAE distributions and the PTSNE network. Helpers for easily specifying the common network structures are included in the implementation. The use of normalizing flows in the VAE model has also been made possible. Additionally, the fast approximate nearest neighbor algorithm NN-descent \cite{nn_descent} has been included in the t-SNE CUDA routines as an optional performance enhancement for computing the input space distribution $P$ when training with large batch sizes.
 
 \chapter{Experiments}
 \label{ch:experiments}
@@ -361,7 +372,7 @@ The code and data used to reproduce all the results presented in this section ha
 
 \section{Data Sets}
 
-To validate the proposed method we studied the properties of the combined model on the four different data sets described below.
+To validate the proposed method properties of the combined model were studied on the four different data sets described below.
 
 \subsection{MNIST}
 
@@ -476,7 +487,7 @@ The quantitative results for all methods under comparison are available in table
 
 \noindent \textcolor{red}{[Note: The effect of choosing a suitable perplexity w.r.t. batch size mentioned in a previous note is highlighted in \ref{fig:comparison_figure}. With large perplexity the clusters in the t-SNE embedding begin to separate more distinctly like with VPTSNE/UMAP, but here the same perplexity is used for both VPTSNE and t-SNE optimization. As perplexity is increased t-SNE optimization becomes considerably slower (for example going from perplexity 10 to 100 increased the total computation time twofold).]}
 
-\noindent \textcolor{red}{[Note: We can also observe that t-SNE (at least with the given perplexity) preserves global structure much more poorly. This can be observed by comparing with the PCA plot, which has three clearly distinct, spatially separated clusters of clusters that are not present in the t-SNE plot. Could consider using some metric to quantify this?]}
+It can also be observed that t-SNE, with the given perplexity, preserves global structure much more poorly. This can be observed by comparing with the PCA plot, which has three clearly distinct, spatially separated clusters of clusters that are not present in the t-SNE plot.
 
 \subsection{Scalability}
 \label{subsubsection:scalability}
@@ -584,23 +595,9 @@ When considering precomputed $P_{ij}$ matrices for each batch the gain in comput
 
 \section{Inference with the Generative Model}
 
-From the underlying generative model we can approximately compute the marginal $p(\mathbf{x})$ for each data point $\mathbf{x}$. An approximation can be retrieved by importance sampling \citep{stochastic_backpropagation}:
+As an example of inference with the generative model discussed in \ref{section:inference_with_the_generative_model} we use the Cytometry B data set to train our combined model with two patients' data held out. The protein expression profile of Patient A's cells closely match that of other patients' in the training set, whereas Patient B's sample is from advanced cancer making it an outlier in relation to the data available during training.
 
-$$p(\mathbf{x}) \approx \frac{1}{N} \sum_{i=1}^{N} \frac{p(\mathbf{x} \vert \mathbf{z}^{(i)}) p(\mathbf{z}^{(i)})}{q_{\theta}(\mathbf{z}^{(i)} \vert \mathbf{x})},$$
-
-where $\mathbf{z}^{(i)} \sim q_{\theta}(\mathbf{z} \vert \mathbf{x})$.
-
-Using the obtained marginals as feedback we can inform the user of potentially anomalous points in the data set. This feedback can then further be used in downstream analysis. From a data visualization perspective points that do not fit the model well correspond to points that are likely to be mapped poorly, thus removing such outliers from the final mapping serves to highlight the natural clusters in the data more clearly.
-
-\textcolor{red}{[Note: discuss the more accurate but computationally costly marginal estimation method: annealed importance sampling \citep{ais, ais_vae}?]}
-
-\textcolor{red}{[Note: could discuss, experiment with modification to the algorithm: if p(x) (or even more simply just the reconstruction error) is high (above some threshold), pass the original data point and not the reconstruction to the mapping. This proved to work for the small subset experiment when limiting the latent dimension to $\leq 3$. Reason for this being that the VAE trained on only 600 samples poorly reconstructed the test set (basically just corrupting many of them).]}
-
-\textcolor{red}{[Note: contents above should be moved to the methods section.]}
-
-As an example we use the Cytometry B data set to train our combined model with two patients' data held out. The protein expression profile of Patient A's cells closely match that of other patients' in the training set, whereas Patient B's sample is from advanced cancer making it an outlier in relation to the data available during training.
-
-To distinguish between outlier and inlier points in the mapping we obtain we set a hard threshold of $\log p(\mathbf{x}) < -150$ to separate between the two. In figure \ref{fig:cytometry_outliers} embeddings with both patient specific labeling and labeling obtained by thresholding are shown side by side. The high tumor purity sample of Patient B has almost completely been mapped to a small region corresponding to protein expression levels of cancer cells, whereas Patient A's mapping contains several distinct clusters of various cell types. Further, the labels obtained through thresholding indicate that the majority of cells in Patient B's sample are indeed considered as outliers by the model, in addition to a handful of visually poorly mapped points.
+To distinguish between outlier and inlier points in the obtained mapping we set a hard threshold of $\log p(\mathbf{x}) < -150$ to separate between the two. In figure \ref{fig:cytometry_outliers} embeddings with both patient specific labeling and labeling obtained by thresholding are shown side by side. The high tumor purity sample of Patient B has almost completely been mapped to a small region corresponding to protein expression levels of cancer cells, whereas Patient A's mapping contains several distinct clusters of various cell types. Further, the labels obtained through thresholding indicate that the majority of cells in Patient B's sample are indeed considered as outliers by the model, in addition to a handful of visually poorly mapped points.
 
 \begin{figure}[!htb]
   \centering
@@ -623,7 +620,7 @@ To distinguish between outlier and inlier points in the mapping we obtain we set
 \bibliography{main}
 
 \appendix
-\chapter{Small Batch Size Low Perplexity Embedding}
+\chapter{Small Batch Size, Low Perplexity Embedding}
 \label{appendix:low_perp_small_bs}
 
 \begin{figure}[!htb]
