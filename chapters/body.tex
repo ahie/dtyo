@@ -91,6 +91,8 @@ Neural networks can be trained for various different computational tasks by simp
 
 Early on in the development of neural networks the simple yet powerful backpropagation algorithm was developed independently by multiple researchers and later popularized by Rumelhart et al. \cite{nature_backprop} to enable the efficient training of neural networks. In essence, backpropagation is an algorithm to perform gradient descent to optimize neural network weights by exploiting the compositional structure of neural networks and the chain rule of derivatives.
 
+The backpropagation algorithm proceeds as follows: first, input values are run through the entire network to compute the value of the objective function.
+
 \note{Backprop algorithm in more detail, SGD, gradient descent optimization methods (mention second order methods?)}
 
 Several difficulties still arise in the optimization of neural networks. \note{explain some of the recent research regarding convergence, vanishing gradients, momentum based methods, regularization, training deeper networks ... \cite{batch_normalization, dropout, relu, resnet}, and how there still isn't consensus on why some established methods seem to work (\cite{how_batch_norm_works}) (learning rate/batch size choice for optimization \cite{large_batch_size_generalization, learning_rate_vs_batch_size}) (potentially worse generalization of adaptive gradient methods, such as AdaGrad, RMSProp, Adam \cite{marginal_value_of_adaptive_gradient_methods})}
@@ -363,7 +365,7 @@ Using the obtained marginals as feedback we can inform the user of potentially a
 
 An accompanying implementation of the method has been made available at \url{https://github.com/ahie/vptsne}. The implementation is built on top of TensorFlow \cite{tensorflow} and takes advantage of the TensorFlow Distributions \cite{tensorflow_distributions} library. To take full advantage of the dataflow architecture of TensorFlow and the paralellism provided by GPUs, both the t-SNE loss and its gradient computation were implemented as custom CUDA \cite{cuda} kernel operations.
 
-The implementation has been made as extensible as possible by allowing the full specification of the neural network structures parameterizing the VAE distributions and the PTSNE network. Helpers for easily specifying the common network structures are included in the implementation. The use of normalizing flows in the VAE model has also been made possible. Additionally, the fast approximate nearest neighbor algorithm NN-descent \cite{nn_descent} has been included in the t-SNE CUDA routines as an optional performance enhancement for computing the input space distribution $P$ when training with large batch sizes.
+The implementation has been made as extensible as possible by allowing the full specification of the neural network structures parameterizing the VAE distributions and the PTSNE network. Helpers for easily specifying common network structures are included in the implementation. The use of normalizing flows in the VAE model has also been made possible. Additionally, the fast approximate nearest neighbor algorithm NN-descent \cite{nn_descent} has been included in the t-SNE CUDA routines as an optional performance enhancement for computing the input space distribution $P$ when training with large batch sizes.
 
 \chapter{Experiments}
 \label{ch:experiments}
@@ -372,7 +374,7 @@ The code and data used to reproduce all the results presented in this section ha
 
 \section{Data Sets}
 
-To validate the proposed method properties of the combined model were studied on the four different data sets described below.
+To validate the proposed method properties of the combined model were studied on the five different data sets described below.
 
 \subsection{MNIST}
 
@@ -391,6 +393,12 @@ As a comparatively new methodological development, mass cytometry enables simult
 In our experiments, we consider two different mass cytometry data sets. As the first data set, henceforth referred to as Cytometry A, we use the publicly available data of \cite{phenograph}, which has been used to demonstrate the effectiveness of the Phenograph clustering algorithm on mass cytometry data. The data set consists of $81000$ data points of $13$ dimensions corresponding to the normalized counts of cell surface proteins belonging to distinct clusters of differentiation. As a benchmark data set for the Phenograph clustering algorithm, we additionally include the labels produced by Phenograph in our analysis.
 
 The second mass cytometry data set (Cytometry B) contains data gathered from ovarian cancer patients at different phases of treatment. The number of points in the entire data set is $1.4$ million, each of which has $23$ dimensions.
+
+\subsection{Single-Cell RNA Sequencing}
+
+Single-cell RNA sequencing (scRNA-seq) enables the measurement of the transcriptional activity within single cells. By counting the number of RNA transcripts present in a given cell matching those of predetermined genes the expression profile of tens of thousands of genes can be measured. As the number of genes for which the strength of expression can be quantified simultaneously is far greater than the number of proteins that can be measured with mass cytometry the computational and analytical challenges are further exacerbated \cite{high_dimensional_data_spaces_gene_and_protein, computational_challenges_single_cell_transcriptomics}.
+
+We explore how our method applied to scRNA-seq data reveals biologically meaningful insights by applying it to the melanoma patient data set studied in \cite{tirosh}. The data set consists of tumor samples from $13$ different patients, altogether containing $4097$ cells for which the expression of $22462$ genes is measured. The data set additionally includes labels for each cell denoting their cell type.
 
 \section{Evaluation Metrics}
 
@@ -427,13 +435,13 @@ To parameterize the embedding $f(\mathbf{\hat{x}})$ a feedforward neural network
 
 For optimization of the neural network \cite{parametric_tsne} use nonlinear conjugate gradient descent, whereas Adam \citep{adam} is used as the optimizer in the results presented here. Updates with Adam are considerably faster to compute than with conjugate gradient descent. Throughout all experiments standard parameters for Adam were chosen, i.e. a learning rate of $0.001$ and the exponential decay rates of the 1st and 2nd moments were set to $0.9$ and $0.999$ respectively. The more recent optimizer AMSGrad \cite{on_the_convergence_of_adam} was considered, but due to little evidence of its benefit over Adam when used in non-synthetic optimization problems its use was left for future work.
 
-We apply batch normalization \cite{batch_normalization} to the hidden layers of the VAE networks, while omitting batch normalization from the embedding network. This is to validate the training procedure on as simple an embedding network as possible. We note that applying batch normalization to the embedding network improves the results marginally.
+We applied batch normalization \cite{batch_normalization} to the hidden layers of the VAE networks, while omitting batch normalization from the embedding network. This is to validate the training procedure on as simple an embedding network as possible. We note that applying batch normalization to the embedding network improves the results marginally.
 
-To further emphasize the universality of our approach we restrict ourselves to use a simple VAE structure, without complicating the model architecture with more recently proposed advances, such as normalizing flows \citep{normalizing_flows} (\textcolor{red}{[Note: could show that better models improve performance in the supplement]}). Throughout all experiments the VAE architecture is fixed to $d - 256 - 128 - 32 - \mu, \log \sigma^2 - 32 - 128 - 256 - d$, where $\mu$ and $\sigma$ parameterize a normal distribution acting as the posterior $q_{\phi}(\mathbf{z} \vert \mathbf{x}^{(i)})$ and the final layer output was used to parameterize a Bernoulli distribution for MNIST as well as Fashion-MNIST, and a normal distribution with a fixed standard deviation of 0.1 for cytometry data. In all experiments, each VAE was trained with a batch size of 1000 for 10000 iterations.
+To further emphasize the universality of our approach we restrict ourselves to use a simple VAE structure, without complicating the model architecture with more recently proposed advances, such as normalizing flows \citep{normalizing_flows} (\textcolor{red}{[Note: could show that better models improve performance in the supplement]}). Throughout all experiments, unless otherwise specified, the VAE architecture was fixed to $d - 256 - 128 - 32 - \mu, \log \sigma^2 - 32 - 128 - 256 - d$, where $\mu$ and $\sigma$ parameterize a normal distribution acting as the posterior $q_{\phi}(\mathbf{z} \vert \mathbf{x}^{(i)})$ and the final layer output was used to parameterize a Bernoulli distribution for MNIST as well as Fashion-MNIST, and a Gaussian distribution with a fixed standard deviation of 0.1 for cytometry data. In all experiments, each VAE was trained with a batch size of 1000 for 10000 iterations and had a latent dimensionality of $3$, unless otherwise specified.
 
 For MNIST and Fashion-MNIST perplexities were set to 30, which is in line with the value used by \cite{parametric_tsne}, whereas for the cytometry data sets a perplexity of 10 was chosen. It should be noted that a more correct way to choose perplexity would take into account the batch size, as perplexity controls the number of neighbors each point is considered to have. For example training VPTSNE on MNIST with batch size 200 and perplexity 10 gives far better results than with perplexity 30. However, with PTSNE the results are actually worse as the training fails to converge even with small learning rates. An example embedding of MNIST with low perplexity and small batch size has been included in Appendix~\ref{appendix:low_perp_small_bs}, which achieves better trustworthiness (0.935) and 1-NN (0.812) than the 600 batch size, 30 perplexity runs. Why PTSNE fails to converge and VPTSNE does not is an important question to explore in future work, as this demonstrates a clear advantage of the method being proposed.
 
-Degrees of freedom of the t-Distribution for the PTSNE objective is set to 1 throughout all experiments, as all embeddings performed are two-dimensional.
+Degrees of freedom of the t-Distribution for the PTSNE objective was set to 1 throughout all experiments, as all embeddings performed were two-dimensional.
 
 \section{Learning}
 \label{subsection:learning}
@@ -494,7 +502,7 @@ It can also be observed that t-SNE, with the given perplexity, preserves global 
 
 A major practical challenge with nonlinear dimensionality reduction methods are their scalability to large data sets. Typically, to capture the spatial structure of data a distance metric is employed to compute the pairwise distances for the entire data set, after which a projection of the points to a lower dimensional space, equipped with a corresponding metric, is sought that retains the computed distances as accurately as possible. As the number of data points increases, the inherent quadratic complexity of methods relying on such pairwise distance computations quickly renders such methods intractable.
 
-In practice, various approximations and data structures are employed to speed up dimensionality reduction methods. With t-SNE a widely used performance enhancement, independently investigated by \cite{accelerated_tsne_1} and \cite{accelerated_tsne_2}, is to use the Barnes-Hut algorithm \cite{barnes_hut} to approximate the $Q_{ij}$ matrix by averaging the influence of distant points belonging to the same node in the underlying space partitioning data structure. This approximation nevertheless fails to provide significant speedup in the general case depending on the chosen tradeoff between accuracy and speed, as well as the distribution of the points being optimized at each step. Furthermore, its use is limited to obtaining 2 or 3 dimensional embeddings due to its use of the quadtree and octree data structures for each respective dimensionality. On the other hand, optimization of the parametric embedding can be performed with stochastic gradient descent. As we have shown, even with small batch sizes we are able to produce embeddings of competitive quality. The Barnes-Hut approximation can also be used to further speed up the computation of the loss and its gradient, but for small batch sizes the computational overhead of constructing the required data structure can outweigh the cost of directly computing all pairwise influences within the batch. Direct computation has the additional benefit that it is not limited to output dimensionalities for which a space partitioning data structure can be efficiently built.
+In practice, various approximations and data structures are employed to speed up dimensionality reduction methods. With t-SNE a widely used performance enhancement, independently investigated by Yang et al. \cite{accelerated_tsne_1} and van der Maaten \cite{accelerated_tsne_2}, is to use the Barnes-Hut algorithm \cite{barnes_hut} to approximate the $Q_{ij}$ matrix by averaging the influence of distant points belonging to the same node in the underlying space partitioning data structure. This approximation nevertheless fails to provide significant speedup in the general case depending on the chosen tradeoff between accuracy and speed, as well as the distribution of the points being optimized at each step. Furthermore, its use is limited to obtaining 2 or 3 dimensional embeddings due to its use of the quadtree and octree data structures for each respective dimensionality. On the other hand, optimization of the parametric embedding can be performed with stochastic gradient descent. As we have shown, even with small batch sizes we are able to produce embeddings of competitive quality. The Barnes-Hut approximation can also be used to further speed up the computation of the loss and its gradient, but for small batch sizes the computational overhead of constructing the required data structure can outweigh the cost of directly computing all pairwise influences within the batch. Direct computation has the additional benefit that it is not limited to output dimensionalities for which a space partitioning data structure can be efficiently built.
 
 As previously mentioned, one of the strengths of UMAP compared to t-SNE is the efficiency of its optimization. The key to its efficient optimization is that its gradient can be approximated stochastically via probabilistic edge sampling following the procedure introduced in \cite{largevis}. As both VPTSNE and UMAP take advantage of stochastic gradient descent, the scalability of their optimization is equal up to an implementation dependent constant factor. VPTSNE however maintains the advantage over UMAP that natural out-of-sample extension is made possible through the learned embedding function.
 
@@ -607,6 +615,28 @@ To distinguish between outlier and inlier points in the obtained mapping we set 
   \end{tabular}
   \caption{Detecting outliers in cytometry data. \textcolor{red}{[Rename patients to match text.]}}
   \label{fig:cytometry_outliers}
+\end{figure}
+
+\section{Application to scRNA-seq Data}
+
+Using the data set of \cite{tirosh} we train our model.
+
+Due to the very high dimensionality in comparison to the other data sets, more capacity to the VAE network was added, i.e. we chose to add more units to the hidden layers. 
+
+In Figure~\ref{fig:tirosh} we have visualized the results of our analysis as obtained by replicating parts of the original study.
+
+Different tumor samples and cell types cluster well in the embedding. The separation of malignant cells from different patients to separate clusters reveals the inherent heterogeneity of melanoma. \note{A few separate clusters of T-cells are also present, which are not visible in the embedding of the original paper. (Add this only if using the projection where this is more clear)}
+
+MITF and AXL program cell scores. Areas of MITF-high and AXL-high are present in the cluster of tumor clusters.
+
+Cell cycle analysis reveals the presence of subclusters of cycling cells. Cycling cells are those that are undergoing cell division. The color gradient in the projection for cycling cells corresponds to how strong the signal indicating cell cycling is. Below a given threshold value for this signal, cells are classified as non-cycling.
+
+The effect of the curse of dimensionality can be seen on methods based on distances. Applying UMAP directly to the high dimensional data results in for example T- and B-cell clusters merging. \note{FIXME: Add the UMAP figure.}
+
+\begin{figure}[!htb]
+  \includegraphics[width=\textwidth]{images/tirosh_combined.png}
+  \caption{Compilation of analysis results replicated on data from \cite{tirosh} visualized as a 2-D scatter plot using our method. \note{FIXME: the actual figure.}}
+  \label{fig:tirosh}
 \end{figure}
 
 \chapter{Conclusions}
