@@ -324,7 +324,7 @@ A major drawback of most non-linear dimensionality reduction methods is that the
 
 A natural extension to t-SNE would be to learn a function parameterizing the embedding from input space to output space.
 
-The basic idea behind PTSNE is very straightforward. A feedforward neural network is used to parameterize a function $f_\mathbf{W}: X \mapsto Y$, which maps points from input space to output space in such a way as to minimize the t-SNE objective. Once the parameters of the mapping are learned, performing dimensionality reduction on any given point is simply done by running it through the neural network.
+The basic idea behind PTSNE is very straightforward. A feedforward neural network is used to parameterize a function $f_\mathbf{W}: X \mapsto Y$, which maps points from input space to output space in such a way as to minimize the t-SNE objective. Once the parameters of the mapping are learned, performing dimensionality reduction on any given point is done simply by running it through the neural network.
 
 By application of the chain rule, we can write the gradient w.r.t. the parameters of the neural network as
 
@@ -335,12 +335,67 @@ As $f_{\mathbf{W}}(\mathbf{x}_i) = \mathbf{y}_i$, Equation~\ref{eq:c_tsne_grad} 
 \chapter{Method}
 \label{ch:method}
 
-The method proposed in this work involves combining the VAE model with Parametric t-SNE to produce a general framework for improved parametric dimensionality reduction for visualization. In this chapter the learning algorithm is described. 
+\note{TODO: go over what this method attempts to improve upon. Other methods are not as scalable, various problems with curse of dimensionality, parametric t-SNE has been previously shown to be slow to optimize and produce poorer results.}
+\note{Even though the VAE addresses issues with scalability and reliance on pairwise distances in the input space, the resulting latent code does not allow for as good separation of clusters as other methods, such as t-SNE would, due to the strong effect the imposed prior has on the global shape of the embedding of a data set.}
+
+The method proposed in this work involves combining the VAE model with Parametric t-SNE to produce a general framework for improved parametric dimensionality reduction for data visualization. In this chapter the basic learning algorithm as well as a few of its variations are described.
 
 \section{Learning a Parametric Embedding Using VAE Sampling}
 
-\section{Sampling from Hidden Layers}
+\note{The aim of the method is to take advantage of the strengths of both VAE and PTSNE.}
+\note{Pros of VAE: generative model, stochasticity brings robustness, scalable parametric nonlinear dimensionality reduction}
+\note{Pros of PTSNE: theoretically capable of learning as good projections as t-SNE, which is widely considered SOTA. Also scalable and parametric, if trainable with smaller batch sizes.}
+\note{Using the notation of the previous chapter, we can summarize the learning procedure as Algorithm~\ref{alg:learning}.}
+
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\newcommand{\btheta}{\mathbf{\theta}}
+\newcommand{\bphi}{\mathbf{\phi}}
+\newcommand{\bW}{\mathbf{W}}
+
+\begin{algorithm}[H]
+  \caption{Training of the neural networks.}
+  \label{alg:learning}
+  \begin{algorithmic}[1]
+    \Require Data set $D$.
+    \Ensure Neural network parameters $\btheta, \bphi, \bW$
+    \State $\btheta, \bphi, \bW \gets \text{Initialize parameters}$
+    \While{VAE not converged}
+      \State $\mathbf{X} \gets \text{Random minibatch}$
+      \State $\mathbf{z}^{(i)} \sim q_{\mathbf{\phi}}(\mathbf{z} \vert \mathbf{x}^{(i)})$
+    \EndWhile
+    \While{PTSNE not converged}
+      \State $\mathbf{X} \gets \text{Random minibatch}$
+      \State $\hat{\mathbf{x}}^{(i)}$ 
+      \State $\bW = ...$
+    \EndWhile
+  \end{algorithmic}
+\end{algorithm}
+
+\note{After training, a deterministic projection for all subsequent points can be obtained with Algorithm~\ref{alg:projection}.}
+
+\begin{algorithm}[H]
+  \caption{Projection.}
+  \label{alg:projection}
+  \begin{algorithmic}[1]
+    \Require Point $\bxi$, neural network parameters $\btheta, \bphi, \bW$
+    \Ensure Projected point $\mathbf{y}^{(i)}$
+    \State $\hat{\mathbf{x}} \gets \text{Deterministic sample of } \mathbf{x}$
+    \State $\mathbf{y} \gets f_{\mathbf{W}}(\hat{\mathbf{x}})$
+  \end{algorithmic}
+\end{algorithm}
+
+\section{Obtaining Reconstructions from Hidden Layers}
 \label{section:sampling_from_hidden_layers}
+
+Instead of training the embedding network on the final output of the observation model it is possible to instead use the outputs of a chosen hidden layer. If the chosen hidden layer has dimensions considerably smaller than that of the original, the benefits of this approach are twofold:
+
+\begin{itemize}
+\item We are performing a step of nonlinear dimensionality reduction that is not dependent on local distance metrics, i.e. a preprocessing step that is less susceptible to the \textit{curse of dimensionality}.
+\item Given that the number of dimensions can be chosen to be considerably lower than in the original input space, computing the t-SNE loss also becomes proportionally cheaper.
+\end{itemize}
+
+When considering precomputed $P_{ij}$ matrices for each batch the gain in computational advantage does however diminish significantly, although the following caveats apply to the precomputation. Storing the precomputed matrices will require considerable space for large batch sizes and data sets. A way to circumvent the need for large storage space is to employ a KNN approximation when computing $P_{ij}$, i.e. only considering a small number of neighbors when computing the conditional probabilities for each pair of points, which will result in a sparse matrix. This however increases the error in the computed gradient and relies on an efficient KNN algorithm in practice. Additionally, fixing the batches in advance hinders the performance of SGD as the gradient estimates become biased. Moreover, relying on precomputed $P_{ij}$ matrices for fixed batches prevents the use of infinite sample generation from the VAE.
 
 \section{Inference with the Generative Model}
 \label{section:inference_with_the_generative_model}
@@ -439,7 +494,7 @@ We applied batch normalization \cite{batch_normalization} to the hidden layers o
 
 To further emphasize the universality of our approach we restrict ourselves to use a simple VAE structure, without complicating the model architecture with more recently proposed advances, such as normalizing flows \citep{normalizing_flows} (\textcolor{red}{[Note: could show that better models improve performance in the supplement]}). Throughout all experiments, unless otherwise specified, the VAE architecture was fixed to $d - 256 - 128 - 32 - \mu, \log \sigma^2 - 32 - 128 - 256 - d$, where $\mu$ and $\sigma$ parameterize a normal distribution acting as the posterior $q_{\phi}(\mathbf{z} \vert \mathbf{x}^{(i)})$ and the final layer output was used to parameterize a Bernoulli distribution for MNIST as well as Fashion-MNIST, and a Gaussian distribution with a fixed standard deviation of 0.1 for cytometry data. In all experiments, each VAE was trained with a batch size of 1000 for 10000 iterations and had a latent dimensionality of $3$, unless otherwise specified.
 
-For MNIST and Fashion-MNIST perplexities were set to 30, which is in line with the value used by \cite{parametric_tsne}, whereas for the cytometry data sets a perplexity of 10 was chosen. It should be noted that a more correct way to choose perplexity would take into account the batch size, as perplexity controls the number of neighbors each point is considered to have. For example training VPTSNE on MNIST with batch size 200 and perplexity 10 gives far better results than with perplexity 30. However, with PTSNE the results are actually worse as the training fails to converge even with small learning rates. An example embedding of MNIST with low perplexity and small batch size has been included in Appendix~\ref{appendix:low_perp_small_bs}, which achieves better trustworthiness (0.935) and 1-NN (0.812) than the 600 batch size, 30 perplexity runs. Why PTSNE fails to converge and VPTSNE does not is an important question to explore in future work, as this demonstrates a clear advantage of the method being proposed.
+For MNIST and Fashion-MNIST perplexities were set to 30, which is in line with the value used by \cite{parametric_tsne}, whereas for the mass cytometry and scRNA-seq data sets a perplexity of 10 was chosen. It should be noted that a more correct way to choose perplexity would take into account the batch size, as perplexity controls the number of neighbors each point is considered to have. For example training VPTSNE on MNIST with batch size 200 and perplexity 10 gives far better results than with perplexity 30. However, with PTSNE the results are actually worse as the training fails to converge even with small learning rates. An example embedding of MNIST with low perplexity and small batch size has been included in Appendix~\ref{appendix:low_perp_small_bs}, which achieves better trustworthiness (0.935) and 1-NN (0.812) than the 600 batch size, 30 perplexity runs. Why PTSNE fails to converge and VPTSNE does not is an important question to explore in future work, as this demonstrates a clear advantage of the method being proposed.
 
 Degrees of freedom of the t-Distribution for the PTSNE objective was set to 1 throughout all experiments, as all embeddings performed were two-dimensional.
 
@@ -562,15 +617,15 @@ As discussed in section \textcolor{red}{[todo and ref. the correct section in me
 
 \section{Robustness to Noisy Data}
 
-As real-world data is generally not perfectly clean, an important property for any machine learning method is its capability to handle data containing artifacts. Considering VAEs are inherently robust to corrupted data due to the regularization provided by the stochastic latent code (\textcolor{red}{[should be discussed in a previous section more thoroughly, connection with VAE and Robust PCA \cite{rpca_1, rpca_2} shown in \citep{hidden_talents_of_the_vae}]}) it is reasonable to hypothesize that a training procedure for a low dimensional mapping taking advantage of this property would perform better on corrupted data than one that is subjected only to the raw data.
+As real-world data is generally not perfectly clean, an important property for any machine learning method is its capability to handle data containing artifacts. Considering VAEs are inherently robust to corrupted data due to the regularization provided by the stochastic latent code (\textcolor{red}{[should be discussed in a previous section more thoroughly, connection with VAE and Robust PCA \cite{rpca_1, rpca_2} shown in \citep{hidden_talents_of_the_vae}]}) it is reasonable to hypothesize that a training procedure for a low dimensional mapping taking advantage of this property would perform better on corrupted data.
 
 Here we aim to back up this hypothesis by running experiments on artificially corrupted MNIST data sets. As the corruption process in our experiments we consider \textit{masking noise} as in \cite{stacked_denoising_ae}, where a predetermined fraction of randomly chosen elements of a data point are set to 0. We test robustness by applying masking noise to 10\%, 20\%, 30\% and 40\% fractions of the training and test sets. The results of our experiments (cf. figure \ref{fig:corrupted_data}) show a clear advantage to using our method when dealing with noisy data as both evaluation metrics can be observed to decrease considerably for PTSNE as the training data is progressively corrupted, whereas VPTSNE maintains its performance throughout the experiments.
 
-As an example of real-world data corrupted in this fashion, in single-cell RNA sequencing (scRNA-seq) so-called \textit{dropout events}, which cause incomplete sequence data to be captured due to technical and biological noise, can be viewed as a form of masking noise. The results presented here would indicate that the proposed method is potentially a good fit for exploratory analysis of scRNA-seq data.
+As an example of real-world data corrupted in this fashion, in scRNA-seq so-called \textit{dropout events}, which cause incomplete sequence data to be captured due to technical and biological noise, can be viewed as a form of masking noise. The results presented here would indicate that the proposed method is potentially a good fit for exploratory analysis of scRNA-seq data.
 
 \todo{find citations for scrna-seq/dropout}
 
-Even with the standard VAE structure, the obtained results are encouraging. As future work it would be interesting to test whether making use of denoising variational autoencoders \cite{denoising_vae}, which are an extension of denoising autoencoders \cite{stacked_denoising_ae} that are directly trained to correct corrupted data. Additionally of interest is how our model fares when other corruption processes are present.
+Even with the standard VAE structure, the obtained results are encouraging. As future work it would be interesting to test whether making use of denoising variational autoencoders \cite{denoising_vae}, which are an extension of denoising autoencoders \cite{stacked_denoising_ae} that are directly trained to correct corrupted data. Additionally of interest is how our method fares when other corruption processes are present.
 
 \begin{figure}[!htb]
   \centering
@@ -581,18 +636,7 @@ Even with the standard VAE structure, the obtained results are encouraging. As f
 
 \section{Obtaining Reconstructions from Hidden Layers}
 
-\textcolor{red}{[Note: Much of this will probably be moved to the methods section.]}
-
-Instead of training the embedding network on the final output of the observation model it is possible to instead use the outputs of a chosen hidden layer. If the chosen hidden layer has dimensions considerably smaller than that of the original, the benefits of this approach are twofold:
-
-\begin{itemize}
-\item We are performing a step of nonlinear dimensionality reduction that is not dependent on local distance metrics, i.e. a preprocessing step that is less susceptible to the \textit{curse of dimensionality}.
-\item Given that the number of dimensions can be chosen to be considerably lower than in the original input space, computing the t-SNE loss also becomes proportionally cheaper.
-\end{itemize}
-
 To show the efficacy of this modification to the learning procedure we train an embedding using the latent code directly. As we choose the dimensionality of the latent code to be more than two orders of magnitude smaller than that of the original data's it is possible for us to use batches of far greater size to train the embedding network, without incurring additional computation cost over training with smaller batches on data of the original dimensionality. The latent dimensionality of the VAE was chosen to be $7$ and the batch size for training the embedding was set to $5000$, as in the original parametric t-SNE paper \cite{parametric_tsne}. The choice of $7$ as the VAE latent dimensionality was deliberately made so that it would correspond to the largest number which is two orders of magnitude smaller than the original dimensionality. We have additionally included the embedding of data points obtained with the original implementation of parametric t-SNE for comparison in figure \ref{fig:hidden_layer}. Qualitatively and quantitatively an overall better embedding is achieved with less computation using our method.
-
-When considering precomputed $P_{ij}$ matrices for each batch the gain in computational advantage does however diminish significantly, although the following caveats apply to the precomputation: Storing the precomputed matrices will require considerable space for large batch sizes and data sets. A way to circumvent the need for large storage space is to employ a KNN approximation when computing $P_{ij}$, i.e. only considering a small number of neighbors when computing the conditional probabilities for each pair of points, which will result in a sparse matrix. This however increases the error in the computed gradient and relies on an efficient KNN algorithm in practice. Additionally, fixing the batches in advance hinders the performance of SGD as the gradient estimates become biased. Moreover, relying on precomputed $P_{ij}$ matrices for fixed batches prevents the use of infinite sample generation from the VAE.
 
 \begin{figure}[!htb]
   \centering
