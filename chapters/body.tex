@@ -298,8 +298,6 @@ Similarly to Symmetric SNE \cite{symmetric_sne}, instead of matching conditional
 
 $$p_{ij} = \frac{p_{j \vert i} + p_{i \vert j}}{2 N}$$
 
-
-
 $$q_{ij} = \frac{(1 + \norm{\mathbf{y}_i - \mathbf{y}_j}^2 / \nu)^{-\frac{\nu + 1}{2}}}{\sum_{k \neq l} (1 + \norm{\mathbf{y}_k - \mathbf{y}_l}^2 / \nu)^{-\frac{\nu + 1}{2}}}$$
 
 The t-SNE objective function is defined similarly to the SNE objective (cf. Equation~\ref{eq:c_sne}), except the sum is taken over KL-divergences of the joint probabilities:
@@ -313,9 +311,9 @@ For which the following gradient can be derived:
 \label{eq:c_tsne_grad}
 \end{equation}
 
-\note{Methods to improve the runtime of t-SNE have been subsequently proposed: \cite{accelerated_tsne_1, accelerated_tsne_2}. Use of the fast multipole method \cite{fast_multipole} has not been explored due to no suitable expansion for the t-Distributed forces in the output space exist.}
+\note{Methods to improve the runtime of t-SNE have been subsequently proposed: \cite{accelerated_tsne_1, accelerated_tsne_2}. Use of the fast multipole method \cite{fast_multipole} has not been explored due to no suitable multipole expansion for the t-Distributed forces in the output space exist.}
 
-\note{Worth a mention is the Stochastic Triplet Embedding \cite{stochastic_triplet_embedding} and Multiple Maps t-SNE \cite{multiple_maps_tsne} methods developed on top of t-SNE, developed to handle non-metric similarities present in the data.}
+\note{Worth a mention are the Stochastic Triplet Embedding \cite{stochastic_triplet_embedding} and Multiple Maps t-SNE \cite{multiple_maps_tsne} methods developed on top of t-SNE, developed to handle non-metric similarities present in the data.}
 
 \subsection{Parametric t-SNE}
 \label{subsection:parametric_tsne}
@@ -338,7 +336,7 @@ As $f_{\mathbf{W}}(\mathbf{x}_i) = \mathbf{y}_i$, Equation~\ref{eq:c_tsne_grad} 
 \note{TODO: go over what this method attempts to improve upon. Other methods are not as scalable, various problems with curse of dimensionality, parametric t-SNE has been previously shown to be slow to optimize and produce poorer results.}
 \note{Even though the VAE addresses issues with scalability and reliance on pairwise distances in the input space, the resulting latent code does not allow for as good separation of clusters as other methods, such as t-SNE would, due to the strong effect the imposed prior has on the global shape of the embedding of a data set.}
 
-The method proposed in this work involves combining the VAE model with Parametric t-SNE to produce a general framework for improved parametric dimensionality reduction for data visualization. In this chapter the basic learning algorithm as well as a few of its variations are described.
+The method proposed in this work involves combining the VAE model with Parametric t-SNE to produce a general framework for improved parametric dimensionality reduction for data visualization. In this chapter the learning algorithm as well as a variation of it is described.
 
 \section{Learning a Parametric Embedding Using VAE Sampling}
 
@@ -391,11 +389,11 @@ The method proposed in this work involves combining the VAE model with Parametri
 Instead of training the embedding network on the final output of the observation model it is possible to instead use the outputs of a chosen hidden layer. If the chosen hidden layer has dimensions considerably smaller than that of the original, the benefits of this approach are twofold:
 
 \begin{itemize}
-\item We are performing a step of nonlinear dimensionality reduction that is not dependent on local distance metrics, i.e. a preprocessing step that is less susceptible to the \textit{curse of dimensionality}.
+\item We are performing a step of nonlinear dimensionality reduction that is not dependent on local distance metrics, i.e. a preprocessing step that is less susceptible to the curse of dimensionality.
 \item Given that the number of dimensions can be chosen to be considerably lower than in the original input space, computing the t-SNE loss also becomes proportionally cheaper.
 \end{itemize}
 
-When considering precomputed $P_{ij}$ matrices for each batch the gain in computational advantage does however diminish significantly, although the following caveats apply to the precomputation. Storing the precomputed matrices will require considerable space for large batch sizes and data sets. A way to circumvent the need for large storage space is to employ a KNN approximation when computing $P_{ij}$, i.e. only considering a small number of neighbors when computing the conditional probabilities for each pair of points, which will result in a sparse matrix. This however increases the error in the computed gradient and relies on an efficient KNN algorithm in practice. Additionally, fixing the batches in advance hinders the performance of SGD as the gradient estimates become biased. Moreover, relying on precomputed $P_{ij}$ matrices for fixed batches prevents the use of infinite sample generation from the VAE.
+When considering precomputed $P_{ij}$ matrices for each batch the gain in computational advantage does however diminish significantly, although the following caveats apply to the precomputation. Storing the precomputed matrices will require considerable space for large batch sizes and data sets. A way to circumvent the need for large storage space is to employ a k-NN approximation when computing $P_{ij}$, i.e. only considering a small number of neighbors when computing the conditional probabilities for each pair of points, which will result in a sparse matrix. This however increases the error in the computed gradient and relies on an efficient k-NN algorithm in practice. Additionally, fixing the batches in advance hinders the performance of SGD as the gradient estimates become biased. Moreover, relying on precomputed $P_{ij}$ matrices for fixed batches prevents the use of infinite sample generation from the VAE.
 
 \section{Inference with the Generative Model}
 \label{section:inference_with_the_generative_model}
@@ -669,19 +667,28 @@ Due to the very high dimensionality in comparison to the other data sets, more c
 
 In Figure~\ref{fig:tirosh} we have visualized the data of \cite{tirosh} using our method and the results of the analysis carried out in the study.
 
-From the results we can see that different tumor samples and cell types cluster well in the embedding. The separation of malignant cells from different patients to separate clusters reveals the heterogeneity of melanoma present in the different tumor samples. \note{A few separate clusters of T-cells are also present, which are not visible in the embedding of the original paper. (Add this only if using the projection where this is more clear)}
+From the results we can see that different tumor samples and cell types cluster well in the embedding. The separation of malignant cells from different patients to separate clusters reveals the heterogeneity of melanoma present in the different tumor samples.
 
-For each cell in the data set so called MITF- and AXL-program scores were computed from the relative expression levels of their corresponding gene sets. These scores aim to provide insight into the potential drug resistance mechanisms of malignant cells. In our embedding a clear gradient from high to low MITF- and AXL-program scores can be seen within the cluster of tumor cell clusters, further suggesting that the embedding is able to capture biologically meaningful variations in the data.
+For each cell in the data set so called MITF- and AXL-program scores were computed from the relative expression levels of their corresponding gene sets. These scores aim to provide insight into the potential drug resistance mechanisms of malignant cells. In our embedding a clear gradient from high to low MITF- and AXL-program scores can be seen within the cluster of tumor cell clusters, further indicating that our method is able to highlight biologically meaningful variations in the data.
 
 Cell cycle analysis also reveals the presence of subclusters of cycling cells in our embedding. Cycling cells being cells which are undergoing cell division. The color gradient in the projection for cycling cells corresponds to the strength of the signal indicating cell cycling. Below a given threshold value for this signal, cells were classified as non-cycling.
 
-With such high dimensional data, the effect of the curse of dimensionality can be seen on methods based on distances, leading them to produce inferior embeddings. For example, applying UMAP directly to the high dimensional data one of the most obvious shortcomings of the embedding is its failure to distinguish between T- and B-cells. A figure of the UMAP embedding is included in Appendix~\ref{appendix:umap_tirosh} for comparison.
+With such a high dimensional data set, the effect of the curse of dimensionality can be seen on methods based on distances, leading them to produce inferior embeddings. For example, applying UMAP directly to the high dimensional data one of the most obvious shortcomings of the embedding is its failure to distinguish between T- and B-cells. A figure of the UMAP embedding is included in Appendix~\ref{appendix:umap_tirosh} for comparison.
 
 \begin{figure}[!htb]
-  \includegraphics[width=\textwidth]{images/tirosh_combined.png}
-  \caption{Compilation of analysis results replicated on data from \cite{tirosh} visualized as a 2-D scatter plot using our method. \note{FIXME: the actual figure.}}
+  \centering
+  \begin{tabular}{cc}
+    \includegraphics[width=0.5\textwidth]{images/tvptsne_cell.png} &
+    \includegraphics[width=0.5\textwidth]{images/tvptsne_tumor.png} \\
+    \includegraphics[width=0.5\textwidth]{images/tvptsne_mitf.png} &
+    \includegraphics[width=0.5\textwidth]{images/tvptsne_axl.png} \\
+    \includegraphics[width=0.5\textwidth]{images/tvptsne_cycling.png} &
+    \includegraphics[width=0.5\textwidth]{images/tirosh_all_legends.png} \\
+  \end{tabular}
+  \caption{Visualization of analysis results on data from \cite{tirosh} using VPTSNE.}
   \label{fig:tirosh}
 \end{figure}
+
 
 \chapter{Conclusions}
 \label{ch:conclusions}
@@ -706,8 +713,16 @@ With such high dimensional data, the effect of the curse of dimensionality can b
 \chapter{UMAP Embedding of scRNA-seq Data}
 \label{appendix:umap_tirosh}
 \begin{figure}[!htb]
-  \includegraphics[width=\textwidth]{images/tirosh_combined.png}
-  \caption{Compilation of analysis results replicated on data from \cite{tirosh} visualized as a 2-D scatter plot using UMAP. \note{FIXME: the actual figure.}}
-  \label{fig:tirosh}
+  \centering
+  \begin{tabular}{cc}
+    \includegraphics[width=0.5\textwidth]{images/tumap_cell.png} &
+    \includegraphics[width=0.5\textwidth]{images/tumap_tumor.png} \\
+    \includegraphics[width=0.5\textwidth]{images/tumap_mitf.png} &
+    \includegraphics[width=0.5\textwidth]{images/tumap_axl.png} \\
+    \includegraphics[width=0.5\textwidth]{images/tumap_cycling.png} &
+    \includegraphics[width=0.5\textwidth]{images/tirosh_all_legends.png} \\
+  \end{tabular}
+  \caption{Visualization of analysis results on data from \cite{tirosh} using UMAP.}
+  \label{fig:tirosh_umap}
 \end{figure}
 
