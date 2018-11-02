@@ -113,6 +113,19 @@ First discussed in \cite{encoding_problem} as "the encoding problem".
 
 Efficient training via stacking RBMs described in \cite{hinton_autoencoder}, as well as its capabilities for dimensionality reduction.
 
+The learning objective of autoencoders is to reconstruct the original input data as faithfully as possible. \note{Common objective function is to minimize the mean squared error:}
+
+\begin{equation}
+  \mathcal{L}_{MSE} = \frac{1}{N} \sum_{i=1}^{N} \norm{\bxi - \hat{\mathbf{x}}^{(i)}}^2.
+  \label{eq:mse}
+\end{equation}
+
+\note{Structure consists of two parts, the encoder and decoder. An example autoencoder network has been visualized in Figure~\ref{fig:ae}.}
+
+\note{Trivial case, where the network has too much capacity the AE can simply learn the identity function. Not useful for learning hidden representations, i.e. meaningful latent codes.}
+
+\note{Case where the latent code's dimensionality is smaller than the original data's dimensionality. This \textit{bottleneck} potentially discards data, leading to a \textit{lossy compressed} representation.}
+
 \begin{figure}[!htb]
   \centering
   \resizebox{\textwidth}{!}{\input{tikz/ae.tikz}\unskip}
@@ -120,7 +133,9 @@ Efficient training via stacking RBMs described in \cite{hinton_autoencoder}, as 
   \label{fig:ae}
 \end{figure}
 
-Connection with pca demonstrated in \cite{autoencoder_pca} when activation functions are linear.
+A connection between PCA and autoencoders which are constrained to only have linear activation functions and are optimized with the MSE objective (see Equation~\ref{eq:mse}) has been shown in \cite{autoencoder_pca}. \note{The subspace spanned by the first $d'$ principal eigenvectors of the (combined) weight matrix is equivalent to the first $d'$ principal components of the training data. The latent code of such an autoencoder is an orthogonal projection onto this subspace. Additionally, the optimization problem is convex.}
+
+\note{Elaborate potential downsides of this approach (how to interpret the learned representation when nonlinearity is introduced? how does it generalize?). This is set up for why stochastic autoencoders are desireable.}
 
 \subsection{Variational Inference}
 \label{subsection:variational_inference}
@@ -212,17 +227,23 @@ The objective of VAEs is to model the data as well as possible, i.e. maximize th
 \end{aligned}
 \end{equation}
 
-This bound is better known as the \textit{evidence lower bound}, or ELBO for short. An interpretation for the terms of the last equation is that the objective is to have the posterior $\qphi(\bz \vert \bxi)$ match the prior $p(\bz)$ as accurately as 
+This bound is better known as the \textit{evidence lower bound}, or ELBO for short, which we will denote as $\mathcal{L}(\btheta, \bphi; \bxi)$. An interpretation for the terms of the last equation is that the objective is to have the posterior $\qphi(\bz \vert \bxi)$ match the prior $p(\bz)$ as accurately as possible while simultaneously maximizing the likelihood of the data point $\bxi$ under the model.
 
-In many cases the KL-divergence can be integrated analytically, for instance in the case of two Gaussian distributions. In cases where the KL term cannot be solved analytically, Monte Carlo methods are used to approximate the expectation.
+In many cases the KL-divergence can be integrated analytically, for instance in the case of two Gaussian distributions. In cases where the KL term cannot be solved analytically, Monte Carlo methods can be used to approximate the expectation.
 
-Several modifications to this objective have been proposed, e.g. the $\beta$-VAE \cite{beta_vae, understanding_beta_vae}, $\beta$-TCVAE \cite{beta_tcvae} and InfoVAE \cite{infovae}.
+Several modifications to this objective have been proposed, e.g. the $\beta$-VAE \cite{beta_vae, understanding_beta_vae}, $\beta$-TCVAE \cite{beta_tcvae} and InfoVAE \cite{infovae}, which aim to improve the learning of better latent representations. Beta-VAE prefixes the KL term with a constant $\beta$ which is interpreted as a Lagrange multiplier that adjusts the regularization imposed by the latent prior. The case where $\beta = 1$ corresponds to the VAE formulation presented in this section, while $\beta > 1$ \note{more learning pressure to match the prior, for factorized models this corresponds to more "disentanglement". $\beta$-TCVAE decomposes the $\beta$-VAE loss for factorized models to reveal a correlation term between latent variables which it attempts to penalize. InfoVAE on the other hand attempts to maximize the mutual information between the latent code and the reconstructed output to enforce utilization of the latent code even when flexible decoder distributions are used.}
 
 \subsubsection{Obtaining Differentiable Monte Carlo Estimates}
 
 To optimize the parameters $\mathbf{\theta}$ and $\mathbf{\phi}$ of our neural network using backpropagation we require a way to compute the gradient of the expectations of random variables. By introducing a random noise variable as input we are able to obtain samples from the latent distribution by using the \textit{reparameterization trick}.
 
-$$\widetilde{\mathbf{z}} = g_{\mathbf{\phi}}(\mathbf{\epsilon}, \mathbf{z})$$
+$$\mathbf{z}^{(i,l)} = g_{\bphi}(\eil, \bxi), \eil \sim p(\mathbf{\epsilon})$$
+
+$$\mathbb{E}_{\qphi(\bz \vert \bxi)}[f(\mathbf{z})] \simeq \frac{1}{L} \sum_{l=1}^{L} f(g_{\bphi}(\eil, \bxi))$$
+
+$$\mathcal{L}(\btheta, \bphi; \bxi) = -\dkl{\qphi(\bz \vert \bxi)}{p(\bz)} + \frac{1}{L} \sum_{l=1}^{L} \log \ptheta(\bxi \vert \mathbf{z}^{(i,l)})$$
+
+$$\mathcal{L}(\btheta, \bphi; \bxi) = \frac{1}{L} \sum_{l=1}^{L} \Big[\qphi(\bz^{(i,l)} \vert \bxi) - p(\bz^{(i,l)}) + \log \ptheta(\bxi \vert \mathbf{z}^{(i,l)})\Big]$$
 
 \subsubsection{Network Structure}
 
@@ -232,6 +253,8 @@ $$\widetilde{\mathbf{z}} = g_{\mathbf{\phi}}(\mathbf{\epsilon}, \mathbf{z})$$
   \caption{Variational Autoencoder}
   \label{fig:vae}
 \end{figure}
+
+It is important to note that the output $\hat{\mathbf{x}}^{(i)}$ of the network in Figure~\ref{fig:vae} should not be interpreted as the final reconstruction of the input like in traditional autoencoders, but rather as the values parameterizing the distribution $\ptheta(\mathbf{x} \vert \bz^{(i, l)})$.
 
 \cite{normalizing_flows, inverse_autoregressive_flow, householder_flow}
 
@@ -354,40 +377,40 @@ The method proposed in this work involves combining the VAE model with Parametri
 \note{Pros of PTSNE: theoretically capable of learning as good projections as t-SNE, which is widely considered SOTA. Also scalable and parametric, if trainable with smaller batch sizes.}
 \note{Using the notation of the previous chapter, we can summarize the learning procedure as Algorithm~\ref{alg:learning}.}
 
-\renewcommand{\algorithmicrequire}{\textbf{Input:}}
-\renewcommand{\algorithmicensure}{\textbf{Output:}}
-\newcommand{\btheta}{\mathbf{\theta}}
-\newcommand{\bphi}{\mathbf{\phi}}
-\newcommand{\bW}{\mathbf{W}}
-
 \begin{algorithm}[H]
   \caption{Training of the neural networks.}
   \label{alg:learning}
   \begin{algorithmic}[1]
-    \Require Data set $D$.
+    \Require Data set $\mathbf{D}$.
     \Ensure Neural network parameters $\btheta, \bphi, \bW$
     \State $\btheta, \bphi, \bW \gets \text{Initialize parameters}$
     \While{VAE not converged}
-      \State $\mathbf{X} \gets \text{Random minibatch}$
-      \State $\mathbf{z}^{(i)} \sim q_{\mathbf{\phi}}(\mathbf{z} \vert \mathbf{x}^{(i)})$
+      \State $\mathbf{X} \gets \text{ Random minibatch from } \mathbf{D}$
+      \ForAll $\bxi \in \mathbf{X}$
+        \State $\eil \gets$ 
+        \State $\bz^{(i,l)} \gets g_{\phi}(\eil, \bxi)$
+        \State $\btheta, \bphi \gets \text{ Updata parameters with } \nabla_{\btheta, \bphi} \mathcal{L}$
+      \EndFor
     \EndWhile
     \While{PTSNE not converged}
       \State $\mathbf{X} \gets \text{Random minibatch}$
       \State $\hat{\mathbf{x}}^{(i)}$ 
-      \State $\bW = ...$
+      \State $\bW \gets \text{ Update parameters with } \bxi$
     \EndWhile
   \end{algorithmic}
 \end{algorithm}
 
 \note{After training, a deterministic projection for all subsequent points can be obtained with Algorithm~\ref{alg:projection}.}
+\note{For encoder networks that directly parameterize the mean of a distribution, computing the expectation can be done exactly with zero overhead.}
 
 \begin{algorithm}[H]
   \caption{Projection.}
   \label{alg:projection}
   \begin{algorithmic}[1]
-    \Require Point $\bxi$, neural network parameters $\btheta, \bphi, \bW$
-    \Ensure Projected point $\mathbf{y}^{(i)}$
-    \State $\hat{\mathbf{x}} \gets \text{Deterministic sample of } \mathbf{x}$
+    \Require Point $\mathbf{x}$, neural network parameters $\btheta, \bphi, \bW$
+    \Ensure Projected point $\mathbf{y}$
+    \State $\mathbf{z} \gets \mathbb{E}_{p(\mathbf{\epsilon})}[g_{\bphi}(\mathbf{\epsilon}, \mathbf{x})]$
+    \State $\hat{\mathbf{x}} \gets \mathbb{E}[f(\mathbf{z})]$
     \State $\mathbf{y} \gets f_{\mathbf{W}}(\hat{\mathbf{x}})$
   \end{algorithmic}
 \end{algorithm}
@@ -409,7 +432,7 @@ When considering precomputed $P_{ij}$ matrices for each batch the gain in comput
 
 From the underlying generative model we can approximately compute the marginal $p(\mathbf{x})$ for each data point $\mathbf{x}$. An approximation can be retrieved by importance sampling \cite{stochastic_backpropagation}:
 
-$$p(\mathbf{x}) \approx \frac{1}{N} \sum_{i=1}^{N} \frac{p(\mathbf{x} \vert \mathbf{z}^{(i)}) p(\mathbf{z}^{(i)})}{q_{\theta}(\mathbf{z}^{(i)} \vert \mathbf{x})},$$
+$$p(\mathbf{x}) \simeq \frac{1}{N} \sum_{i=1}^{N} \frac{p(\mathbf{x} \vert \mathbf{z}^{(i)}) p(\mathbf{z}^{(i)})}{q_{\theta}(\mathbf{z}^{(i)} \vert \mathbf{x})},$$
 
 where $\mathbf{z}^{(i)} \sim q_{\theta}(\mathbf{z} \vert \mathbf{x})$.
 
@@ -688,7 +711,7 @@ For each cell in the data set so called MITF- and AXL-program scores were comput
 
 Cell cycle analysis also reveals the presence of subclusters of cycling cells in our embedding. Cycling cells being cells which are undergoing cell division. The color gradient in the projection for cycling cells corresponds to the strength of the signal indicating cell cycling. Below a given threshold value for this signal, cells were classified as non-cycling.
 
-With such a high dimensional data set, the effect of the curse of dimensionality can be seen on methods based on distances, leading them to produce inferior embeddings. For example, applying UMAP directly to the high dimensional data one of the most obvious shortcomings of the embedding is its failure to distinguish between T- and B-cells. A figure of the UMAP embedding is included in Appendix~\ref{appendix:umap_tirosh} for comparison.
+With such a high dimensional data set, the effect of the curse of dimensionality can be seen on methods based on distances, leading them to produce inferior embeddings. For example, applying UMAP directly to the high dimensional data a couple of the most obvious shortcomings of the embedding is its failure to distinguish between different cell types as well as being unable to properly separate tumor cell clusters originating from different samples. A figure of the UMAP embedding is included in Appendix~\ref{appendix:umap_tirosh} for comparison.
 
 \begin{figure}[!htb]
   \centering
