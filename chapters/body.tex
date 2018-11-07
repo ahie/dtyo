@@ -41,7 +41,7 @@ The final chapter presents discussion and conclusions for the work carried out i
 \begin{itemize}
 \item main motivator for this work is to provide a tool to enhance exploratory analysis in cancer research
 \item on molecular data
-\item find references where visualization is used to aid analysis
+\item add references where visualization is used to aid analysis
 \item discuss current state of the art
 \item challenges associated with currently used methods
 \item we outline in this chapter the relevant background information on the two methods that are used in the developed method, discussed in chapter \ref{ch:method}
@@ -324,7 +324,7 @@ The probability density function of a t-Distribution with $\nu$ degrees of freed
 
 $$f(x \vert \nu) = \frac{\Gamma(\frac{\nu + 1}{2})}{\sqrt{\nu \pi} \Gamma(\frac{\nu}{2})} (1 + \frac{x^2}{\nu})^{-\frac{\nu + 1}{2}},$$
 
-which can be recognized to be closely related to the Gaussian distribution, in fact as $\nu \lim \infty$ the probability density approaches that of the standard normal distribution. One can observe that the number of degrees of freedom controls how much probability density is placed in the tails of the distribution. The standard choice for t-SNE is to choose $\nu = 1$ when reducing to a very low number of dimensions, such as 2 or 3 for visualization of a data set as a scatter plot. However, more generally it is suggested to consider higher degrees of freedom when embedding to higher dimensional spaces, as the crowding problem becomes less prominent and thus the required amount of compensation is reduced.
+which can be recognized to be closely related to the Gaussian distribution, in fact as $\nu \rightarrow \infty$ the probability density approaches that of the standard normal distribution. One can observe that the number of degrees of freedom controls how much probability density is placed in the tails of the distribution. The standard choice for t-SNE is to choose $\nu = 1$ when reducing to a very low number of dimensions, such as 2 or 3 for visualization of a data set as a scatter plot. However, more generally it is suggested to consider higher degrees of freedom when embedding to higher dimensional spaces, as the crowding problem becomes less prominent and thus the required amount of compensation is reduced.
 
 Similarly to Symmetric SNE \cite{symmetric_sne}, instead of matching conditional distributions in the input and output spaces, t-SNE forms a joint distribution over all pairs of points in both the input and output space, which it attempts to match. The joint distribution over the input points is formed by using Equation~\ref{eq:p_j_c_i}:
 
@@ -368,7 +368,7 @@ As $f_{\mathbf{W}}(\mathbf{x}_i) = \mathbf{y}_i$, Equation~\ref{eq:c_tsne_grad} 
 \note{TODO: go over what this method attempts to improve upon. Other methods are not as scalable, various problems with curse of dimensionality, parametric t-SNE has been previously shown to be slow to optimize and produce poorer results.}
 \note{Even though the VAE addresses issues with scalability and reliance on pairwise distances in the input space, the resulting latent code does not allow for as good separation of clusters as other methods, such as t-SNE would, due to the strong effect the imposed prior has on the global shape of the embedding of a data set.}
 
-The method proposed in this work involves combining the VAE model with Parametric t-SNE to produce a general framework for improved parametric dimensionality reduction for data visualization. In this chapter the learning algorithm as well as a variation of it is described.
+The method proposed in this work involves combining the VAE model with Parametric t-SNE to produce a general framework for improved parametric dimensionality reduction for data visualization. In this chapter the learning algorithm as well as variations of it are described.
 
 \section{Learning a Parametric Embedding Using VAE Sampling}
 
@@ -393,9 +393,9 @@ The method proposed in this work involves combining the VAE model with Parametri
       \EndFor
     \EndWhile
     \While{PTSNE not converged}
-      \State $\mathbf{X} \gets \text{Random minibatch}$
-      \State $\hat{\mathbf{x}}^{(i)}$ 
-      \State $\bW \gets \text{ Update parameters with } \bxi$
+      \State $\mathbf{X} \gets \text{ Random minibatch }$
+      \State $\hat{\mathbf{x}}^{(i)} \gets \text{ Reconstruction from VAE }$ 
+      \State $\bW \gets \text{ Update parameters with }$
     \EndWhile
   \end{algorithmic}
 \end{algorithm}
@@ -443,7 +443,12 @@ Using the obtained marginals as feedback we can inform the user of potentially a
 \textcolor{red}{[Note: could discuss, experiment with modification to the algorithm: if p(x) (or even more simply just the reconstruction error) is high (above some threshold), pass the original data point and not the reconstruction to the mapping. This proved to work for the small subset experiment when limiting the latent dimension to $\leq 3$. Reason for this being that the VAE trained on only 600 samples poorly reconstructed the test set (basically just corrupting many of them).]}
 
 \section{Robustness to Sparse and Noisy Data}
-\label{section:robustness_to_sparse_and_noisy_data}
+\label{section:robustness}
+
+\note{The unknown intrinsic dimensionality of the data manifold is reduced to at most the dimensionality of the latent code. Data less sparsely distributed on this manifold.}
+\note{The stochastic model allows sampling infinitely many similar points.}
+
+As real-world data is generally not perfectly clean, an important property for any machine learning method is its capability to handle data containing artifacts. Considering VAEs are inherently robust to corrupted data due to the regularization provided by the stochastic latent code (\textcolor{red}{[connection with VAE and Robust PCA \cite{rpca_1, rpca_2} shown in \citep{hidden_talents_of_the_vae}]}) it is reasonable to hypothesize that a training procedure for a low dimensional mapping taking advantage of this property would perform better on corrupted data.
 
 \section{Implementation}
 \label{section:implementation}
@@ -455,9 +460,7 @@ The implementation has been made as extensible as possible by allowing the full 
 \chapter{Experiments}
 \label{ch:experiments}
 
-\note{Experiments are carried out to validate the efficacy of the method, as well as compare it to previous methods.} Lastly, two applications of the method to single cell data analysis are presented in sections \ref{section:inference_with_the_generative_model} and \ref{section:application_to_scrna}.
-
-The code and data used to reproduce all the results presented in this section have been made available at \url{https://github.com/ahie/vptsne-results}.
+\note{Several experiments are carried out to validate the efficacy of the proposed method, as well as compare it to existing methods. } Lastly, two applications of the method to single cell data analysis are presented in section \ref{section:applications}.
 
 \section{Data Sets}
 
@@ -532,7 +535,10 @@ For MNIST and Fashion-MNIST perplexities were set to 30, which is in line with t
 
 Degrees of freedom of the t-Distribution for the PTSNE objective was set to 1 throughout all experiments, as all embeddings performed were two-dimensional.
 
-\section{Learning}
+\section{Results}
+\label{section:results}
+
+\subsection{Learning}
 \label{subsection:learning}
 
 In this section we compare the effect of training on VAE reconstructions to training on the original MNIST data set. To quantitatively evaluate the quality of the embeddings produced we employed the trustworthiness metric \cite{trustworthiness} on the MNIST test set. Additionally, we compared the 1-NN classification errors by fitting the classifiers on the produced embeddings of the training set and finding the mean accuracies of the classifiers on the test set.
@@ -570,14 +576,14 @@ Qualitatively the embeddings trained on the original data remain noisier than th
   \label{fig:fashion_mnist_comparison}
 \end{figure}
 
-\section{Comparisons}
+\subsection{Comparisons}
 \label{subsection:comparisons}
 
 We now compare the proposed method to other parametric dimensionality reduction methods, namely PCA and VAE. In addition we also consider two non-parametric dimensionality reduction methods, t-SNE and the recently proposed method UMAP \cite{umap}, which had been demonstrated to be able to produce embeddings comparable to t-SNE while being more efficient to optimize in practice.
 
 For the comparisons we will be using the Cytometry A data set. As evaluation criteria, similarly to the previous section, both trustworthiness and 1-NN classification accuracy are used. In addition to comparing the quality of the embeddings, the runtime performance of the different methods are studied. Our goal is to demonstrate that our method produces competitive embeddings as well as has superior scalability.
 
-\subsection{Embedding Quality}
+\subsubsection{Embedding Quality}
 \label{subsubsection:embedding_quality}
 
 The quantitative results for all methods under comparison are available in table \ref{table:comparison} and the corresponding scatter plots of the 2-D embeddings are presented in figure \ref{fig:comparison_figure}. Although VAE produces quantitatively better results for the chosen metrics, the spatial layout of clusters in the resulting embedding have less distinct separation and the global structure of the embedding is constrained by the chosen prior $p(\mathbf{z})$. From a data visualization standpoint these factors make the latent space embeddings qualitatively worse than what the corresponding quantitative metrics would suggest. Unsurprisingly, PCA performs the worst on both quantitative and qualitative results. Our method however is able to reach results on par with those of the chosen non-parametric methods.
@@ -586,7 +592,7 @@ The quantitative results for all methods under comparison are available in table
 
 It can also be observed that t-SNE, with the given perplexity, preserves global structure much more poorly. This can be observed by comparing with the PCA plot, which has three clearly distinct, spatially separated clusters of clusters that are not present in the t-SNE plot.
 
-\subsection{Scalability}
+\subsubsection{Scalability}
 \label{subsubsection:scalability}
 
 A major practical challenge with nonlinear dimensionality reduction methods are their scalability to large data sets. Typically, to capture the spatial structure of data a distance metric is employed to compute the pairwise distances for the entire data set, after which a projection of the points to a lower dimensional space, equipped with a corresponding metric, is sought that retains the computed distances as accurately as possible. As the number of data points increases, the inherent quadratic complexity of methods relying on such pairwise distance computations quickly renders such methods intractable.
@@ -638,7 +644,7 @@ PCA         & $0.8557$                   & $0.4886$ & $96$      \\ \hline
   \label{fig:comparison_figure}
 \end{figure}
 
-\section{Robustness to Sparse Data}
+\subsection{Robustness to Sparse Data}
 
 As discussed in section \textcolor{red}{[todo and ref. the correct section in methods]} the probabilistic model is advantageous when only few data points are available. To show this effect in practice we trained mappings with and without the use of our method on randomly chosen subsets of the MNIST training data set, effectively simulating sparsity of available training data. Evaluation of the mappings was carried out on the full MNIST test set as in previous experiments. A line plot of the obtained scores corresponding to the chosen size of the subsets can be found in figure \ref{fig:downsampled}. Significant differences in the obtained scores are noted in favor of our method. From these results we can observe that both the trustworthiness and 1-NN scores remain higher even with extremely small data sets, indicating that the use of our method is able to provide better generalization even when few training data points are available.
 
@@ -649,11 +655,9 @@ As discussed in section \textcolor{red}{[todo and ref. the correct section in me
   \label{fig:downsampled}
 \end{figure}
 
-\section{Robustness to Noisy Data}
+\subsection{Robustness to Noisy Data}
 
-As real-world data is generally not perfectly clean, an important property for any machine learning method is its capability to handle data containing artifacts. Considering VAEs are inherently robust to corrupted data due to the regularization provided by the stochastic latent code (\textcolor{red}{[should be discussed in a previous section more thoroughly, connection with VAE and Robust PCA \cite{rpca_1, rpca_2} shown in \citep{hidden_talents_of_the_vae}]}) it is reasonable to hypothesize that a training procedure for a low dimensional mapping taking advantage of this property would perform better on corrupted data.
-
-Here we aim to back up this hypothesis by running experiments on artificially corrupted MNIST data sets. As the corruption process in our experiments we consider \textit{masking noise} as in \cite{stacked_denoising_ae}, where a predetermined fraction of randomly chosen elements of a data point are set to 0. We test robustness by applying masking noise to 10\%, 20\%, 30\% and 40\% fractions of the training and test sets. The results of our experiments (cf. figure \ref{fig:corrupted_data}) show a clear advantage to using our method when dealing with noisy data as both evaluation metrics can be observed to decrease considerably for PTSNE as the training data is progressively corrupted, whereas VPTSNE maintains its performance throughout the experiments.
+Here we aim to back up the hypothesis of Section~\ref{section:robustness} by running experiments on artificially corrupted MNIST data sets. As the corruption process in our experiments we consider \textit{masking noise} as in \cite{stacked_denoising_ae}, where a predetermined fraction of randomly chosen elements of a data point are set to 0. We test robustness by applying masking noise to 10\%, 20\%, 30\% and 40\% fractions of the training and test sets. The results of our experiments presented in Figure~\ref{fig:corrupted_data} show a clear advantage to using our method when dealing with noisy data as both evaluation metrics can be observed to decrease considerably for PTSNE as the training data is progressively corrupted, whereas the performance of VPTSNE suffers far less throughout the experiments.
 
 As an example of real-world data corrupted in this fashion, in scRNA-seq so-called \textit{dropout events}, which cause incomplete sequence data to be captured due to technical and biological noise, can be viewed as a form of masking noise. The results presented here would indicate that the proposed method is potentially a good fit for exploratory analysis of scRNA-seq data.
 
@@ -668,7 +672,7 @@ Even with the standard VAE structure, the obtained results are encouraging. As f
   \label{fig:corrupted_data}
 \end{figure}
 
-\section{Obtaining Reconstructions from Hidden Layers}
+\subsection{Obtaining Reconstructions from Hidden Layers}
 
 To show the efficacy of this modification to the learning procedure we train an embedding using the latent code directly. As we choose the dimensionality of the latent code to be more than two orders of magnitude smaller than that of the original data's it is possible for us to use batches of far greater size to train the embedding network, without incurring additional computation cost over training with smaller batches on data of the original dimensionality. The latent dimensionality of the VAE was chosen to be $7$ and the batch size for training the embedding was set to $5000$, as in the original parametric t-SNE paper \cite{parametric_tsne}. The choice of $7$ as the VAE latent dimensionality was deliberately made so that it would correspond to the largest number which is two orders of magnitude smaller than the original dimensionality. We have additionally included the embedding of data points obtained with the original implementation of parametric t-SNE for comparison in figure \ref{fig:hidden_layer}. Qualitatively and quantitatively an overall better embedding is achieved with less computation using our method.
 
@@ -679,7 +683,10 @@ To show the efficacy of this modification to the learning procedure we train an 
   \label{fig:hidden_layer}
 \end{figure}
 
-\section{Inference with the Generative Model}
+\section{Application to Single-Cell Data Analysis}
+\label{section:applications}
+
+\subsection{Inference with the Generative Model}
 \label{section:inference_with_the_generative_model}
 
 As an example of inference with the generative model discussed in \ref{section:inference_with_the_generative_model} we use the Cytometry B data set to train our combined model with two patients' data held out. The protein expression profile of Patient A's cells closely match that of other patients' in the training set, whereas Patient B's sample is from advanced cancer making it an outlier in relation to the data available during training.
@@ -696,7 +703,7 @@ To distinguish between outlier and inlier points in the obtained mapping we set 
   \label{fig:cytometry_outliers}
 \end{figure}
 
-\section{Application to scRNA-seq Data}
+\subsection{Application to scRNA-seq Data}
 \label{section:application_to_scrna}
 
 Noting the results presented in the previous sections, we finally aim to demonstrate the applicability of our method to a real-world data set that is both sparse and very high dimensional, as well as contains corruption due to technical variation. For this purpose the scRNA-seq data set of \cite{tirosh} was chosen.
