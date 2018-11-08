@@ -100,7 +100,7 @@ Neural networks can be trained for various different computational tasks by simp
 
 Early on in the development of neural networks the simple yet powerful backpropagation algorithm was developed independently by multiple researchers and later popularized by Rumelhart et al. \cite{nature_backprop} to enable the efficient training of neural networks. In essence, backpropagation is an algorithm to perform gradient descent to optimize neural network weights by exploiting the compositional structure of neural networks and the chain rule of derivatives.
 
-The backpropagation algorithm proceeds as follows: first, input values are run through the entire network to compute the value of the objective function.
+The backpropagation algorithm proceeds as follows. First, input values are run through the entire network to compute the value of the objective function. \note{... rest of the algo}
 
 \note{Backprop algorithm in more detail, SGD, gradient descent optimization methods (mention second order methods?)}
 
@@ -120,9 +120,9 @@ The learning objective of autoencoders is to reconstruct the original input data
   \label{eq:mse}
 \end{equation}
 
-\note{Structure consists of two parts, the encoder and decoder. An example autoencoder network has been visualized in Figure~\ref{fig:ae}.}
+\note{The structure of autoencoders consists of two parts, namely the encoder and decoder. An example autoencoder network has been visualized in Figure~\ref{fig:ae}.}
 
-\note{Trivial case, where the network has too much capacity the AE can simply learn the identity function. Not useful for learning hidden representations, i.e. meaningful latent codes.}
+\note{Trivial case, where the network has too much capacity the AE can simply learn an identity mapping. This is clearly not conducive to learning meaningful latent representations of the data.}
 
 \note{Case where the latent code's dimensionality is smaller than the original data's dimensionality. This \textit{bottleneck} potentially discards data, leading to a \textit{lossy compressed} representation.}
 
@@ -133,24 +133,20 @@ The learning objective of autoencoders is to reconstruct the original input data
   \label{fig:ae}
 \end{figure}
 
-A connection between PCA and autoencoders which are constrained to only have linear activation functions and are optimized with the MSE objective (see Equation~\ref{eq:mse}) has been shown in \cite{autoencoder_pca}. \note{The subspace spanned by the first $d'$ principal eigenvectors of the (combined) weight matrix is equivalent to the first $d'$ principal components of the training data. The latent code of such an autoencoder is an orthogonal projection onto this subspace. Additionally, the optimization problem is convex.}
+A connection between PCA and autoencoders which are constrained to only have linear activation functions and are optimized with the MSE objective (see Equation~\ref{eq:mse}) has been shown in \cite{autoencoder_pca}. Additionally, it is shown that the optimization landscape of such an autoencoder is convex.
 
-\note{Elaborate potential downsides of this approach (how to interpret the learned representation when nonlinearity is introduced? how does it generalize?). This is set up for why stochastic autoencoders are desireable.}
+\note{Elaborate potential downsides of this approach (how to interpret the learned representation when nonlinearity is introduced? how does it generalize?). This is set up for why stochastic autoencoders are desireable. "Even though autoencoders provide a powerful and scalable non-metric approach to dimensionality reduction there are a few problems inherent to how they function. ..."}
 
 \subsection{Variational Inference}
 \label{subsection:variational_inference}
 
-In modern statistics and machine learning a need to approximate highly complex probability distributions is a problem that often arises as
-Highly complex probability densities often arise in modern statistics and machine learning. 
-A core challenge that arises in modern statistics and machine learning is that of approximating 
+In modern statistics and machine learning a need to approximate highly complex probability distributions is a problem that often arises.
 
-A domain where such complex distributions are often encountered is Bayesian inference, where the posterior 
-
-The Bayes theorem states that the posterior distribution is given by
+A domain where such complex distributions are often encountered is Bayesian inference. The Bayes theorem states that the posterior distribution is given by
 
 $$p(\bz \vert \bx) = \frac{p(\bz, \bx)}{p(\bx)} = \frac{p(\bz, \bx)}{\int p(\bz, \bx) d\bz}.$$
 
-Even for only moderately complex models exact computation of the posterior is often intractable due to the required marginalization over all possible latent values $\mathbf{z}$. To illustrate this problem we will consider the Bayesian mixture of Gaussians model as in \cite{variational_inference_review}. The model under consideration is univariate and consists of $K$ unit variance Gaussian mixture components. The full hierarchical model is given by the following
+Even for only moderately complex models exact computation of the posterior is often intractable due to the required marginalization over all possible values of $\mathbf{z}$. To illustrate this problem we will consider the Bayesian mixture of Gaussians model as in \cite{variational_inference_review}. The model under consideration is univariate and consists of $K$ unit variance Gaussian mixture components. The full hierarchical model is given by the following
 
 $$\mu_k \sim \mathcal{N}(0, \sigma^2),$$
 $$c_i \sim \text{Categorical}(\frac{1}{K}, \dotsc, \frac{1}{K}),$$
@@ -166,11 +162,13 @@ $$p(\mathbf{x}) = \int p(\mathbf{\mu}) \prod_{i=1}^{n} \sum_{c_i} p(c_i) p(x_i \
 
 As the time complexity of evaluating this integral is $\mathcal{O}(K^n)$, it is evident that direct computation quickly becomes infeasible even for relatively small $K$ and $n$.
 
-The dominant paradigm for obtaining these approximates has been through various methods of sampling.
+The dominant paradigm for obtaining approximates for such distributions has been through various methods of sampling. \note{cite/mention mcmc, methods like metropolis hastings and gibbs sampling.}
 
-Variational inference takes a different approach to approximating the posterior. Instead of sampling, in variational inference the approximation problem is turned into an optimization problem. By considering a family of distributions $\mathcal{Q}$ 
+Variational inference takes a different approach to approximating the posterior. Instead of sampling, in variational inference the approximation problem is turned into an optimization problem. By considering a family of distributions $\mathcal{Q}$ one seeks to optimize
 
-$$q^{*}(\mathbf{z}) = \argmin_{q(\mathbf{z}) \in \mathcal{Q}} \dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \mathbf{x})}$$
+$$q^{*}(\mathbf{z}) = \argmin_{q(\mathbf{z}) \in \mathcal{Q}} \dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \mathbf{x})}.$$
+
+In practice the considered family of distributions $\mathcal{Q}$ is constrained in a way as to make optimization tractable. A common constraint is to assume the distribution factorizes as follows \note{add the equation}, which is referred to as the \textit{mean field approximation} in literature. In the case where the family of distributions under consideration consists of Gaussian distributions the mean field approximation essentially removes from consideration all covariate structure. An illustration of this is presented in Figure~\ref{fig:mean_field_approximation}.
 
 \note{It is possible to combine automatic differentiation with variational inference to further ease statistical model building and computational efficiency \cite{advi}. (Brief discussion on probabilistic programming)}
 
@@ -235,7 +233,7 @@ Several modifications to this objective have been proposed, e.g. the $\beta$-VAE
 
 \subsubsection{Obtaining Differentiable Monte Carlo Estimates}
 
-To optimize the parameters $\mathbf{\theta}$ and $\mathbf{\phi}$ of our neural network using backpropagation we require a way to compute the gradient of the expectations of random variables. By introducing a random noise variable as input we are able to obtain samples from the latent distribution by using the \textit{reparameterization trick}.
+To optimize the parameters $\mathbf{\theta}$ and $\mathbf{\phi}$ of our neural network using backpropagation we require a way to compute the gradient of the expectations of random variables. By introducing a random noise variable as input, we can obtain samples from the posterior distribution by using the \textit{reparameterization trick}. The reparameterization trick enables keeping all computation the neural network performs fully deterministic while still permitting the sampling of probability distributions parameterized by the network itself. \note{By keeping all computation deterministic, standard back propagation can be used.}
 
 $$\mathbf{z}^{(i,l)} = g_{\bphi}(\eil, \bxi), \eil \sim p(\mathbf{\epsilon})$$
 
@@ -256,9 +254,7 @@ $$\mathcal{L}(\btheta, \bphi; \bxi) = \frac{1}{L} \sum_{l=1}^{L} \Big[\qphi(\bz^
 
 It is important to note that the output $\hat{\mathbf{x}}^{(i)}$ of the network in Figure~\ref{fig:vae} should not be interpreted as the final reconstruction of the input like in traditional autoencoders, but rather as the values parameterizing the distribution $\ptheta(\mathbf{x} \vert \bz^{(i, l)})$.
 
-\cite{normalizing_flows, inverse_autoregressive_flow, householder_flow}
-
-\cite{semi_supervised_vae, adversarial_autoencoders}
+\note{On more flexible posterior distributions through normalizing flows \cite{normalizing_flows, inverse_autoregressive_flow, householder_flow}, results in overall better $p(\mathbf{x})$. Extensions to semi supervised and adversarial learning \cite{semi_supervised_vae, adversarial_autoencoders}.}
 
 \section{t-Distributed Stochastic Neighbor Embedding}
 \label{section:tsne}
@@ -270,7 +266,7 @@ Taking a slight departure from the preceding discussion on neural networks, the 
 
 The Stochastic Neighbor Embedding (SNE) algorithm \cite{sne}, developed by Hinton and Roweis in 2003, serves as the precursor to the later improved t-SNE algorithm. As such, SNE shares many similarities in its definition with t-SNE, and thus by first developing an understanding of SNE and its pitfalls the motivation behind the t-SNE algorithm become more apparent.
 
-\note{FIXME: As the algorithm's name suggests, the approach SNE takes to perform dimensionality reduction is probabilistic in nature. Without delving directly into the mathematical details, an intuitive overview of the algorithm is that it attempts to embed data points in a lower dimension by preserving probability distributions defining . More concretely, the algorithm proceeds as follows. First, for all data points a probability distribution ... . After these probability distributions have been formed, the actual embedding is performed by attempting to distribute the points in the output space such that similarly defined probability distributions in the output space match those of the input space as closely as possible. The natural way to match two distributions is familiar from the discussion on variational bayes methods, namely the KL-divergence between the input and output space distributions is used as the objective function for the embedding of data points, which can be optimized with various methods, including the previously covered gradient descent.}
+As the algorithm's name suggests, the approach SNE takes to perform dimensionality reduction is probabilistic in nature. Without delving directly into the mathematical details, an intuitive overview of the algorithm is that it attempts to embed data points in a lower dimension by preserving probability distributions defined on the pairwise distances of points. More concretely, the algorithm proceeds as follows. First, for all data points probability distributions for how likely it is to pick each point as its neighbor in both input and output space are formed. After these probability distributions have been formed, the actual embedding is performed by attempting to distribute the points in the output space such that similarly defined probability distributions in the output space match those of the input space as closely as possible. The natural way to match two distributions is familiar from the discussion on variational bayes methods, namely the KL-divergence between the input and output space distributions is used as the objective function for the embedding of data points, which can be optimized with various methods, including the previously covered gradient descent.
 
 To formalize these notions, we begin with how the conditional probability of data point $i$ picking data point $j$ in the input space is defined by the equation
 
@@ -343,7 +339,7 @@ For which the following gradient can be derived:
 \label{eq:c_tsne_grad}
 \end{equation}
 
-\note{Methods to improve the runtime of t-SNE have been subsequently proposed: \cite{accelerated_tsne_1, accelerated_tsne_2}. Use of the fast multipole method \cite{fast_multipole} has not been explored due to no suitable multipole expansion for the t-Distributed forces in the output space exist.}
+Methods originally developed for improving the runtime performance of n-body simulations have been adapted to speed up the optimization of t-SNE \cite{accelerated_tsne_1, accelerated_tsne_2}. Use of the fast multipole method \cite{fast_multipole} however is not feasible due to no suitable multipole expansion for the t-Distributions in the output space exist. More discussion on these methods and performance considerations w.r.t. our method is presented in Section~\ref{section:performance}.
 
 \note{Worth a mention are the Stochastic Triplet Embedding \cite{stochastic_triplet_embedding} and Multiple Maps t-SNE \cite{multiple_maps_tsne} methods developed on top of t-SNE, developed to handle non-metric similarities present in the data.}
 
@@ -440,8 +436,6 @@ Using the obtained marginals as feedback we can inform the user of potentially a
 
 \textcolor{red}{[Note: discuss the more accurate but computationally costly marginal estimation method: annealed importance sampling \cite{ais, ais_vae}?]}
 
-\textcolor{red}{[Note: could discuss, experiment with modification to the algorithm: if p(x) (or even more simply just the reconstruction error) is high (above some threshold), pass the original data point and not the reconstruction to the mapping. This proved to work for the small subset experiment when limiting the latent dimension to $\leq 3$. Reason for this being that the VAE trained on only 600 samples poorly reconstructed the test set (basically just corrupting many of them).]}
-
 \section{Robustness to Sparse and Noisy Data}
 \label{section:robustness}
 
@@ -461,6 +455,8 @@ The implementation has been made as extensible as possible by allowing the full 
 \label{ch:experiments}
 
 \note{Several experiments are carried out to validate the efficacy of the proposed method, as well as compare it to existing methods. } Lastly, two applications of the method to single cell data analysis are presented in section \ref{section:applications}.
+
+Before going into the results and applications this chapter begins by first presenting the different data sets that will be used throughout the experiments after which the different quantitative metrics for evaluating the experimental results are covered and the general experimental setup, in regards to the used network structures, parameters and chosen optimization methods are discussed.
 
 \section{Data Sets}
 
