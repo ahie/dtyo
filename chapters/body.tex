@@ -129,13 +129,13 @@ The learning objective of autoencoders is to reconstruct the original input data
 \begin{figure}[!htb]
   \centering
   \resizebox{\textwidth}{!}{\input{tikz/ae.tikz}\unskip}
-  \caption{Autoencoder}
+  \caption{Autoencoder with one hidden layer in both the encoder and decoder and latent dimensionality of 2.}
   \label{fig:ae}
 \end{figure}
 
 A connection between PCA and autoencoders which are constrained to only have linear activation functions and are optimized with the MSE objective (see Equation~\ref{eq:mse}) has been shown in \cite{autoencoder_pca}. Additionally, it is shown that the optimization landscape of such an autoencoder is convex.
 
-\note{Elaborate potential downsides of this approach (how to interpret the learned representation when nonlinearity is introduced? how does it generalize?). This is set up for why stochastic autoencoders are desireable. "Even though autoencoders provide a powerful and scalable non-metric approach to dimensionality reduction there are a few problems inherent to how they function. ..."}
+\note{Elaborate the potential downsides of this approach (how to interpret the learned representation when nonlinearity is introduced? how does it generalize?). This is set up for why stochastic autoencoders are desireable. "Even though autoencoders provide a powerful and scalable non-metric approach to dimensionality reduction there are a few disadvantages inherent to how they function. ..."}
 
 \subsection{Variational Inference}
 \label{subsection:variational_inference}
@@ -248,7 +248,7 @@ $$\mathcal{L}(\btheta, \bphi; \bxi) = \frac{1}{L} \sum_{l=1}^{L} \Big[\qphi(\bz^
 \begin{figure}[!htb]
   \centering
   \resizebox{\textwidth}{!}{\input{tikz/vae.tikz}\unskip}
-  \caption{Variational Autoencoder}
+  \caption{Variational Autoencoder. Note that the hidden layer values $\mathbf{\mu}$, $\mathbf{\sigma}$ and $\mathbf{\epsilon}$ represent vectors instead of single values for a cleaner visual representation.}
   \label{fig:vae}
 \end{figure}
 
@@ -362,13 +362,13 @@ As $f_{\mathbf{W}}(\mathbf{x}_i) = \mathbf{y}_i$, Equation~\ref{eq:c_tsne_grad} 
 \label{ch:method}
 
 \note{TODO: go over what this method attempts to improve upon. Other methods are not as scalable, various problems with curse of dimensionality, parametric t-SNE has been previously shown to be slow to optimize and produce poorer results.}
-\note{Even though the VAE addresses issues with scalability and reliance on pairwise distances in the input space, the resulting latent code does not allow for as good separation of clusters as other methods, such as t-SNE would, due to the strong effect the imposed prior has on the global shape of the embedding of a data set.}
+\note{Even though the VAE addresses issues with scalability and reliance on pairwise distances in the input space, the resulting latent space representation does not allow for as good separation of clusters as other methods, such as parametric t-SNE or UMAP \cite{umap}, which will later be demonstrated in Section~\ref{section:comparisons}.}
 
 The method proposed in this work involves combining the VAE model with Parametric t-SNE to produce a general framework for improved parametric dimensionality reduction for data visualization. In this chapter the learning algorithm as well as variations of it are described.
 
 \section{Learning a Parametric Embedding Using VAE Sampling}
 
-\note{The aim of the method is to take advantage of the strengths of both VAE and PTSNE.}
+The aim of the method is to take advantage of the strengths of both VAE and PTSNE.
 \note{Pros of VAE: generative model, stochasticity brings robustness, scalable parametric nonlinear dimensionality reduction}
 \note{Pros of PTSNE: theoretically capable of learning as good projections as t-SNE, which is widely considered SOTA. Also scalable and parametric, if trainable with smaller batch sizes.}
 \note{Using the notation of the previous chapter, we can summarize the learning procedure as Algorithm~\ref{alg:learning}.}
@@ -454,9 +454,9 @@ The implementation has been made as extensible as possible by allowing the full 
 \chapter{Experiments}
 \label{ch:experiments}
 
-\note{Several experiments are carried out to validate the efficacy of the proposed method, as well as compare it to existing methods. } Lastly, two applications of the method to single cell data analysis are presented in section \ref{section:applications}.
+Several experiments are carried out to validate the efficacy of the proposed method, as well as compare it to existing methods. \note{Add brief explanation of what the experiments cover.} Lastly, two applications of the method to single cell data analysis are presented in section \ref{section:applications}.
 
-Before going into the results and applications this chapter begins by first presenting the different data sets that will be used throughout the experiments after which the different quantitative metrics for evaluating the experimental results are covered and the general experimental setup, in regards to the used network structures, parameters and chosen optimization methods are discussed.
+Before going into the results and applications of the method this chapter begins by first presenting the different data sets that will be used throughout the experiments after which the different quantitative metrics for evaluating the experimental results are covered and the general experimental setup, in regards to the used network structures, parameters and chosen optimization methods are discussed.
 
 \section{Data Sets}
 
@@ -525,7 +525,7 @@ For optimization of the neural network \cite{parametric_tsne} use nonlinear conj
 
 We applied batch normalization \cite{batch_normalization} to the hidden layers of the VAE networks, while omitting batch normalization from the embedding network. This is to validate the training procedure on as simple an embedding network as possible. We note that applying batch normalization to the embedding network improves the results marginally.
 
-To further emphasize the universality of our approach we restrict ourselves to use a simple VAE structure, without complicating the model architecture with more recently proposed advances, such as normalizing flows \citep{normalizing_flows} (\textcolor{red}{[Note: could show that better models improve performance in the supplement]}). Throughout all experiments, unless otherwise specified, the VAE architecture was fixed to $d - 256 - 128 - 32 - \mu, \log \sigma^2 - 32 - 128 - 256 - d$, where $\mu$ and $\sigma$ parameterize a normal distribution acting as the posterior $q_{\phi}(\mathbf{z} \vert \mathbf{x}^{(i)})$ and the final layer output was used to parameterize a Bernoulli distribution for MNIST as well as Fashion-MNIST, and a Gaussian distribution with a fixed standard deviation of 0.1 for cytometry data. In all experiments, each VAE was trained with a batch size of 1000 for 10000 iterations and had a latent dimensionality of $3$, unless otherwise specified.
+To further emphasize the universality of our approach we restrict ourselves to use a simple VAE structure, without complicating the model architecture with more recently proposed advances, such as normalizing flows.\footnote{In preliminary results VAE models that achieve a lower ELBO do in fact contribute to improved embeddings.} Throughout all experiments, unless otherwise specified, the VAE architecture was fixed to $d - 256 - 128 - 32 - \mu, \log \sigma^2 - 32 - 128 - 256 - d$, where $\mu$ and $\sigma$ parameterize a normal distribution acting as the posterior $q_{\phi}(\mathbf{z} \vert \mathbf{x}^{(i)})$ and the final layer output was used to parameterize a Bernoulli distribution for MNIST as well as Fashion-MNIST, and a Gaussian distribution with a fixed standard deviation of 0.1 for cytometry data. In all experiments, each VAE was trained with a batch size of 1000 for 10000 iterations and had a latent dimensionality of $3$, unless otherwise specified.
 
 For MNIST and Fashion-MNIST perplexities were set to 30, which is in line with the value used by \cite{parametric_tsne}, whereas for the mass cytometry and scRNA-seq data sets a perplexity of 10 was chosen. It should be noted that a more correct way to choose perplexity would take into account the batch size, as perplexity controls the number of neighbors each point is considered to have. For example training VPTSNE on MNIST with batch size 200 and perplexity 10 gives far better results than with perplexity 30. However, with PTSNE the results are actually worse as the training fails to converge even with small learning rates. An example embedding of MNIST with low perplexity and small batch size has been included in Appendix~\ref{appendix:low_perp_small_bs}, which achieves better trustworthiness (0.935) and 1-NN (0.812) than the 600 batch size, 30 perplexity runs. Why PTSNE fails to converge and VPTSNE does not is an important question to explore in future work, as this demonstrates a clear advantage of the method being proposed.
 
@@ -568,12 +568,12 @@ Qualitatively the embeddings trained on the original data remain noisier than th
     \includegraphics[width=0.45\textwidth]{images/fashion_mnist_vptsne_embedding.png} \\
     \multicolumn{2}{c}{\includegraphics[width=0.45\textwidth]{images/fashion_mnist_legend.png}}
   \end{tabular}
-  \caption{Embeddings of the Fashion-MNIST data set trained with batch size 400. \textcolor{red}{[Note: could include UMAP embedding of this data set here for comparison. It is remarkably similar and this would reinforce the claim that small batch size training is actually very effective.]}}
+  \caption{Embeddings of the Fashion-MNIST data set trained with batch size 400.}
   \label{fig:fashion_mnist_comparison}
 \end{figure}
 
 \subsection{Comparisons}
-\label{subsection:comparisons}
+\label{section:comparisons}
 
 We now compare the proposed method to other parametric dimensionality reduction methods, namely PCA and VAE. In addition we also consider two non-parametric dimensionality reduction methods, t-SNE and the recently proposed method UMAP \cite{umap}, which had been demonstrated to be able to produce embeddings comparable to t-SNE while being more efficient to optimize in practice.
 
@@ -636,13 +636,13 @@ PCA         & $0.8557$                   & $0.4886$ & $96$      \\ \hline
     PCA &
     \raisebox{-.5\height}{\includegraphics[width=0.25\textwidth]{images/pca_levine.png}} \\
   \end{tabular}
-  \caption{Cytometry A data set embedded with the methods being compared in section \ref{subsection:comparisons}.}
+  \caption{Cytometry A data set embedded with the methods being compared in Section~\ref{section:comparisons}.}
   \label{fig:comparison_figure}
 \end{figure}
 
 \subsection{Robustness to Sparse Data}
 
-As discussed in section \textcolor{red}{[todo and ref. the correct section in methods]} the probabilistic model is advantageous when only few data points are available. To show this effect in practice we trained mappings with and without the use of our method on randomly chosen subsets of the MNIST training data set, effectively simulating sparsity of available training data. Evaluation of the mappings was carried out on the full MNIST test set as in previous experiments. A line plot of the obtained scores corresponding to the chosen size of the subsets can be found in figure \ref{fig:downsampled}. Significant differences in the obtained scores are noted in favor of our method. From these results we can observe that both the trustworthiness and 1-NN scores remain higher even with extremely small data sets, indicating that the use of our method is able to provide better generalization even when few training data points are available.
+As discussed in Section~\ref{section:robustness} the probabilistic model is advantageous when only few data points are available. To show this effect in practice we trained mappings with and without the use of our method on randomly chosen subsets of the MNIST training data set, effectively simulating sparsity of available training data. Evaluation of the mappings was carried out on the full MNIST test set as in previous experiments. A line plot of the obtained scores corresponding to the chosen size of the subsets can be found in figure \ref{fig:downsampled}. Significant differences in the obtained scores are noted in favor of our method. From these results we can observe that both the trustworthiness and 1-NN scores remain higher even with extremely small data sets, indicating that the use of our method is able to provide better generalization even when few training data points are available.
 
 \begin{figure}[!htb]
   \centering
@@ -653,18 +653,16 @@ As discussed in section \textcolor{red}{[todo and ref. the correct section in me
 
 \subsection{Robustness to Noisy Data}
 
-Here we aim to back up the hypothesis of Section~\ref{section:robustness} by running experiments on artificially corrupted MNIST data sets. As the corruption process in our experiments we consider \textit{masking noise} as in \cite{stacked_denoising_ae}, where a predetermined fraction of randomly chosen elements of a data point are set to 0. We test robustness by applying masking noise to 10\%, 20\%, 30\% and 40\% fractions of the training and test sets. The results of our experiments presented in Figure~\ref{fig:corrupted_data} show a clear advantage to using our method when dealing with noisy data as both evaluation metrics can be observed to decrease considerably for PTSNE as the training data is progressively corrupted, whereas the performance of VPTSNE suffers far less throughout the experiments.
+We aim to back up the hypothesis of Section~\ref{section:robustness} by running experiments on artificially corrupted MNIST data sets. As the corruption process in our experiments we consider \textit{masking noise} as in \cite{stacked_denoising_ae}, where a predetermined fraction of randomly chosen elements of a data point are set to 0. We test robustness by applying masking noise to 10\%, 20\%, 30\% and 40\% fractions of the training and test sets. The results of our experiments presented in Figure~\ref{fig:corrupted_data} show a clear advantage to using our method when dealing with noisy data as both evaluation metrics can be observed to decrease considerably for PTSNE as the training data is progressively corrupted, whereas the performance of VPTSNE suffers far less throughout the experiments.
 
-As an example of real-world data corrupted in this fashion, in scRNA-seq so-called \textit{dropout events}, which cause incomplete sequence data to be captured due to technical and biological noise, can be viewed as a form of masking noise. The results presented here would indicate that the proposed method is potentially a good fit for exploratory analysis of scRNA-seq data.
-
-\todo{find citations for scrna-seq/dropout}
+As an example of real-world data corrupted in this fashion, in scRNA-seq so-called \textit{dropout events} \cite{sc_dropout}, which cause incomplete sequence data to be captured due to technical and biological noise, can be viewed as a form of masking noise. The results presented here would indicate that the proposed method is potentially a good fit for exploratory analysis of scRNA-seq data.
 
 Even with the standard VAE structure, the obtained results are encouraging. As future work it would be interesting to test whether making use of denoising variational autoencoders \cite{denoising_vae}, which are an extension of denoising autoencoders \cite{stacked_denoising_ae} that are directly trained to correct corrupted data. Additionally of interest is how our method fares when other corruption processes are present.
 
 \begin{figure}[!htb]
   \centering
   \includegraphics[width=\textwidth]{images/corrupted.png}
-  \caption{ 1-NN and trustworthiness scores obtained for PTSNE and VPTSNE trained on MNIST data with different levels of masking noise applied. Error bars indicate the 95\% confidence intervals of the mean for each corruption level, obtained from 20 repeated runs.}
+  \caption{1-NN and trustworthiness scores obtained for PTSNE and VPTSNE trained on MNIST data with different levels of masking noise applied. Error bars indicate the 95\% confidence intervals of the mean for each corruption level, obtained from 20 repeated runs.}
   \label{fig:corrupted_data}
 \end{figure}
 
