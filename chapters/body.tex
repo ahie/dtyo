@@ -3,7 +3,7 @@
 
 At present, ever larger sets of increasingly higher dimensional data are being produced, gathered and analyzed. As a consequence, several challenges arise when analyses are carried out on these vast amounts of high dimensional data. This recent surge of data prompts not only for the development of methods for data analysis capable of scaling to massive data sets but ones which are simultaneously capable of dealing with challenges inherent to high dimensional data.
 
-In literature, problems arising from high dimensionality are collectively referred to as the \textit{curse of dimensionality}, a term first coined by Richard Bellman in the context of dynamic programming \cite{bellman_curse_of_dimensionality}. Particularly in machine learning the following aspects of high dimensionality 
+In literature, problems arising from high dimensionality are collectively referred to as the \textit{curse of dimensionality}. Particularly in machine learning the following aspects of high dimensionality are problematic
 
 \begin{itemize}
 \item distances between pairs of points become less distinguished as dimensionality of the space increases \cite{on_the_surprising_behavior_of_distance_metrics}, rendering methods based on distance metrics at a disadvantage.
@@ -346,11 +346,9 @@ Methods originally developed for improving the runtime performance of n-body sim
 \subsection{Parametric t-SNE}
 \label{subsection:parametric_tsne}
 
-A major drawback of most nonlinear dimensionality reduction methods is that they do not directly enable out-of-sample extensions.
+A major drawback of most nonlinear dimensionality reduction methods is that they do not directly enable out-of-sample extensions. A natural extension to t-SNE is to learn a function parameterizing the embedding from input space to output space, i.e. instead of optimizing the t-SNE objective by simply moving a fixed set of points in the output space, we would instead optimize the parameters of a function that maps training data points from the input space to the output space. Once parameters for such a function are found the function can be used to not only embed the training data but any subsequently collected data points that belong to approximately the same manifold.
 
-A natural extension to t-SNE would be to learn a function parameterizing the embedding from input space to output space.
-
-The basic idea behind PTSNE is very straightforward. A feedforward neural network is used to parameterize a function $f_\mathbf{W}: X \mapsto Y$, which maps points from input space to output space in such a way as to minimize the t-SNE objective. Once the parameters of the mapping are learned, performing dimensionality reduction on any given point is done simply by running it through the neural network.
+The basic idea behind parametric t-SNE is straightforward. A feedforward neural network is used to parameterize a function $f_\mathbf{W}: X \mapsto Y$, which maps points from input space to output space in such a way as to minimize the t-SNE objective. Once the weights of the neural network are learned, performing dimensionality reduction on any given point is done simply by running it through the neural network. This parametric extension to t-SNE was first realized by van der Maaten \cite{parametric_tsne}, and we will henceforth refer to this method as PTSNE.
 
 By application of the chain rule, we can write the gradient w.r.t. the parameters of the neural network as
 
@@ -361,17 +359,20 @@ As $f_{\mathbf{W}}(\mathbf{x}_i) = \mathbf{y}_i$, Equation~\ref{eq:c_tsne_grad} 
 \chapter{Method}
 \label{ch:method}
 
-\note{TODO: go over what this method attempts to improve upon. Other methods are not as scalable, various problems with curse of dimensionality, parametric t-SNE has been previously shown to be slow to optimize and produce poorer results.}
-\note{Even though the VAE addresses issues with scalability and reliance on pairwise distances in the input space, the resulting latent space representation does not allow for as good separation of clusters as other methods, such as parametric t-SNE or UMAP \cite{umap}, which will later be demonstrated in Section~\ref{section:comparisons}.}
+Scalable, non-linear dimensionality reduction methods that are robust to the curse of dimensionality while being able to produce meaningful visualizations for exploratory data analysis \note{".. don't really exit .."}. Even though VAEs address issues with scalability and reliance on distance metrics, the resulting latent space representations do not allow for as good separation of clusters as other methods, such as t-SNE or UMAP \cite{umap}, which will later be demonstrated in Section~\ref{section:comparisons}. On the other hand, PTSNE is in theory capable of achieving embeddings that are comparable to t-SNE, but in practice, the optimization often results in much noisier embeddings, where for instance cluster boundaries are not as clearly visible.
 
-The method proposed in this work involves combining the VAE model with Parametric t-SNE to produce a general framework for improved parametric dimensionality reduction for data visualization. In this chapter the learning algorithm as well as variations of it are described.
+The method proposed in this work involves combining the VAE model with PTSNE to produce a general framework for improved parametric dimensionality reduction for data visualization. By combining the two models in a way where the strengths of both methods compliment each other the weaknesses of each individual method are diminished.
+
+In this chapter the combined model, its training procedure, its properties, and a variation of the method are discussed.
 
 \section{Learning a Parametric Embedding Using VAE Sampling}
 
-The aim of the method is to take advantage of the strengths of both VAE and PTSNE.
+As the aim of the method is to take advantage of the strengths of both VAE and PTSNE, we begin by recapitulating the strengths of each method.
+
 \note{Pros of VAE: generative model, stochasticity brings robustness, scalable parametric nonlinear dimensionality reduction}
 \note{Pros of PTSNE: theoretically capable of learning as good projections as t-SNE, which is widely considered SOTA. Also scalable and parametric, if trainable with smaller batch sizes.}
-\note{Using the notation of the previous chapter, we can summarize the learning procedure as Algorithm~\ref{alg:learning}.}
+
+Using the notation introduced in Chapter~\ref{ch:background_and_related_work}, we can summarize the learning procedure as Algorithm~\ref{alg:learning}.
 
 \begin{algorithm}[H]
   \caption{Training of the neural networks.}
@@ -396,8 +397,7 @@ The aim of the method is to take advantage of the strengths of both VAE and PTSN
   \end{algorithmic}
 \end{algorithm}
 
-\note{After training, a deterministic projection for all subsequent points can be obtained with Algorithm~\ref{alg:projection}.}
-\note{For encoder networks that directly parameterize the mean of a distribution, computing the expectation can be done exactly with zero overhead.}
+After training, a deterministic projection for all subsequent points can be obtained with Algorithm~\ref{alg:projection}. For encoder and decoder network pairs that both directly parameterize the mean of a distribution, computing the expectation can be done exactly with zero overhead.
 
 \begin{algorithm}[H]
   \caption{Projection.}
@@ -414,7 +414,7 @@ The aim of the method is to take advantage of the strengths of both VAE and PTSN
 \section{Obtaining Reconstructions from Hidden Layers}
 \label{section:sampling_from_hidden_layers}
 
-Instead of training the embedding network on the final output of the observation model it is possible to instead use the outputs of a chosen hidden layer. If the chosen hidden layer has dimensions considerably smaller than that of the original, the benefits of this approach are twofold:
+Instead of training the embedding network on the final output of the VAE it is possible to instead use the outputs of a chosen hidden layer. If the chosen hidden layer has dimensions considerably smaller than that of the original, the benefits of this approach are twofold:
 
 \begin{itemize}
 \item We are performing a step of nonlinear dimensionality reduction that is not dependent on local distance metrics, i.e. a preprocessing step that is less susceptible to the curse of dimensionality.
@@ -449,18 +449,18 @@ As real-world data is generally not perfectly clean, an important property for a
 
 An accompanying implementation of the method has been made available at \url{https://github.com/ahie/vptsne}. The implementation is built on top of TensorFlow \cite{tensorflow} and takes advantage of the TensorFlow Distributions \cite{tensorflow_distributions} library. To take full advantage of the dataflow architecture of TensorFlow and the paralellism provided by GPUs, both the t-SNE loss and its gradient computation were implemented as custom CUDA \cite{cuda} kernel operations.
 
-The implementation has been made as extensible as possible by allowing the full specification of the neural network structures parameterizing the VAE distributions and the PTSNE network. Helpers for easily specifying common network structures are included in the implementation. The use of normalizing flows in the VAE model has also been made possible. Additionally, the fast approximate nearest neighbor algorithm NN-descent \cite{nn_descent} has been included in the t-SNE CUDA routines as an optional performance enhancement for computing the input space distribution $P$ when training with large batch sizes.
+The implementation has been made as extensible as possible by allowing the full specification of the neural network structures parameterizing the VAE distributions and the PTSNE network. Helpers for easily specifying common network structures are included in the implementation. The use of normalizing flows in the VAE model has also been made possible. Additionally, the fast approximate nearest neighbor algorithm NN-descent \cite{nn_descent} has been included in the t-SNE CUDA routines as an optional performance enhancement for computing the input space distribution $P_{ij}$ when training with large batch sizes.
 
 \chapter{Experiments}
 \label{ch:experiments}
 
-Several experiments are carried out to validate the efficacy of the proposed method, as well as compare it to existing methods. \note{Add brief explanation of what the experiments cover.} Lastly, two applications of the method to single cell data analysis are presented in section \ref{section:applications}.
+Several experiments are carried out to validate the efficacy of the method outlined in this thesis. The learning of a parametric embedding using our method is compared to plain PTSNE. Other methods of dimensionality reduction are compared against our method in terms of both embedding quality and scalability. Additionally, robustness properties of the method are demonstrated empirically as well as training the embedding on hidden layer outputs is experimented with. Lastly, two applications of the method to single cell data analysis are presented in section \ref{section:applications}, including a demonstration of the use of the VAE for inference.
 
 Before going into the results and applications of the method this chapter begins by first presenting the different data sets that will be used throughout the experiments after which the different quantitative metrics for evaluating the experimental results are covered and the general experimental setup, in regards to the used network structures, parameters and chosen optimization methods are discussed.
 
 \section{Data Sets}
 
-To empirically validate the claims of advantageous properties of the proposed method the combined model was studied on the five different data sets described below.
+The five different data sets described below were used to conduct the experiments of this section.
 
 \subsection{MNIST}
 
@@ -484,7 +484,7 @@ The second mass cytometry data set (Cytometry B) contains data gathered from ova
 
 \subsection{Single-Cell RNA Sequencing}
 
-Single-cell RNA sequencing (scRNA-seq) enables the measurement of the transcriptional activity within single cells. By counting the number of RNA transcripts present in a given cell matching those of predetermined genes the expression profile of tens of thousands of genes can be measured. As the number of genes for which the strength of expression can be quantified simultaneously is far greater than the number of proteins that can be measured with mass cytometry the computational and analytical challenges are further exacerbated \cite{high_dimensional_data_spaces_gene_and_protein, computational_challenges_single_cell_transcriptomics}.
+Single-cell RNA sequencing (scRNA-seq) enables the measurement of the transcriptional activity within single cells. By counting the number of RNA transcripts present in a given cell matching those of predetermined genes the expression profile of tens of thousands of genes can be measured simultaneously. As the number of genes for which the strength of expression can be quantified is far greater than the number of proteins that can be measured with mass cytometry the computational and analytical challenges are further exacerbated \cite{high_dimensional_data_spaces_gene_and_protein, computational_challenges_single_cell_transcriptomics}.
 
 We explore how our method applied to scRNA-seq data reveals biologically meaningful insights by applying it to the melanoma patient data set studied in \cite{tirosh}. The data set consists of tumor samples from $13$ different patients, altogether containing $4097$ cells for which the expression of $22462$ genes is measured. The data set additionally includes labels for each cell denoting their cell type and tumor of origin.
 
