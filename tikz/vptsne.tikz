@@ -1,0 +1,80 @@
+\begin{tikzpicture}[x=1em,y=1em]
+
+  % VAE
+  % Input layer
+  \foreach \i in {1,...,3}{
+    \node[draw, circle] (N-1-\i) at (0, 10 + 4 - 4 * \i) {$x^{(i)}_{\i}$};
+  }
+  % Encoder hidden layer
+  \foreach \i in {1,...,4}{
+    \node[draw, circle] (N-2-\i) at (6, 12 + 4 - 4 * \i) {};
+    \foreach \j in {1,...,3}{
+      \draw [->] (N-1-\j) -- (N-2-\i);
+    }
+  }
+  % Latent code
+  \node[draw, circle] (mu) at (12, 10) {$\mathbf{\mu}^{(i)}$};
+  \node[draw, circle] (sigma) at (12, 6) {$\mathbf{\sigma}^{(i)}$};
+  \node[draw, circle] (eps) at (12, 2) {$\mathbf{\epsilon}^{(l)}$};
+  \node[draw, circle] (z) at (18, 6) {$\mathbf{z}^{(i, l)}$};
+  \foreach \x in {mu,sigma,eps}{
+    \draw [->] (\x) -- (z);
+  }
+  \foreach \x in {mu,sigma}{
+    \foreach \j in {1,...,4}{
+      \draw [->] (N-2-\j) -- (\x);
+    }
+  }
+  % Decoder hidden layer
+  \foreach \i in {1,...,4}{
+    \node[draw, circle] (N-4-\i) at (22, 12 + 4 - 4 * \i) {};
+    \draw [->] (z) -- (N-4-\i);
+  }
+  % Output layer
+  \foreach \i in {1,...,3}{
+    \node[draw, circle] (N-5-\i) at (28, 10 + 4 - 4 * \i) {$\hat{x}^{(i, l)}_{\i}$};
+    \foreach \j in {1,...,4}{
+      \draw [->] (N-4-\j) -- (N-5-\i);
+    }
+  }
+
+  % PTSPE
+  % Input layer
+  \foreach \i in {1,...,3}{
+    \node[draw, circle] (P-1-\i) at (24 + 0, -16 + 10 + 4 - 4 * \i) {};
+  }
+  % Hidden layer 1
+  \foreach \i in {1,...,4}{
+    \node[draw, circle] (P-2-\i) at (24 - 6, -16 + 12 + 4 - 4 * \i) {};
+    \foreach \j in {1,...,3}{
+      \draw [->] (P-1-\j) -- (P-2-\i);
+    }
+  }
+  % Hidden layer 2
+  \foreach \i in {1,...,4}{
+    \node[draw, circle] (P-3-\i) at (24 - 12, -16 + 12 + 4 - 4 * \i) {};
+    \foreach \j in {1,...,4}{
+      \draw [->] (P-2-\j) -- (P-3-\i);
+    }
+  }
+  % Output layer
+  \foreach \i in {1,...,2}{
+    \node[draw, circle] (P-4-\i) at (24 - 18, -16 + 8 + 4 - 4 * \i) {$y_{\i}^{(i,l)}$};
+    \foreach \j in {1,...,4}{
+      \draw [->] (P-3-\j) -- (P-4-\i);
+    }
+  }
+
+  \foreach \i in {1,...,3}{
+    \coordinate (C-\i) at (32, -16 + 10 + 4 - 4 * \i);
+    \draw [dashed,->] (N-5-\i) -| (C-\i);
+    \foreach \j in {1,...,3}{
+      \draw [dashed,->] (C-\i) -- (P-1-\j);
+    }
+  }
+
+  \draw [thick, decoration={brace, raise=0.5cm}, decorate] (0,12) -- (28,12) node[pos=0.5,anchor=north,yshift=1.15cm] {Variational Autoencoder};
+  
+  \draw [thick, decoration={brace, mirror, raise=0.5cm}, decorate] (6,-16) -- (24,-16) node[pos=0.5,anchor=north,yshift=-0.55cm] {Parametric t-SNE};
+
+\end{tikzpicture}

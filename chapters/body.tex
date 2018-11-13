@@ -359,7 +359,7 @@ As $f_{\mathbf{W}}(\mathbf{x}_i) = \mathbf{y}_i$, Equation~\ref{eq:c_tsne_grad} 
 \chapter{Method}
 \label{ch:method}
 
-Scalable, non-linear dimensionality reduction methods that are robust to the curse of dimensionality while being able to produce meaningful visualizations for exploratory data analysis \note{".. don't really exit .."}. Even though VAEs address issues with scalability and reliance on distance metrics, the resulting latent space representations do not allow for as good separation of clusters as other methods, such as t-SNE or UMAP \cite{umap}, which will later be demonstrated in Section~\ref{section:comparisons}. On the other hand, PTSNE is in theory capable of achieving embeddings that are comparable to t-SNE, but in practice, the optimization often results in much noisier embeddings, where for instance cluster boundaries are not as clearly visible.
+Scalable, non-linear dimensionality reduction methods that are robust to the curse of dimensionality while being able to produce meaningful visualizations for exploratory data analysis \note{".. don't really exist .."}. Even though VAEs address issues with scalability and reliance on distance metrics, the resulting latent space representations do not allow for as good separation of clusters as other methods, such as t-SNE or UMAP \cite{umap}, which will later be demonstrated in Section~\ref{section:comparisons}. On the other hand, PTSNE is in theory capable of achieving embeddings that are comparable to t-SNE, but in practice, the optimization often results in much noisier embeddings, where for instance cluster boundaries are not as clearly visible.
 
 The method proposed in this work involves combining the VAE model with PTSNE to produce a general framework for improved parametric dimensionality reduction for data visualization. By combining the two models in a way where the strengths of both methods compliment each other the weaknesses of each individual method are diminished.
 
@@ -385,7 +385,7 @@ Using the notation introduced in Chapter~\ref{ch:background_and_related_work}, w
       \State $\mathbf{X} \gets \text{ Random minibatch from } \mathbf{D}$
       \ForAll $\bxi \in \mathbf{X}$
         \State $\eil \gets$ 
-        \State $\bz^{(i,l)} \gets g_{\phi}(\eil, \bxi)$
+        \State $\bz^{(i,l)} \gets g_{\bphi}(\eil, \bxi)$
         \State $\btheta, \bphi \gets \text{ Updata parameters with } \nabla_{\btheta, \bphi} \mathcal{L}$
       \EndFor
     \EndWhile
@@ -396,6 +396,8 @@ Using the notation introduced in Chapter~\ref{ch:background_and_related_work}, w
     \EndWhile
   \end{algorithmic}
 \end{algorithm}
+
+\note{As we can draw infinite samples from the continuous distribution $p_{\bphi}(\bz \vert \bxi)$ with $g_{\bphi}(\eil, \bxi)$ ...}
 
 After training, a deterministic projection for all subsequent points can be obtained with Algorithm~\ref{alg:projection}. For encoder and decoder network pairs that both directly parameterize the mean of a distribution, computing the expectation can be done exactly with zero overhead.
 
@@ -411,13 +413,20 @@ After training, a deterministic projection for all subsequent points can be obta
   \end{algorithmic}
 \end{algorithm}
 
+\begin{figure}[!htb]
+  \centering
+  \resizebox{\textwidth}{!}{\input{tikz/vptsne.tikz}\unskip}
+  \caption{VPTSNE}
+  \label{fig:vptsne}
+\end{figure}
+
 \section{Obtaining Reconstructions from Hidden Layers}
 \label{section:sampling_from_hidden_layers}
 
 Instead of training the embedding network on the final output of the VAE it is possible to instead use the outputs of a chosen hidden layer. If the chosen hidden layer has dimensions considerably smaller than that of the original, the benefits of this approach are twofold:
 
 \begin{itemize}
-\item We are performing a step of nonlinear dimensionality reduction that is not dependent on local distance metrics, i.e. a preprocessing step that is less susceptible to the curse of dimensionality.
+\item We are performing a step of nonlinear dimensionality reduction that is not dependent on distance metrics, i.e. a preprocessing step that is less susceptible to the curse of dimensionality.
 \item Given that the number of dimensions can be chosen to be considerably lower than in the original input space, computing the t-SNE loss also becomes proportionally cheaper.
 \end{itemize}
 
@@ -426,15 +435,13 @@ When considering precomputed $P_{ij}$ matrices for each batch the gain in comput
 \section{Inference with the Generative Model}
 \label{section:inference_with_the_generative_model}
 
-From the underlying generative model we can approximately compute the marginal $p(\mathbf{x})$ for each data point $\mathbf{x}$. An approximation can be retrieved by importance sampling \cite{stochastic_backpropagation}:
+From the underlying generative model we can estimate the marginal likelihood $p(\mathbf{x})$ for each data point $\mathbf{x}$. An estimation can be retrieved by importance sampling \cite{stochastic_backpropagation}:
 
 $$p(\mathbf{x}) \simeq \frac{1}{N} \sum_{i=1}^{N} \frac{p(\mathbf{x} \vert \mathbf{z}^{(i)}) p(\mathbf{z}^{(i)})}{q_{\theta}(\mathbf{z}^{(i)} \vert \mathbf{x})},$$
 
-where $\mathbf{z}^{(i)} \sim q_{\theta}(\mathbf{z} \vert \mathbf{x})$.
+where $\mathbf{z}^{(i)} \sim q_{\theta}(\mathbf{z} \vert \mathbf{x})$. Alternatively, one could directly use the ELBO to estimate $p(\bx)$, however, this gives generally worse estimates \cite{ais_vae}. For more accurate estimates than importance sampling, the usage of annealed importance sampling \cite{ais} has been suggested for VAEs in \cite{ais_vae}.
 
-Using the obtained marginals as feedback we can inform the user of potentially anomalous points in the data set. This feedback can then further be used in downstream analysis. From a data visualization perspective points that do not fit the model well correspond to points that are likely to be mapped poorly, thus removing such outliers from the final mapping serves to highlight the natural clusters in the data more clearly.
-
-\textcolor{red}{[Note: discuss the more accurate but computationally costly marginal estimation method: annealed importance sampling \cite{ais, ais_vae}?]}
+Using the obtained marginals as feedback we can inform the user of potentially anomalous points in the data set. This feedback can then further be used in downstream analysis. From a data visualization perspective, points that do not fit the model well correspond to points that are likely to be mapped poorly, thus removing such outliers from the final mapping serves to highlight the natural clusters in the data more clearly.
 
 \section{Robustness to Sparse and Noisy Data}
 \label{section:robustness}
@@ -655,7 +662,7 @@ As discussed in Section~\ref{section:robustness} the probabilistic model is adva
 
 We aim to back up the hypothesis of Section~\ref{section:robustness} by running experiments on artificially corrupted MNIST data sets. As the corruption process in our experiments we consider \textit{masking noise} as in \cite{stacked_denoising_ae}, where a predetermined fraction of randomly chosen elements of a data point are set to 0. We test robustness by applying masking noise to 10\%, 20\%, 30\% and 40\% fractions of the training and test sets. The results of our experiments presented in Figure~\ref{fig:corrupted_data} show a clear advantage to using our method when dealing with noisy data as both evaluation metrics can be observed to decrease considerably for PTSNE as the training data is progressively corrupted, whereas the performance of VPTSNE suffers far less throughout the experiments.
 
-As an example of real-world data corrupted in this fashion, in scRNA-seq so-called \textit{dropout events} \cite{sc_dropout}, which cause incomplete sequence data to be captured due to technical and biological noise, can be viewed as a form of masking noise. The results presented here would indicate that the proposed method is potentially a good fit for exploratory analysis of scRNA-seq data.
+As an example of real-world data corrupted in this fashion, in scRNA-seq so-called \textit{dropout events} \cite{sc_dropout}, which cause incomplete sequence data to be captured due to technical and biological noise, can be viewed as a form of masking noise. The results presented here would indicate that the proposed method is potentially a good fit for exploratory analysis of scRNA-seq data, even without attempting to explicitly correct for the present technical noise, as in e.g. \cite{zifa} where factor analysis is extended to additionally model dropouts.
 
 Even with the standard VAE structure, the obtained results are encouraging. As future work it would be interesting to test whether making use of denoising variational autoencoders \cite{denoising_vae}, which are an extension of denoising autoencoders \cite{stacked_denoising_ae} that are directly trained to correct corrupted data. Additionally of interest is how our method fares when other corruption processes are present.
 
@@ -731,6 +738,14 @@ With such a high dimensional data set, the effect of the curse of dimensionality
 
 \chapter{Conclusions}
 \label{ch:conclusions}
+
+By combining two dimensionality reduction methods: a stochastic variant of autoencoders and a neural network parameterized variant of t-SNE, we demonstrated a method for parametric dimensionality reduction exhibiting various advantageous properties in comparison to either method applied by itself. \note{.. recap results ..}
+
+In addition, two applications of the method to single-cell data analysis were demonstrated in this work. The method was applied to both moderately high dimensional proteomic data and extremely high dimensional transcriptomic data. \note{.. recap more results ..}
+
+\note{.. Future work ..}
+
+\note{.. Why development of new methods is important [to better analyze ever more complex data, gathered with continuously developing technology] ..}
 
 \ifnameyear
   \bibliographystyle{babapaliktutnat}
