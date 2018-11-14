@@ -137,6 +137,31 @@ A connection between PCA and autoencoders which are constrained to only have lin
 
 \note{Elaborate the potential downsides of this approach (how to interpret the learned representation when nonlinearity is introduced? how does it generalize?). This is set up for why stochastic autoencoders are desireable. "Even though autoencoders provide a powerful and scalable non-metric approach to dimensionality reduction there are a few disadvantages inherent to how they function. ..."}
 
+\subsection{Information Theory}
+
+As a primer to variational inference, the main quantities of interest in information theory will be covered here, as they play a central role in all the subsequently discussed methods.
+
+\note{This chapter should cover at least entropy, relative entropy (KL-div).}
+
+The Kullback-Leibler divergence, or KL-divergence for short, is a measure of dissimilarity between two probability distributions.
+
+For continuous probability distributions $p$ and $q$ the Kullback-Leibler divergence is defined as
+
+$$\dkl{p}{q} = \int p(\mathbf{x}) \log \frac{p(\mathbf{x})}{q(\mathbf{x})} d\mathbf{x},$$
+
+and likewise for discrete probability distributions as
+
+$$\dkl{p}{q} = \sum_{i} p(i) \log \frac{p(i)}{q(i)}.$$
+
+The following properties hold for KL-divergence:
+
+\begin{enumerate}
+\item $\dkl{p}{q} \geq 0$ (non-negativity)
+\item $\dkl{p}{q} = 0 \iff p = q$ (identity of indiscernibles).
+\end{enumerate}
+
+One must note however that KL-divergence is asymmetric, i.e. $\dkl{p}{q} \neq \dkl{q}{p}$, and does not obey the triangle inequality, thus cannot readily be used as a metric. Especially asymmetry is important to take into account when interpreting the use of KL-divergence.
+
 \subsection{Variational Inference}
 \label{subsection:variational_inference}
 
@@ -162,13 +187,20 @@ $$p(\mathbf{x}) = \int p(\mathbf{\mu}) \prod_{i=1}^{n} \sum_{c_i} p(c_i) p(x_i \
 
 As the time complexity of evaluating this integral is $\mathcal{O}(K^n)$, it is evident that direct computation quickly becomes infeasible even for relatively small $K$ and $n$.
 
-The dominant paradigm for obtaining approximates for such distributions has been through various methods of sampling. \note{cite/mention mcmc, methods like metropolis hastings and gibbs sampling.}
+The dominant paradigm for obtaining approximates for such distributions has been through various methods of sampling. \note{cite/mention mcmc, methods like metropolis hastings and gibbs sampling.} \note{These sampling methods provide asymptotic guarantees of exactness. More computationally demanding but more accurate approximates than VI. VI more suited to the large data sets prevalent in modern machine learning.}
 
 Variational inference takes a different approach to approximating the posterior. Instead of sampling, in variational inference the approximation problem is turned into an optimization problem. By considering a family of distributions $\mathcal{Q}$ one seeks to optimize
 
-$$q^{*}(\mathbf{z}) = \argmin_{q(\mathbf{z}) \in \mathcal{Q}} \dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \mathbf{x})}.$$
+\begin{equation}
+q^{*}(\mathbf{z}) = \argmin_{q(\mathbf{z}) \in \mathcal{Q}} \dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \mathbf{x})},
+\label{eq:vi}
+\end{equation}
+
+\note{where the quantity being optimized is the KL-divergence introduced in the previous chapter. The optimization tries to find a member $q^{*}(\mathbf{z})$ of the chosen family of distributions that best matches the true posterior, which can then be used as a surrogate for the true posterior.}
 
 In practice the considered family of distributions $\mathcal{Q}$ is constrained in a way as to make optimization tractable. A common constraint is to assume the distribution factorizes as follows \note{add the equation}, which is referred to as the \textit{mean field approximation} in literature. In the case where the family of distributions under consideration consists of Gaussian distributions the mean field approximation essentially removes from consideration all covariate structure. An illustration of this is presented in Figure~\ref{fig:mean_field_approximation}.
+
+\note{How this is practically optimized, introduce the concept of ELBO (main point: Equation~\ref{eq:vi} cannot be directly optimized since that would require evaluation of the posterior itself)}
 
 \note{It is possible to combine automatic differentiation with variational inference to further ease statistical model building and computational efficiency \cite{advi}. (Brief discussion on probabilistic programming)}
 
@@ -178,29 +210,6 @@ In practice the considered family of distributions $\mathcal{Q}$ is constrained 
   \caption{Illustration of the mean-field approximation of a full rank Gaussian. Adapted from \cite{variational_inference_review}, Figure 1.}
   \label{fig:mean_field_approximation}
 \end{figure}
-
-\subsubsection{Kullback-Leibler Divergence}
-
-The Kullback-Leibler divergence, or KL-divergence for short, is a measure of dissimilarity between two probability distributions.
-
-For continuous probability distributions $p$ and $q$ the Kullback-Leibler divergence is defined as
-
-$$\dkl{p}{q} = \int p(\mathbf{x}) \log \frac{p(\mathbf{x})}{q(\mathbf{x})} d\mathbf{x},$$
-
-and likewise for discrete probability distributions as
-
-$$\dkl{p}{q} = \sum_{i} p(i) \log \frac{p(i)}{q(i)}.$$
-
-The following properties hold for KL-divergence:
-
-\begin{enumerate}
-\item $\dkl{p}{q} \geq 0$ (non-negativity)
-\item $\dkl{p}{q} = 0 \iff p = q$ (identity of indiscernibles).
-\end{enumerate}
-
-One must note however that KL-divergence is asymmetric, i.e. $\dkl{p}{q} \neq \dkl{q}{p}$, and does not obey the triangle inequality, thus cannot readily be used as a metric. Especially asymmetry is important to take into account when interpreting the use of KL-divergence.
-
-\subsubsection{The Evidence Lower Bound}
 
 \subsection{Autoencoding Variational Bayes}
 
@@ -339,9 +348,9 @@ For which the following gradient can be derived:
 \label{eq:c_tsne_grad}
 \end{equation}
 
-Methods originally developed for improving the runtime performance of n-body simulations have been adapted to speed up the optimization of t-SNE \cite{accelerated_tsne_1, accelerated_tsne_2}. Use of the fast multipole method \cite{fast_multipole} however is not feasible due to no suitable multipole expansion for the t-Distributions in the output space exist. More discussion on these methods and performance considerations w.r.t. our method is presented in Section~\ref{section:performance}.
+Methods originally developed for improving the runtime performance of n-body simulations have been adapted to speed up the optimization of t-SNE \cite{accelerated_tsne_1, accelerated_tsne_2}. Use of the fast multipole method \cite{fast_multipole} however is not feasible due to no suitable multipole expansion for the t-Distributions in the output space exist. More discussion on these methods and performance considerations w.r.t. our method is presented in Section~\ref{subsubsection:scalability}.
 
-\note{Worth a mention are the Stochastic Triplet Embedding \cite{stochastic_triplet_embedding} and Multiple Maps t-SNE \cite{multiple_maps_tsne} methods developed on top of t-SNE, developed to handle non-metric similarities present in the data.}
+Further variations of the t-SNE method, beyond performance enhancements to the original, have been proposed. One of particular interest is the extension of t-SNE to a parametric dimensionality reduction method \cite{parametric_tsne}, which will be covered in the next section, as it is a central component to the method presented in this work. Other methods worth a mention include Stochastic Triplet Embedding \cite{stochastic_triplet_embedding} and Multiple Maps t-SNE \cite{multiple_maps_tsne}, developed to handle non-metric similarities present in the data.
 
 \subsection{Parametric t-SNE}
 \label{subsection:parametric_tsne}
@@ -373,6 +382,13 @@ As the aim of the method is to take advantage of the strengths of both VAE and P
 \note{Pros of PTSNE: theoretically capable of learning as good projections as t-SNE, which is widely considered SOTA. Also scalable and parametric, if trainable with smaller batch sizes.}
 
 Using the notation introduced in Chapter~\ref{ch:background_and_related_work}, we can summarize the learning procedure as Algorithm~\ref{alg:learning}.
+
+\begin{figure}[!htb]
+  \centering
+  \resizebox{0.8\textwidth}{!}{\input{tikz/vptsne.tikz}\unskip}
+  \caption{Illustration of the general structure of a VPTSNE network.}
+  \label{fig:vptsne}
+\end{figure}
 
 \begin{algorithm}[H]
   \caption{Training of the neural networks.}
@@ -412,13 +428,6 @@ After training, a deterministic projection for all subsequent points can be obta
     \State $\mathbf{y} \gets f_{\mathbf{W}}(\hat{\mathbf{x}})$
   \end{algorithmic}
 \end{algorithm}
-
-\begin{figure}[!htb]
-  \centering
-  \resizebox{\textwidth}{!}{\input{tikz/vptsne.tikz}\unskip}
-  \caption{VPTSNE}
-  \label{fig:vptsne}
-\end{figure}
 
 \section{Obtaining Reconstructions from Hidden Layers}
 \label{section:sampling_from_hidden_layers}
@@ -719,7 +728,7 @@ For each cell in the data set so called MITF- and AXL-program scores were comput
 
 Cell cycle analysis also reveals the presence of subclusters of cycling cells in our embedding. Cycling cells being cells which are undergoing cell division. The color gradient in the projection for cycling cells corresponds to the strength of the signal indicating cell cycling. Below a given threshold value for this signal, cells were classified as non-cycling.
 
-With such a high dimensional data set, the effect of the curse of dimensionality can be seen on methods based on distances, leading them to produce inferior embeddings. For example, applying UMAP directly to the high dimensional data a couple of the most obvious shortcomings of the embedding is its failure to distinguish between different cell types as well as being unable to properly separate tumor cell clusters originating from different samples. A figure of the UMAP embedding is included in Appendix~\ref{appendix:umap_tirosh} for comparison.
+With such a high dimensional data set, the effect of the curse of dimensionality can be seen on methods based on distances, leading them to produce inferior embeddings. For example, applying UMAP directly to the high dimensional data, a couple of the most obvious shortcomings of the embedding is its failure to distinguish between different cell types as well as being unable to properly separate tumor cell clusters originating from different samples. A figure of the UMAP embedding is included in Appendix~\ref{appendix:umap_tirosh} for comparison.
 
 \begin{figure}[!htb]
   \centering
@@ -734,7 +743,6 @@ With such a high dimensional data set, the effect of the curse of dimensionality
   \caption{Visualization of analysis results on data from \cite{tirosh} using VPTSNE.}
   \label{fig:tirosh}
 \end{figure}
-
 
 \chapter{Conclusions}
 \label{ch:conclusions}
