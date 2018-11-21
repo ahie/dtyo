@@ -1,6 +1,12 @@
 \chapter{Introduction}
 \label{ch:introduction}
 
+\note{This chapter should be split into the following sections:}
+
+\section{Background and Motivation}
+\section{Objective}
+\section{Scope}
+
 At present, ever larger sets of increasingly higher dimensional data are being produced, gathered and analyzed. As a consequence, several challenges arise when analyses are carried out on these vast amounts of high dimensional data. This recent surge of data prompts not only for the development of methods for data analysis capable of scaling to massive data sets but ones which are simultaneously capable of dealing with challenges inherent to high dimensional data.
 
 In literature, problems arising from high dimensionality are collectively referred to as the \textit{curse of dimensionality}. Particularly in machine learning the following aspects of high dimensionality are problematic
@@ -26,6 +32,8 @@ As a wealth of dimensionality reduction methods have been developed, attempting 
 In exploratory data analysis, visualization of the characteristics of data sets plays a key role. Being able to project high dimensional data into meaningful low dimensional representations enables researchers and data analysts to generate hypotheses.
 
 In this work, a method for improving the applicability of parametric t-SNE is proposed. In the proposed method a generative model in the form of a Variational Autoencoder is first trained and subsequently used to produce training data for the parametric t-SNE embedding. The benefits of this procedure are severalfold: . Further, each of these benefits are experimentally demonstrated on a variety of data sets, both quantitatively and qualitatively.
+
+\section{Outline}
 
 The structure of this thesis is as follows. In Chapter~\ref{ch:background_and_related_work} the relevant background and related work to the contribution of this thesis is covered to give context to an audience not previously familiar with variational autoencoders or the t-SNE method for dimensionality reduction. The chapter is organized into two main sections, one that builds up to the theory and recent advances in variational autoencoders from the introduction of neural networks, and the other section presents the development of t-SNE up to its parametrization with neural networks.
 
@@ -71,7 +79,7 @@ Unsupervised and semi-supervised learning, representation learning. Deep belief 
 
 Reinforcement learning, atari \cite{deep_atari}, go \cite{alphago} and shortly after, go \textit{tabula rasa} \cite{alphazero}.
 
-The development of ever faster hardware for accelerating the computations needed for deep learning has played a pivotal role in the resurgence of research interest in neural networks. Originally built to accelerate the linear algebra operations required to produce 3D computer graphics, graphics programming units (GPUs) offer immense parallel computing capabilities compared to traditional central processing units (CPUs). With the advent of programming languages and APIs targeting GPUs, general-purpose computing on this specialized hardware has been made possible and has subsequently been taken advantage of in research and development of applications making use of neural networks. Recently, hardware specialized solely for use with deep learning has been developed \cite{tpu} and microarchitectures of modern GPUs have begun to incorporate specialized computing units for deep learning \cite{nvidia_tensor_core}, indicating a strong and growing interest towards deep learning in both academia and industry alike.
+The development of ever faster hardware for accelerating the computations needed for deep learning has played a pivotal role in the resurgence of research interest in neural networks. Originally built to accelerate the linear algebra operations required to produce 3D computer graphics, graphics programming units (GPU) offer immense parallel computing capabilities compared to traditional central processing units (CPU). With the advent of programming languages and APIs targeting GPUs, general-purpose computing on this specialized hardware has been made possible and has subsequently been taken advantage of in research and development of applications making use of neural networks. Recently, hardware specialized solely for use with deep learning has been developed \cite{tpu} and microarchitectures of modern GPUs have begun to incorporate specialized computing units for deep learning \cite{nvidia_tensor_core}, indicating a strong and growing interest towards deep learning in both academia and industry alike.
 
 \subsubsection{Structure of Neural Networks}
 
@@ -270,26 +278,36 @@ Several modifications to this objective have been proposed, e.g. the $\beta$-VAE
 
 \subsubsection{Obtaining Differentiable Monte Carlo Estimates}
 
-To optimize the parameters $\mathbf{\theta}$ and $\mathbf{\phi}$ of our neural network using backpropagation we require a way to compute the gradient of the expectations of random variables. By introducing a random noise variable as input, we can obtain samples from the posterior distribution by using the \textit{reparameterization trick}. The reparameterization trick enables keeping all computation the neural network performs fully deterministic while still permitting the sampling of probability distributions parameterized by the network itself. \note{By keeping all computation deterministic, standard back propagation can be used.}
+To optimize the parameters $\mathbf{\theta}$ and $\mathbf{\phi}$ of our neural network using backpropagation we require a way to compute the gradient of the expectations of random variables. The \textit{reparameterization trick} enables keeping all computation the neural network performs fully deterministic while still permitting the sampling of probability distributions parameterized by the network itself. By keeping all computation deterministic, backpropagation can be used to optimize the network.
 
-$$\mathbf{z}^{(i,l)} = g_{\bphi}(\eil, \bxi), \eil \sim p(\mathbf{\epsilon})$$
+\tred{The reparameterization trick works by introducing an auxiliary noise variable as input to the network and a suitable differentiable function is used to transform the input noise into a sample of the distribution parameterized by the neural network and the original input data. As in \cite{aevb}, we shall denote this function by $g_{\bphi}$, the latent variable samples are then obtained by}
 
-$$\mathbb{E}_{\qphi(\bz \vert \bxi)}[f(\mathbf{z})] \simeq \frac{1}{L} \sum_{l=1}^{L} f(g_{\bphi}(\eil, \bxi))$$
+$$\mathbf{z}^{(i,l)} = g_{\bphi}(\bxi, \eil), \eil \sim p(\mathbf{\epsilon}).$$
+
+The choice of distribution from which $\eil$ is drawn from and the analytic form of $g_{\bphi}$ depends on the distribution that is being reparameterized.
+
+$$\mathbb{E}_{\qphi(\bz \vert \bxi)}[f(\mathbf{z})] \simeq \frac{1}{L} \sum_{l=1}^{L} f(g_{\bphi}(\bxi, \eil))$$
 
 $$\mathcal{L}(\btheta, \bphi; \bxi) = -\dkl{\qphi(\bz \vert \bxi)}{p(\bz)} + \frac{1}{L} \sum_{l=1}^{L} \log \ptheta(\bxi \vert \mathbf{z}^{(i,l)})$$
 
 $$\mathcal{L}(\btheta, \bphi; \bxi) = \frac{1}{L} \sum_{l=1}^{L} \Big[\qphi(\bz^{(i,l)} \vert \bxi) - p(\bz^{(i,l)}) + \log \ptheta(\bxi \vert \mathbf{z}^{(i,l)})\Big]$$
 
+\note{Should mention inability to reparameterize discrete distributions. A method for obtaining samples of a categorical distribution by relaxation to a continuous distribution \cite{gumbel_softmax}, can avoid marginalizing over all possible values of latent categorical variables in models like the M2 VAE.}
+
 \subsubsection{Network Structure}
 
-It is important to note that the output $\hat{\mathbf{x}}^{(i,l)}$ of the network in Figure~\ref{fig:vae} should not be interpreted as the final reconstruction of the input like in traditional autoencoders, but rather as the values parameterizing the distribution $\ptheta(\mathbf{x} \vert \bz^{(i, l)})$.
+Figure~\ref{fig:vae} depicts the network structure of a VAE whose encoder outputs the mean and standard deviation parameters of a distribution. These parameters could for instance be used to model the approximate posterior $\qphi(\bz \vert \bxi)$ as the multivariate Gaussian distribution $\mathcal{N}(\mathbf{\mu}^{(i)}, \mathbf{\sigma}^{(i)} \mathbf{I})$, where, with slight abuse of notation, $\mathbf{\sigma}^{(i)} \mathbf{I}$ stands for a diagonal covariance matrix whose diagonal is made up of the elements of the vector $\mathbf{\sigma}^{(i)}$.
 
-\note{On more flexible posterior distributions through normalizing flows \cite{normalizing_flows, inverse_autoregressive_flow, householder_flow}, results in overall better $p(\mathbf{x})$. Extensions to semi supervised and adversarial learning \cite{semi_supervised_vae, adversarial_autoencoders}.}
+It is important to note that the output $\hat{\mathbf{x}}^{(i,l)}$ of the network in the figure should not be interpreted as the final reconstruction of the input like in traditional autoencoders, but rather as the values parameterizing the distribution $\ptheta(\mathbf{x} \vert \bz^{(i, l)})$. For binary data, the distribution $\ptheta(\mathbf{x} \vert \bz^{(i, l)})$ is commonly chosen to be a multivariate Bernoulli, where the decoder outputs $\hat{\mathbf{x}}^{(i,l)}$ parameterize individual Bernoulli distributions, whereas for continuous data the parameters for a Gaussian distribution are typically outputted.
+
+\note{Problem with variational inference, also apparent in our Gaussian encoder example here, is the inflexibility of the chosen distribution. Normalizing flows attempt to resolve this issue \cite{normalizing_flows, inverse_autoregressive_flow, householder_flow}, result in overall better $p(\mathbf{x})$, and with VAE these flows can be learned efficiently.}
+
+\note{Extensions to semi supervised and adversarial learning \cite{semi_supervised_vae, adversarial_autoencoders}.}
 
 \begin{figure}[!htb]
   \centering
   \resizebox{\textwidth}{!}{\input{tikz/vae.tikz}\unskip}
-  \caption{Variational Autoencoder. Note that the hidden layer values $\mathbf{\mu}$, $\mathbf{\sigma}$ and $\mathbf{\epsilon}$ represent vectors instead of single values for a cleaner visual representation.}
+  \caption{Variational Autoencoder. Note that the hidden layer values $\mathbf{\mu}^{(i)}$, $\mathbf{\sigma}^{(i)}$ and the input noise variable $\mathbf{\epsilon}^{(l)}$ represent vectors instead of single values for a cleaner visual representation.}
   \label{fig:vae}
 \end{figure}
 
@@ -407,9 +425,9 @@ In this chapter the combined model, its training procedure, its properties, and 
 As the aim of the method is to take advantage of the strengths of both VAE and PTSNE, we begin by recapitulating the strengths of each method.
 
 \note{Pros of VAE: generative model, stochasticity brings robustness, scalable parametric nonlinear dimensionality reduction}
-\note{Pros of PTSNE: theoretically capable of learning as good projections as t-SNE, which is widely considered SOTA. Also scalable and parametric, if trainable with smaller batch sizes.}
+\note{Pros of PTSNE: theoretically capable of learning as good projections as t-SNE, which is widely considered as the best option for data visualization. Also scalable and parametric, if trainable with smaller batch sizes.}
 
-Using the notation introduced in Chapter~\ref{ch:background_and_related_work}, we can summarize the learning procedure as Algorithm~\ref{alg:learning}.
+Using the notation introduced in Chapter~\ref{ch:background_and_related_work}, we can summarize the learning procedure as Algorithm~\ref{alg:learning}. \tred{In essence, training the model is done in two phases...}
 
 \begin{figure}[!htb]
   \centering
@@ -429,7 +447,7 @@ Using the notation introduced in Chapter~\ref{ch:background_and_related_work}, w
       \State $\mathbf{X} \gets \text{ Random minibatch from } \mathbf{D}$
       \ForAll $\bxi \in \mathbf{X}$
         \State $\eil \gets$ 
-        \State $\bz^{(i,l)} \gets g_{\bphi}(\eil, \bxi)$
+        \State $\bz^{(i,l)} \gets g_{\bphi}(\bxi, \eil)$
         \State $\btheta, \bphi \gets \text{ Updata parameters with } \nabla_{\btheta, \bphi} \mathcal{L}$
       \EndFor
     \EndWhile
@@ -441,7 +459,7 @@ Using the notation introduced in Chapter~\ref{ch:background_and_related_work}, w
   \end{algorithmic}
 \end{algorithm}
 
-\note{As we can draw infinite samples from the continuous distribution $p_{\bphi}(\bz \vert \bxi)$ with $g_{\bphi}(\eil, \bxi)$ ...}
+\note{As we can draw infinite samples from the continuous distribution $p_{\bphi}(\bz \vert \bxi)$ with $g_{\bphi}(\bxi, \eil)$ ...}
 
 After training, a deterministic projection for all subsequent points can be obtained with Algorithm~\ref{alg:projection}. For encoder and decoder network pairs that both directly parameterize the mean of a distribution, computing the expectation can be done exactly with zero overhead.
 
@@ -451,7 +469,7 @@ After training, a deterministic projection for all subsequent points can be obta
   \begin{algorithmic}[1]
     \Require Point $\mathbf{x}$, neural network parameters $\btheta, \bphi, \bW$
     \Ensure Projected point $\mathbf{y}$
-    \State $\mathbf{z} \gets \mathbb{E}_{p(\mathbf{\epsilon})}[g_{\bphi}(\mathbf{\epsilon}, \mathbf{x})]$
+    \State $\mathbf{z} \gets \mathbb{E}_{p(\mathbf{\epsilon})}[g_{\bphi}(\bxi, \eil)]$
     \State $\hat{\mathbf{x}} \gets \mathbb{E}[f(\mathbf{z})]$
     \State $\mathbf{y} \gets f_{\mathbf{W}}(\hat{\mathbf{x}})$
   \end{algorithmic}
