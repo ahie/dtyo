@@ -1,12 +1,6 @@
 \chapter{Introduction}
 \label{ch:introduction}
 
-\note{This chapter should be split into the following sections:}
-
-\section{Background and Motivation}
-\section{Objective}
-\section{Scope}
-
 At present, ever larger sets of increasingly higher dimensional data are being produced, gathered and analyzed. As a consequence, several challenges arise when analyses are carried out on these vast amounts of high dimensional data. This recent surge of data prompts not only for the development of methods for data analysis capable of scaling to massive data sets but ones which are simultaneously capable of dealing with challenges inherent to high dimensional data.
 
 In literature, problems arising from high dimensionality are collectively referred to as the \textit{curse of dimensionality}. Particularly in machine learning the following aspects of high dimensionality are problematic
@@ -32,6 +26,10 @@ As a wealth of dimensionality reduction methods have been developed, attempting 
 In exploratory data analysis, visualization of the characteristics of data sets plays a key role. Being able to project high dimensional data into meaningful low dimensional representations enables researchers and data analysts to generate hypotheses.
 
 In this work, a method for improving the applicability of parametric t-SNE is proposed. In the proposed method a generative model in the form of a Variational Autoencoder is first trained and subsequently used to produce training data for the parametric t-SNE embedding. The benefits of this procedure are severalfold: . Further, each of these benefits are experimentally demonstrated on a variety of data sets, both quantitatively and qualitatively.
+
+\note{This chapter should be split into the following sections:}
+
+\section{Objective and Scope}
 
 \section{Outline}
 
@@ -155,11 +153,9 @@ A connection between PCA and autoencoders which are constrained to only have lin
 
 As a primer to variational inference, the main quantities of interest in information theory will be covered here, as they play a central role in all the subsequently discussed methods.
 
-\note{This chapter should cover at least entropy, relative entropy (KL-div).}
+The fundamental quantity of interest in information theory, entropy, is the average amount of information produced by a stochastic source. \tred{In more concrete terms ...} Entropy computes the expected value of the log-probability of a random variable. A coin flip carries only one bit of information, whereas a roll of a 6-sided die carries approximately $2.58$ bits of information.
 
-The Kullback-Leibler divergence, or KL-divergence for short, is a measure of dissimilarity between two probability distributions. \note{KL-divergence aka relative entropy to tie the two together}
-
-For continuous probability distributions $p$ and $q$ the Kullback-Leibler divergence is defined as
+Relative entropy, also known as the Kullback-Leibler divergence, or KL-divergence for short, is a measure of dissimilarity between two probability distributions. For continuous probability distributions $p$ and $q$ the Kullback-Leibler divergence is defined as
 
 $$\dkl{p}{q} = \int p(\mathbf{x}) \log \frac{p(\mathbf{x})}{q(\mathbf{x})} d\mathbf{x},$$
 
@@ -174,16 +170,23 @@ The following properties hold for KL-divergence:
 \item $\dkl{p}{q} = 0 \iff p = q$ (identity of indiscernibles).
 \end{enumerate}
 
-One must note however that KL-divergence is asymmetric, i.e. $\dkl{p}{q} \neq \dkl{q}{p}$, and does not obey the triangle inequality, thus cannot readily be used as a metric. Especially asymmetry is important to take into account when interpreting the use of KL-divergence.
+One must note however that KL-divergence is asymmetric, i.e. $\dkl{p}{q} \neq \dkl{q}{p}$, and does not obey the triangle inequality, thus cannot readily be used as a metric. Especially asymmetry is important to take into account when interpreting the use of KL-divergence. Figure~\ref{fig:kl_divergence} visualizes the effect this asymmetry has as the KL-divergence between a Gaussian distribution $q$ and a mixture of Gaussians distribution $p$ is minimized.
+
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=0.7\textwidth]{images/kl_divergence.png}
+  \caption{Asymmetry of KL-divergence as the KL-divergence between a Gaussian distribution $q$ and a mixture of Gaussians $p$ is minimized.}
+  \label{fig:kl_divergence}
+\end{figure}
 
 \subsection{Variational Inference}
 \label{subsection:variational_inference}
 
-In modern statistics and machine learning a need to approximate highly complex probability distributions is a problem that often arises. A domain where such complex distributions are often encountered is Bayesian inference. The Bayes theorem states that the posterior distribution is given by
+In modern statistics and machine learning a need to approximate highly complex probability distributions is a problem that often arises. A domain where such complex distributions are often encountered is Bayesian inference. The Bayes theorem states that the posterior distribution of latent variables conditioned on observed data is given by
 
 $$p(\bz \vert \bx) = \frac{p(\bz, \bx)}{p(\bx)} = \frac{p(\bz, \bx)}{\int p(\bz, \bx) d\bz},$$
 
-\note{where ... explain the variables ...} Even for only moderately complex models exact computation of the posterior is often intractable due to the required marginalization over all possible values of $\mathbf{z}$.
+where the vector $\bx$ denotes the observed variables and $\bz$ the latent variables of the model. Even for only moderately complex models exact computation of the posterior is often intractable due to the required marginalization over all possible latent values $\mathbf{z}$.
 
 To illustrate this problem we will consider the Bayesian mixture of Gaussians model as in \cite{variational_inference_review}. The model under consideration is univariate and consists of $K$ unit variance Gaussian mixture components. The full hierarchical model is given by the following
 
@@ -210,7 +213,7 @@ q^{*}(\mathbf{z}) = \argmin_{q(\mathbf{z}) \in \mathcal{Q}} \dkl{q(\mathbf{z})}{
 \label{eq:vi}
 \end{equation}
 
-\note{where the quantity being optimized is the KL-divergence introduced in the previous chapter. The optimization tries to find a member $q^{*}(\mathbf{z})$ of the chosen family of distributions that best matches the true posterior, which can then be used as a surrogate for the true posterior.}
+\note{where the quantity being optimized is the KL-divergence introduced in the previous section. The optimization tries to find a member $q^{*}(\mathbf{z})$ of the chosen family of distributions that best matches the true posterior, which can then be used as a surrogate for the true posterior.}
 
 In practice, the considered family of distributions $\mathcal{Q}$ is constrained in a way as to make optimization tractable. A common constraint is to assume the distributions of the chosen family factorize as follows
 
