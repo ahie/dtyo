@@ -83,11 +83,11 @@ The development of ever faster hardware for accelerating the computations needed
 
 Neural networks can be thought of as being large function compositions. Each neuron that is part of the network acts as a single function, taking as input the weighted output of other neurons connected to it and outputting the value of the neuron's \textit{activation function}. Neural networks can be classified into two main categories: feedforward and recurrent neural networks. Thinking of neurons and their connections in terms of graphs, where neurons represent vertices and edges represent the flow of data from one neuron to another, these two categories correspond to acyclic directed graphs and directed graphs that may contain cycles. In this work we will limit our focus to feedforward neural networks as the methods discussed do not make use of recurrent neural network structures.
 
-As an example, Figure~\ref{fig:nn} depicts a feedforward neural network\footnote{Note that bias neurons are omitted from the figure for simplicity.} taking input vectors $\mathbf{x}$ of length $3$ and outputting vectors $\mathbf{y}$ of length $2$. The network can be seen to be split into three functionally distinct parts: an input layer, hidden layers, and an output layer. The input layer is directly fed the values to be run through the network. The hidden layers are formed by neurons connecting the input to the output layer. The output layer represents the result of the computation performed by the network. What this depicted neural network computes can be expressed with the equation
+As an example, Figure~\ref{fig:nn} depicts a feedforward neural network\footnote{Note that bias neurons are omitted from the figure for simplicity.} taking input vectors $\bx$ of length $3$ and outputting vectors $\mathbf{y}$ of length $2$. The network can be seen to be split into three functionally distinct parts: an input layer, hidden layers, and an output layer. The input layer is directly fed the values to be run through the network. The hidden layers are formed by neurons connecting the input to the output layer. The output layer represents the result of the computation performed by the network. What this depicted neural network computes can be expressed with the equation
 
-$$\mathbf{y} = f_3(\mathbf{W}_3 f_2(\mathbf{W}_2 f_1(\mathbf{W}_1 \mathbf{x} + \mathbf{b}_1) + \mathbf{b}_2) + \mathbf{b}_3),$$
+$$\mathbf{y} = f_3(\bW_3 f_2(\bW_2 f_1(\bW_1 \bx + \mathbf{b}_1) + \mathbf{b}_2) + \mathbf{b}_3),$$
 
-where $f_i$ are the activation functions, $\mathbf{W}_i$ the matrices of weights, and $\mathbf{b}_i$ the biases of the $i$th layer. The purpose of an activation function is to alter incoming signals to induce nonlinearity into the network as well as impose constraints on the values that flow through specific neurons, enabling the learning of more complex functions with desired properties. Bias neurons enable the shifting of activation function outputs. Weights of the network control the signal strengths from one neuron to the other.
+where $f_i$ are the activation functions, $\bW_i$ the matrices of weights, and $\mathbf{b}_i$ the biases of the $i$th layer. The purpose of an activation function is to alter incoming signals to induce nonlinearity into the network as well as impose constraints on the values that flow through specific neurons, enabling the learning of more complex functions with desired properties. Bias neurons enable the shifting of activation function outputs. Weights of the network control the signal strengths from one neuron to the other.
 
 \begin{figure}[!htb]
   \centering
@@ -130,7 +130,7 @@ The structure of autoencoders can be decomposed into two parts, namely the encod
 The learning objective of autoencoders is for the network to be able to reconstruct its inputs as faithfully as possible. A common objective function to train an autoencoder with is to have it minimize the mean squared error between its input and output:
 
 \begin{equation}
-  \mathcal{L}_{MSE} = \frac{1}{N} \sum_{i=1}^{N} \norm{\bxi - \hat{\mathbf{x}}^{(i)}}^2,
+  \mathcal{L}_{MSE} = \frac{1}{N} \sum_{i=1}^{N} \norm{\bxi - \hat{\bx}^{(i)}}^2,
   \label{eq:mse}
 \end{equation}
 
@@ -155,9 +155,9 @@ As a primer to variational inference, the main quantities of interest in informa
 
 The fundamental quantity of interest in information theory, entropy, is the average amount of information produced by a stochastic source. \tred{In more concrete terms ...} Entropy computes the expected value of the log-probability of a random variable. A coin flip carries only one bit of information, whereas a roll of a 6-sided die carries approximately $2.58$ bits of information.
 
-Relative entropy, also known as the Kullback-Leibler divergence, or KL-divergence for short, is a measure of dissimilarity between two probability distributions. For continuous probability distributions $p$ and $q$ the Kullback-Leibler divergence is defined as
+Relative entropy, also known as the Kullback-Leibler divergence, or KL-divergence for short, is a measure of dissimilarity between two probability distributions. For continuous probability distributions $p$ and $q$, the Kullback-Leibler divergence is defined as
 
-$$\dkl{p}{q} = \int p(\mathbf{x}) \log \frac{p(\mathbf{x})}{q(\mathbf{x})} d\mathbf{x},$$
+$$\dkl{p}{q} = \int p(\bx) \log \frac{p(\bx)}{q(\bx)} d\bx,$$
 
 and likewise for discrete probability distributions as
 
@@ -200,7 +200,7 @@ $$p(\mathbf{\mu}, \mathbf{c}, \bx) = p(\mathbf{\mu}) \prod_{i=1}^{n} p(c_i) p(x_
 
 Now, when marginalizing out $\mathbf{\mu}$ and $\mathbf{c}$, we arrive at the following integral
 
-$$p(\mathbf{x}) = \int p(\mathbf{\mu}) \prod_{i=1}^{n} \sum_{c_i} p(c_i) p(x_i \vert c_i \mathbf{\mu}) d\mathbf{\mu}.$$
+$$p(\bx) = \int p(\mathbf{\mu}) \prod_{i=1}^{n} \sum_{c_i} p(c_i) p(x_i \vert c_i \mathbf{\mu}) d\mathbf{\mu}.$$
 
 As the time complexity of evaluating this integral is $\mathcal{O}(K^n)$, it is evident that direct computation quickly becomes infeasible even for relatively small $K$ and $n$.
 
@@ -209,7 +209,7 @@ The dominant paradigm for obtaining approximates for such distributions has been
 Variational inference takes a different approach to approximating the posterior. Instead of sampling, in variational inference the approximation problem is turned into an optimization problem. By considering a family of distributions $\mathcal{Q}$ one seeks to optimize
 
 \begin{equation}
-q^{*}(\mathbf{z}) = \argmin_{q(\mathbf{z}) \in \mathcal{Q}} \dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \mathbf{x})},
+q^{*}(\mathbf{z}) = \argmin_{q(\mathbf{z}) \in \mathcal{Q}} \dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \bx)},
 \label{eq:vi}
 \end{equation}
 
@@ -225,8 +225,8 @@ Since Equation~\ref{eq:vi} cannot be directly optimized as it depends on evaluat
 
 \begin{equation}
 \begin{aligned}
-\dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \mathbf{x})} &= \mathbb{E}[\log q(\mathbf{z})] - \mathbb{E}[\log p(\mathbf{z} \vert \mathbf{x})] \\
-                                                    &= \mathbb{E}[\log q(\mathbf{z})] - \mathbb{E}[\log p(\mathbf{z}, \mathbf{x})] + \log p(\mathbf{x}),
+\dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \bx)} &= \mathbb{E}[\log q(\mathbf{z})] - \mathbb{E}[\log p(\mathbf{z} \vert \bx)] \\
+                                             &= \mathbb{E}[\log q(\mathbf{z})] - \mathbb{E}[\log p(\mathbf{z}, \bx)] + \log p(\bx),
 \end{aligned}
 \end{equation}
 
@@ -234,8 +234,8 @@ and by rearranging, it follows that
 
 \begin{equation}
 \begin{aligned}
-\log p(\mathbf{x}) &= \dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \mathbf{x})} - \mathbb{E}[\log q(\mathbf{z})] + \mathbb{E}[\log p(\mathbf{z}, \mathbf{x})] \\
-                   &= \underbrace{\dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \mathbf{x})}}_{\geq 0} + \underbrace{\mathbb{E}[\log p(\mathbf{x} \vert \mathbf{z})] - \dkl{q(\mathbf{z})}{p(\mathbf{z})}}_{\text{ELBO}}
+\log p(\bx) &= \dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \bx)} - \mathbb{E}[\log q(\mathbf{z})] + \mathbb{E}[\log p(\mathbf{z}, \bx)] \\
+            &= \underbrace{\dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \bx)}}_{\geq 0} + \underbrace{\mathbb{E}[\log p(\bx \vert \mathbf{z})] - \dkl{q(\mathbf{z})}{p(\mathbf{z})}}_{\text{ELBO}}
 \end{aligned}
 \end{equation}
 
@@ -295,11 +295,17 @@ The choice of distribution from which $\eil$ is drawn from and the analytic form
 
 $$\mathbb{E}_{\qphi(\bz \vert \bxi)}[f(\mathbf{z})] \simeq \frac{1}{L} \sum_{l=1}^{L} f(g_{\bphi}(\bxi, \eil))$$
 
-$$\mathcal{L}(\btheta, \bphi; \bxi) = -\dkl{\qphi(\bz \vert \bxi)}{\ptheta(\bz)} + \frac{1}{L} \sum_{l=1}^{L} \log \ptheta(\bxi \vert \mathbf{z}^{(i,l)})$$
+\begin{equation}
+\mathcal{L}(\btheta, \bphi; \bxi) = -\dkl{\qphi(\bz \vert \bxi)}{\ptheta(\bz)} + \frac{1}{L} \sum_{l=1}^{L} \log \ptheta(\bxi \vert \mathbf{z}^{(i,l)})
+\label{eq:vae_loss}
+\end{equation}
 
 In many cases the KL-divergence can be integrated analytically, for instance in the case of two Gaussian distributions. In cases where the KL term cannot be solved analytically a Monte Carlo estimate for the KL-divergence can be used:
 
-$$\mathcal{L}(\btheta, \bphi; \bxi) = \frac{1}{L} \sum_{l=1}^{L} \Big[\qphi(\bz^{(i,l)} \vert \bxi) - p(\bz^{(i,l)}) + \log \ptheta(\bxi \vert \mathbf{z}^{(i,l)})\Big].$$
+\begin{equation}
+\mathcal{L}(\btheta, \bphi; \bxi) = \frac{1}{L} \sum_{l=1}^{L} \Big[\qphi(\bz^{(i,l)} \vert \bxi) - p(\bz^{(i,l)}) + \log \ptheta(\bxi \vert \mathbf{z}^{(i,l)})\Big].
+\label{eq:vae_loss_2}
+\end{equation}
 
 \note{Should mention inability to reparameterize discrete distributions. A method for obtaining samples of a categorical distribution by relaxation to a continuous distribution \cite{gumbel_softmax}, can avoid marginalizing over all possible values of latent categorical variables in models like the M2 VAE.}
 \tred{A drawback of the reparameterization trick is that it is only applicable to continuous distributions...}
@@ -308,9 +314,9 @@ $$\mathcal{L}(\btheta, \bphi; \bxi) = \frac{1}{L} \sum_{l=1}^{L} \Big[\qphi(\bz^
 
 Figure~\ref{fig:vae} depicts the network structure of a VAE whose encoder outputs the mean and standard deviation parameters of a distribution. These parameters could for instance be used to model the approximate posterior $\qphi(\bz \vert \bxi)$ as the multivariate Gaussian distribution $\mathcal{N}(\mathbf{\mu}^{(i)}, \mathbf{\sigma}^{(i)} \mathbf{I})$, where, with slight abuse of notation, $\mathbf{\sigma}^{(i)} \mathbf{I}$ stands for a diagonal covariance matrix whose diagonal is made up of the elements of the vector $\mathbf{\sigma}^{(i)}$.
 
-It is important to note that the output $\hat{\mathbf{x}}^{(i,l)}$ of the network in the figure should not be interpreted as the final reconstruction of the input like in traditional autoencoders, but rather as the values parameterizing the distribution $\ptheta(\mathbf{x} \vert \bz^{(i, l)})$. For binary data, the distribution $\ptheta(\mathbf{x} \vert \bz^{(i, l)})$ is commonly chosen to be a multivariate Bernoulli, where the decoder outputs $\hat{\mathbf{x}}^{(i,l)}$ parameterize individual Bernoulli distributions, whereas for continuous data the parameters for a Gaussian distribution are typically outputted.
+It is important to note that the output $\hat{\bx}^{(i,l)}$ of the network in the figure should not be interpreted as the final reconstruction of the input like in traditional autoencoders, but rather as the values parameterizing the distribution $\ptheta(\bx \vert \bz^{(i, l)})$. For binary data, the distribution $\ptheta(\bx \vert \bz^{(i, l)})$ is commonly chosen to be a multivariate Bernoulli, where the decoder outputs $\hat{\bx}^{(i,l)}$ parameterize individual Bernoulli distributions, whereas for continuous data the parameters for a Gaussian distribution are typically outputted.
 
-\note{Problem with variational inference, also apparent in our Gaussian encoder example here, is the inflexibility of the chosen distribution. Normalizing flows attempt to resolve this issue \cite{normalizing_flows, inverse_autoregressive_flow, householder_flow}, result in overall better $p(\mathbf{x})$, and with VAE these flows can be learned efficiently.}
+\note{Problem with variational inference, also apparent in our Gaussian encoder example here, is the inflexibility of the chosen distribution. Normalizing flows attempt to resolve this issue \cite{normalizing_flows, inverse_autoregressive_flow, householder_flow}, result in overall better $p(\bx)$, and with VAE these flows can be learned efficiently.}
 
 \note{Extensions to semi supervised and adversarial learning \cite{semi_supervised_vae, adversarial_autoencoders}.}
 
@@ -336,11 +342,11 @@ As the algorithm's name suggests, the approach SNE takes to perform dimensionali
 To formalize these notions, we begin with how the conditional probability of data point $i$ picking data point $j$ in the input space is defined by the equation
 
 \begin{equation}
-p_{j \vert i} = \frac{exp(-\norm{\mathbf{x}_i - \mathbf{x}_j}^2 / 2 \sigma_i^2)}{\sum_{k \neq i} exp(-\norm{\mathbf{x}_i - \mathbf{x}_k}^2 / 2 \sigma_i^2)},
+p_{j \vert i} = \frac{exp(-\norm{\bx_i - \bx_j}^2 / 2 \sigma_i^2)}{\sum_{k \neq i} exp(-\norm{\bx_i - \bx_k}^2 / 2 \sigma_i^2)},
 \label{eq:p_j_c_i}
 \end{equation}
 
-where the probability can be seen as being derived as if a Gaussian were centered on $\mathbf{x}_i$ and an appropriate normalizing term is used to scale the individual probabilities so that they sum to $1$. The variance (denoted by $\sigma_i$ in the equation) is determined separately for each data point $i$ by forcing the perplexity of the conditional distribution over all other data points (later denoted as $P_i$) to equal some preset value.
+where the probability can be seen as being derived as if a Gaussian were centered on $\bx_i$ and an appropriate normalizing term is used to scale the individual probabilities so that they sum to $1$. The variance (denoted by $\sigma_i$ in the equation) is determined separately for each data point $i$ by forcing the perplexity of the conditional distribution over all other data points (later denoted as $P_i$) to equal some preset value.
 
 Perplexity is an information theoretic measure of how well a distribution predicts its samples. For a given probability distribution, perplexity is defined as the exponentiation of the distribution's entropy $H$, e.g. in the case of our discrete $P_i$:
 
@@ -352,7 +358,7 @@ The conditional distribution in the output space is similarly defined with a Gau
 
 $$q_{j \vert i} = \frac{exp(-\norm{\mathbf{y}_i - \mathbf{y}_j}^2)}{\sum_{k \neq i} exp(-\norm{\mathbf{y}_i - \mathbf{y}_k}^2)},$$
 
-where each $\mathbf{y}_i$ represents the point in the embedding for data point $\mathbf{x}_i$. A notable difference is the absence of the variance term $2 \sigma_i^2$, which can be interpreted as having been set to $1$ throughout. This choice of fixed variance can, in turn, be interpreted as smoothing out the manifold of the input space when performing the embedding.
+where each $\mathbf{y}_i$ represents the point in the embedding for data point $\bx_i$. A notable difference is the absence of the variance term $2 \sigma_i^2$, which can be interpreted as having been set to $1$ throughout. This choice of fixed variance can, in turn, be interpreted as smoothing out the manifold of the input space when performing the embedding.
 
 Now that we have defined both the output and input distributions for points, the objective function can be formulated as the sum of KL-divergences between each input-output distribution pair:
 
@@ -413,13 +419,13 @@ Further variations of the t-SNE method, beyond performance enhancements to the o
 
 A major drawback of most nonlinear dimensionality reduction methods is that they do not directly enable out-of-sample extensions. A natural extension to t-SNE is to learn a function parameterizing the embedding from input space to output space, i.e. instead of optimizing the t-SNE objective by simply moving a fixed set of points in the output space, we would instead optimize the parameters of a function that maps training data points from the input space to the output space. Once parameters for such a function are found the function can be used to not only embed the training data but any subsequently collected data points that belong to approximately the same manifold.
 
-The basic idea behind parametric t-SNE is straightforward. A feedforward neural network is used to parameterize a function $f_\mathbf{W}: X \mapsto Y$, which maps points from input space to output space in such a way as to minimize the t-SNE objective. Once the weights of the neural network are learned, performing dimensionality reduction on any given point is done simply by running it through the neural network. This parametric extension to t-SNE was first realized by van der Maaten \cite{parametric_tsne}, and we will henceforth refer to this method as PTSNE.
+The basic idea behind parametric t-SNE is straightforward. A feedforward neural network is used to parameterize a function $f_\bW: X \mapsto Y$, which maps points from input space to output space in such a way as to minimize the t-SNE objective. Once the weights of the neural network are learned, performing dimensionality reduction on any given point is done simply by running it through the neural network. This parametric extension to t-SNE was first realized by van der Maaten \cite{parametric_tsne}, and we will henceforth refer to this method as PTSNE.
 
 By application of the chain rule, we can write the gradient w.r.t. the parameters of the neural network as
 
-$$\frac{\partial C_{\text{t-SNE}}}{\partial \mathbf{W}} = \frac{\partial C_{\text{t-SNE}}}{\partial f_{\mathbf{W}}(\mathbf{x}_i)} \frac{\partial f_{\mathbf{W}}(\mathbf{x}_i)}{\partial \mathbf{W}}.$$
+$$\nabla_{\bW} C_{\text{t-SNE}} = \frac{\partial C_{\text{t-SNE}}}{\partial \bW} = \frac{\partial C_{\text{t-SNE}}}{\partial f_{\bW}(\bx_i)} \frac{\partial f_{\bW}(\bx_i)}{\partial \bW}.$$
 
-As $f_{\mathbf{W}}(\mathbf{x}_i) = \mathbf{y}_i$, Equation~\ref{eq:c_tsne_grad} is used to compute the first term of the product, while standard backpropagation can be applied to the rest of the network.
+As $f_{\bW}(\bx_i) = \mathbf{y}_i$, Equation~\ref{eq:c_tsne_grad} is used to compute the first term of the product, while standard backpropagation can be applied to the rest of the network.
 
 \chapter{Method}
 \label{ch:method}
@@ -439,32 +445,41 @@ As the aim of the method is to take advantage of the strengths of both VAE and P
 
 Using the notation introduced in Chapter~\ref{ch:background_and_related_work}, we can summarize the learning procedure as Algorithm~\ref{alg:learning}. \tred{In essence, training the model is done in two phases...}
 
-\begin{figure}[!htb]
-  \centering
-  \resizebox{0.8\textwidth}{!}{\input{tikz/vptsne.tikz}\unskip}
-  \caption{Illustration of the general structure of a VPTSNE network.}
-  \label{fig:vptsne}
-\end{figure}
+%\begin{figure}[!htb]
+%  \centering
+%  \resizebox{0.7\textwidth}{!}{\input{tikz/vptsne.tikz}\unskip}
+%  \caption{Illustration of the general structure of a VPTSNE network.}
+%  \label{fig:vptsne}
+%\end{figure}
 
 \begin{algorithm}[H]
   \caption{Training of the neural networks.}
   \label{alg:learning}
   \begin{algorithmic}[1]
-    \Require Data set $\mathbf{D}$.
+    \Require Data set $\mathbf{D}$ of size $N$, VAE training batch size $M_{\mathsf{VAE}}$, VAE samples $L$, PTSNE training batch size $M_{\mathsf{PTSNE}}$
     \Ensure Neural network parameters $\btheta, \bphi, \bW$
-    \State $\btheta, \bphi, \bW \gets \text{Initialize parameters}$
+    \State $\btheta, \bphi, \bW \gets \text{Initialize neural network parameters}$
     \While{VAE not converged}
-      \State $\mathbf{X} \gets \text{ Random minibatch from } \mathbf{D}$
-      \ForAll $\bxi \in \mathbf{X}$
-        \State $\eil \gets$ 
-        \State $\bz^{(i,l)} \gets g_{\bphi}(\bxi, \eil)$
-        \State $\btheta, \bphi \gets \text{ Updata parameters with } \nabla_{\btheta, \bphi} \mathcal{L}$
+      \State $\mathbf{X} \gets \text{ Random minibatch of size } M_{\mathsf{VAE}} \text{ from } \mathbf{D}$
+      \ForAll{$\bxi \in \mathbf{X}$}
+        \For{$l \gets 1$ to $L$}
+          \State $\eil \gets \text{ Draw sample from noise distribution } p(\mathbf{\epsilon})$
+          \State $\bz^{(i,l)} \gets g_{\bphi}(\bxi, \eil)$ \Comment{Draw from $\qphi(\bz \vert \bxi)$}
+          \State $\hat{\bx}^{(i,l)} \gets f_{\mathbf{\theta}}(\bzil)$ \Comment{Obtain parameters of $\ptheta(\bx \vert \bzil)$ by decoding $\bzil$}
+        \EndFor
+        \State $\mathcal{L}(\btheta, \bphi; \bxi) \gets \text{ Compute estimate with either equation \ref{eq:vae_loss} or \ref{eq:vae_loss_2} }$
       \EndFor
+      \State $\btheta, \bphi \gets \text{ Updata parameters by ascending gradient } \nabla_{\btheta, \bphi} \frac{N}{M_{\mathsf{VAE}}} \sum_{i=1}^{M_{\mathsf{VAE}}} \mathcal{L}(\btheta, \bphi; \bxi)$
     \EndWhile
     \While{PTSNE not converged}
-      \State $\mathbf{X} \gets \text{ Random minibatch }$
-      \State $\hat{\mathbf{x}}^{(i)} \gets \text{ Reconstruction from VAE }$ 
-      \State $\bW \gets \text{ Update parameters with }$
+      \State $\mathbf{X} \gets \text{ Random minibatch of size } M_{\mathsf{PTSNE}} \text{ from } \mathbf{D}$
+      \ForAll{$\bxi \in \mathbf{X}$}
+        \State $\eil \gets \text{ Draw sample from noise distribution } p(\mathbf{\epsilon})$
+        \State $\bz^{(i,l)} \gets g_{\bphi}(\bxi, \eil)$ \Comment{Draw from $\qphi(\bz \vert \bxi)$}
+        \State $\widetilde{\bx}^{(i)} \gets \text{ Draw sample from } \ptheta(\bx \vert \bzil)$ \Comment{Obtain reconstruction from VAE}
+        \State $\mathbf{y}^{(i)} \gets f_{\bW}(\widetilde{\bx}^{(i)})$
+      \EndFor
+      \State $\bW \gets \text{ Update parameters by descending gradient } \nabla_{\bW} C_{\text{t-SNE}} \text{ using all computed } \widetilde{\bx}^{(i)} \text{ and } \mathbf{y}^{(i)}$
     \EndWhile
   \end{algorithmic}
 \end{algorithm}
@@ -474,14 +489,14 @@ Using the notation introduced in Chapter~\ref{ch:background_and_related_work}, w
 After training, a deterministic projection for all subsequent points can be obtained with Algorithm~\ref{alg:projection}. For encoder and decoder network pairs that both directly parameterize the mean of a distribution, computing the expectation can be done exactly with zero overhead.
 
 \begin{algorithm}[H]
-  \caption{Projection.}
+  \caption{Deterministic projection.}
   \label{alg:projection}
   \begin{algorithmic}[1]
-    \Require Point $\mathbf{x}$, neural network parameters $\btheta, \bphi, \bW$
-    \Ensure Projected point $\mathbf{y}$
-    \State $\mathbf{z} \gets \mathbb{E}_{p(\mathbf{\epsilon})}[g_{\bphi}(\bxi, \eil)]$
-    \State $\hat{\mathbf{x}} \gets \mathbb{E}[f(\mathbf{z})]$
-    \State $\mathbf{y} \gets f_{\mathbf{W}}(\hat{\mathbf{x}})$
+    \Require Point $\bxi$, neural network parameters $\btheta, \bphi, \bW$
+    \Ensure Projected point $\mathbf{y}^{(i)}$
+    \State $\widetilde{\bz}^{(i)} \gets \mathbb{E}[\qphi(\bz \vert \bxi)]$
+    \State $\widetilde{\bx}^{(i)} \gets \mathbb{E}[\ptheta(\bx \vert \widetilde{\bz}^{(i)})]$
+    \State $\mathbf{y}^{(i)} \gets f_{\bW}(\widetilde{\bx}^{(i)})$
   \end{algorithmic}
 \end{algorithm}
 
@@ -500,11 +515,11 @@ When considering precomputed $P_{ij}$ matrices for each batch the gain in comput
 \section{Inference with the Generative Model}
 \label{section:inference_with_the_generative_model}
 
-From the underlying generative model we can estimate the marginal likelihood $p(\mathbf{x})$ for each data point $\mathbf{x}$. An estimation can be retrieved by importance sampling \cite{stochastic_backpropagation}:
+From the underlying generative model we can estimate the marginal likelihood $p(\bx)$ for each data point $\bx$. An estimation can be retrieved by importance sampling \cite{stochastic_backpropagation}:
 
-$$p(\mathbf{x}) \simeq \frac{1}{N} \sum_{i=1}^{N} \frac{p(\mathbf{x} \vert \mathbf{z}^{(i)}) p(\mathbf{z}^{(i)})}{q_{\theta}(\mathbf{z}^{(i)} \vert \mathbf{x})},$$
+$$p(\bx) \simeq \frac{1}{N} \sum_{i=1}^{N} \frac{p(\bx \vert \mathbf{z}^{(i)}) p(\mathbf{z}^{(i)})}{q_{\theta}(\mathbf{z}^{(i)} \vert \bx)},$$
 
-where $\mathbf{z}^{(i)} \sim q_{\theta}(\mathbf{z} \vert \mathbf{x})$. Alternatively, one could directly use the ELBO to estimate $p(\bx)$, however, this gives generally worse estimates \cite{ais_vae}. For more accurate estimates than importance sampling, the usage of annealed importance sampling \cite{ais} has been suggested for VAEs in \cite{ais_vae}.
+where $\mathbf{z}^{(i)} \sim q_{\theta}(\mathbf{z} \vert \bx)$. Alternatively, one could directly use the ELBO to estimate $p(\bx)$; however, this gives generally worse estimates \cite{ais_vae}. For more accurate estimates than importance sampling, the usage of annealed importance sampling \cite{ais} has been suggested for VAEs in \cite{ais_vae}.
 
 Using the obtained marginals as feedback we can inform the user of potentially anomalous points in the data set. This feedback can then further be used in downstream analysis. From a data visualization perspective, points that do not fit the model well correspond to points that are likely to be mapped poorly, thus removing such outliers from the final mapping serves to highlight the natural clusters in the data more clearly.
 
@@ -597,7 +612,7 @@ For optimization of the neural network \cite{parametric_tsne} use nonlinear conj
 
 We applied batch normalization \cite{batch_normalization} to the hidden layers of the VAE networks, while omitting batch normalization from the embedding network. This is to validate the training procedure on as simple an embedding network as possible. We note that applying batch normalization to the embedding network improves the results marginally.
 
-To further emphasize the universality of our approach we restrict ourselves to use a simple VAE structure, without complicating the model architecture with more recently proposed advances, such as normalizing flows.\footnote{In preliminary results VAE models that achieve a lower ELBO do in fact contribute to improved embeddings.} Throughout all experiments, unless otherwise specified, the VAE architecture was fixed to $d - 256 - 128 - 32 - \mu, \log \sigma^2 - 32 - 128 - 256 - d$, where $\mu$ and $\sigma$ parameterize a normal distribution acting as the posterior $q_{\phi}(\mathbf{z} \vert \mathbf{x}^{(i)})$ and the final layer output was used to parameterize a Bernoulli distribution for MNIST as well as Fashion-MNIST, and a Gaussian distribution with a fixed standard deviation of 0.1 for cytometry data. In all experiments, each VAE was trained with a batch size of 1000 for 10000 iterations and had a latent dimensionality of $3$, unless otherwise specified.
+To further emphasize the universality of our approach we restrict ourselves to use a simple VAE structure, without complicating the model architecture with more recently proposed advances, such as normalizing flows.\footnote{In preliminary results VAE models that achieve a lower ELBO do in fact contribute to improved embeddings.} Throughout all experiments, unless otherwise specified, the VAE architecture was fixed to $d - 256 - 128 - 32 - \mu, \log \sigma^2 - 32 - 128 - 256 - d$, where $\mu$ and $\sigma$ parameterize a normal distribution acting as the posterior $q_{\phi}(\mathbf{z} \vert \bx^{(i)})$ and the final layer output was used to parameterize a Bernoulli distribution for MNIST as well as Fashion-MNIST, and a Gaussian distribution with a fixed standard deviation of 0.1 for cytometry data. In all experiments, each VAE was trained with a batch size of 1000 for 10000 iterations and had a latent dimensionality of $3$, unless otherwise specified.
 
 For MNIST and Fashion-MNIST perplexities were set to 30, which is in line with the value used by \cite{parametric_tsne}, whereas for the mass cytometry and scRNA-seq data sets a perplexity of 10 was chosen. It should be noted that a more correct way to choose perplexity would take into account the batch size, as perplexity controls the number of neighbors each point is considered to have. For example training VPTSNE on MNIST with batch size 200 and perplexity 10 gives far better results than with perplexity 30. However, with PTSNE the results are actually worse as the training fails to converge even with small learning rates. An example embedding of MNIST with low perplexity and small batch size has been included in Appendix~\ref{appendix:low_perp_small_bs}, which achieves better trustworthiness (0.935) and 1-NN (0.812) than the 600 batch size, 30 perplexity runs. Why PTSNE fails to converge and VPTSNE does not is an important question to explore in future work, as this demonstrates a clear advantage of the method being proposed.
 
@@ -757,7 +772,7 @@ To show the efficacy of this modification to the learning procedure we train an 
 
 As an example of inference with the generative model discussed in \ref{section:inference_with_the_generative_model} we use the Cytometry B data set to train our combined model with two patients' data held out. The protein expression profile of Patient A's cells closely match that of other patients' in the training set, whereas Patient B's sample is from advanced cancer making it an outlier in relation to the data available during training.
 
-To distinguish between outlier and inlier points in the obtained mapping we set a hard threshold of $\log p(\mathbf{x}) < -150$ to separate between the two. In figure \ref{fig:cytometry_outliers} embeddings with both patient specific labeling and labeling obtained by thresholding are shown side by side. The high tumor purity sample of Patient B has almost completely been mapped to a small region corresponding to protein expression levels of cancer cells, whereas Patient A's mapping contains several distinct clusters of various cell types. Further, the labels obtained through thresholding indicate that the majority of cells in Patient B's sample are indeed considered as outliers by the model, in addition to a handful of visually poorly mapped points.
+To distinguish between outlier and inlier points in the obtained mapping we set a hard threshold of $\log p(\bx) < -150$ to separate between the two. In figure \ref{fig:cytometry_outliers} embeddings with both patient specific labeling and labeling obtained by thresholding are shown side by side. The high tumor purity sample of Patient B has almost completely been mapped to a small region corresponding to protein expression levels of cancer cells, whereas Patient A's mapping contains several distinct clusters of various cell types. Further, the labels obtained through thresholding indicate that the majority of cells in Patient B's sample are indeed considered as outliers by the model, in addition to a handful of visually poorly mapped points.
 
 \begin{figure}[!htb]
   \centering

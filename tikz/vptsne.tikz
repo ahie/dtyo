@@ -59,7 +59,7 @@
   }
   % Output layer
   \foreach \i in {1,...,2}{
-    \node[draw, circle] (P-4-\i) at (24 - 18, -16 + 8 + 4 - 4 * \i) {$y_{\i}^{(i,l)}$};
+    \node[draw, circle] (P-4-\i) at (24 - 18, -16 + 8 + 4 - 4 * \i) {$y_{\i}^{(i,l,k)}$};
     \foreach \j in {1,...,4}{
       \draw [->] (P-3-\j) -- (P-4-\i);
     }
