@@ -1,6 +1,8 @@
 \chapter{Introduction}
 \label{ch:introduction}
 
+\note{Most of this chapter is probably going to be rewritten}
+
 At present, ever larger sets of increasingly higher dimensional data are being produced, gathered and analyzed. As a consequence, several challenges arise when analyses are carried out on these vast amounts of high dimensional data. This recent surge of data prompts not only for the development of methods for data analysis capable of scaling to massive data sets but ones which are simultaneously capable of dealing with challenges inherent to high dimensional data.
 
 In literature, problems arising from high dimensionality are collectively referred to as the \textit{curse of dimensionality}. Particularly in machine learning the following aspects of high dimensionality are problematic
@@ -9,7 +11,7 @@ In literature, problems arising from high dimensionality are collectively referr
 \item distances between pairs of points become less distinguished as dimensionality of the space increases \cite{on_the_surprising_behavior_of_distance_metrics}, rendering methods based on distance metrics at a disadvantage.
 \item The volume of a space grows exponentially along with the number of dimensions. This leads to even large data sets appearing sparse in the feature space. Efficient sampling requires a lot of points
 \item need for more training data, k-means example \cite[p.~263]{understanding_machine_learning}
-\item algorithm complexity depends on the dimensionality of data being processed, large costs are accrued
+\item algorithm complexity depends on the dimensionality of data being processed
 \item from a more practical perspective, high dimensional data by itself is hard to directly reason about and difficult to visualize in any meaningful sense, as simple statistics will often not be able to capture adequate information of the data distribution.
 \end{itemize}
 
@@ -21,15 +23,13 @@ The so-called manifold hypothesis \cite{manifold_hypothesis} often holds for rea
 
 Several different methods for dimensionality reduction have been developed over the years. Arguably the most well known and applied dimensionality reduction method in practice is Principal Component Analysis (PCA), developed independently by Karl Pearson \cite{pca_1} and Harold Hotelling \cite{pca_2} in the early 1900s. Although very efficient to compute and providing easily interpretable results, PCA however suffers from the fact that it only takes into account linear relationships in the data it is given, making it nonideal for ... . The fact that PCA only aims to find an orthogonal projection that maximizes the variance... local structure of the data is poorly preserved. On the other hand, methods that aim to preserve local structure of data typically suffer from poor scalability to large data sets and the curse of dimensionality in several ways, such as ... .
 
+\section{Scope and Objective}
+
 As a wealth of dimensionality reduction methods have been developed, attempting to cover all of them would be greatly out of the scope of this thesis, in which the focus is on improving an existing method for primarily data visualization purposes. For comprehensive reviews on other prominent methods the reader is referred to \cite{first_dimensionality_reduction_review, second_dimensionality_reduction_review}.
 
 In exploratory data analysis, visualization of the characteristics of data sets plays a key role. Being able to project high dimensional data into meaningful low dimensional representations enables researchers and data analysts to generate hypotheses.
 
 In this work, a method for improving the applicability of parametric t-SNE is proposed. In the proposed method a generative model in the form of a Variational Autoencoder is first trained and subsequently used to produce training data for the parametric t-SNE embedding. The benefits of this procedure are severalfold: . Further, each of these benefits are experimentally demonstrated on a variety of data sets, both quantitatively and qualitatively.
-
-\note{This chapter should be split into the following sections:}
-
-\section{Objective and Scope}
 
 \section{Outline}
 
@@ -75,7 +75,7 @@ Advances in supervised learning for computer vision have arguably played an impo
 
 Unsupervised and semi-supervised learning, representation learning. Deep belief networks, or rather unsupervised pretraining by stacking RBMs is one of the most important results in reviving interest in deep learning, as it was one of the first generally applicable results to enable learning of deep networks. 
 
-Reinforcement learning, atari \cite{deep_atari}, go \cite{alphago} and shortly after, go \textit{tabula rasa} \cite{alphazero}.
+The application of deep learning to reinforcement learning has produced superhuman results on tasks where previous methods of artificial intelligence have failed, such as atari \cite{deep_atari}, go \cite{alphago} and shortly after, go \textit{tabula rasa} \cite{alphazero}.
 
 The development of ever faster hardware for accelerating the computations needed for deep learning has played a pivotal role in the resurgence of research interest in neural networks. Originally built to accelerate the linear algebra operations required to produce 3D computer graphics, graphics programming units (GPU) offer immense parallel computing capabilities compared to traditional central processing units (CPU). With the advent of programming languages and APIs targeting GPUs, general-purpose computing on this specialized hardware has been made possible and has subsequently been taken advantage of in research and development of applications making use of neural networks. Recently, hardware specialized solely for use with deep learning has been developed \cite{tpu} and microarchitectures of modern GPUs have begun to incorporate specialized computing units for deep learning \cite{nvidia_tensor_core}, indicating a strong and growing interest towards deep learning in both academia and industry alike.
 
@@ -91,7 +91,7 @@ where $f_i$ are the activation functions, $\bW_i$ the matrices of weights, and $
 
 \begin{figure}[!htb]
   \centering
-  \resizebox{0.8\textwidth}{!}{\input{tikz/nn.tikz}\unskip}
+  \resizebox{0.7\textwidth}{!}{\input{tikz/nn.tikz}\unskip}
   \caption{Feedforward neural network with input dimension 3, output dimension 2 and 2 hidden layers of dimension 4 each.}
   \label{fig:nn}
 \end{figure}
@@ -144,7 +144,7 @@ A connection between PCA and autoencoders which are constrained to only have lin
 
 \begin{figure}[!htb]
   \centering
-  \resizebox{\textwidth}{!}{\input{tikz/ae.tikz}\unskip}
+  \resizebox{0.8\textwidth}{!}{\input{tikz/ae.tikz}\unskip}
   \caption{Autoencoder with one hidden layer in both the encoder and decoder and latent dimensionality of 2.}
   \label{fig:ae}
 \end{figure}
@@ -153,9 +153,17 @@ A connection between PCA and autoencoders which are constrained to only have lin
 
 As a primer to variational inference, the main quantities of interest in information theory will be covered here, as they play a central role in all the subsequently discussed methods.
 
-The fundamental quantity of interest in information theory, entropy, is the average amount of information produced by a stochastic source. \tred{In more concrete terms ...} Entropy computes the expected value of the log-probability of a random variable. A coin flip carries only one bit of information, whereas a roll of a 6-sided die carries approximately $2.58$ bits of information.
+The fundamental quantity of interest in information theory, entropy, is the average amount of information produced by a stochastic source. \note{In more concrete terms ... talk about relation to compression}
+
+Entropy is defined as the expected value of the negative log-probability of a random variable $\mathbf{X}$
+
+$$H(\mathbf{X}) = \mathbb{E}_{\mathbf{X}}[-\log p(x)].$$
+
+The base of the logarithm determines the unit of information being considered, where popular choices are $2$ for bits and $e$ for nats. Using the formula defined above we can determine that a coin flip carries only one bit of information, whereas a roll of a 6-sided die carries approximately $2.58$ bits of information.
 
 Relative entropy, also known as the Kullback-Leibler divergence, or KL-divergence for short, is a measure of dissimilarity between two probability distributions. For continuous probability distributions $p$ and $q$, the Kullback-Leibler divergence is defined as
+
+\note{Add the more practical explanation, which relates back to compression: $\dkl{p}{q}$ determines the average additional bits needed for compression if $q$ is used as a surrogate for $p$.}
 
 $$\dkl{p}{q} = \int p(\bx) \log \frac{p(\bx)}{q(\bx)} d\bx,$$
 
@@ -186,7 +194,7 @@ In modern statistics and machine learning a need to approximate highly complex p
 
 $$p(\bz \vert \bx) = \frac{p(\bz, \bx)}{p(\bx)} = \frac{p(\bz, \bx)}{\int p(\bz, \bx) d\bz},$$
 
-where the vector $\bx$ denotes the observed variables and $\bz$ the latent variables of the model. Even for only moderately complex models exact computation of the posterior is often intractable due to the required marginalization over all possible latent values $\mathbf{z}$.
+where the vector $\bx$ denotes the observed variables and $\bz$ the latent variables of the model. Even for only moderately complex models exact computation of the posterior is often intractable due to the required marginalization over all possible latent values $\bz$.
 
 To illustrate this problem we will consider the Bayesian mixture of Gaussians model as in \cite{variational_inference_review}. The model under consideration is univariate and consists of $K$ unit variance Gaussian mixture components. The full hierarchical model is given by the following
 
@@ -209,35 +217,39 @@ The dominant paradigm for obtaining approximates for such distributions has been
 Variational inference takes a different approach to approximating the posterior. Instead of sampling, in variational inference the approximation problem is turned into an optimization problem. By considering a family of distributions $\mathcal{Q}$ one seeks to optimize
 
 \begin{equation}
-q^{*}(\mathbf{z}) = \argmin_{q(\mathbf{z}) \in \mathcal{Q}} \dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \bx)},
+q^{*}(\bz) = \argmin_{q(\bz) \in \mathcal{Q}} \dkl{q(\bz)}{p(\bz \vert \bx)},
 \label{eq:vi}
 \end{equation}
 
-\note{where the quantity being optimized is the KL-divergence introduced in the previous section. The optimization tries to find a member $q^{*}(\mathbf{z})$ of the chosen family of distributions that best matches the true posterior, which can then be used as a surrogate for the true posterior.}
+where the quantity being optimized is the KL-divergence introduced in the previous section. The optimization tries to find a member $q^{*}(\bz)$ of the chosen family of distributions that best matches the true posterior, which can then be used as a surrogate for the true posterior.
 
 In practice, the considered family of distributions $\mathcal{Q}$ is constrained in a way as to make optimization tractable. A common constraint is to assume the distributions of the chosen family factorize as follows
 
-$$q(\mathbf{z}) = \prod_{i=1}^{d} q_{i}(z_{i}),$$
+$$q(\bz) = \prod_{i=1}^{d} q_{i}(z_{i}),$$
 
-which is referred to as the \textit{mean field approximation} in literature. The mean field approximation essentially removes from consideration all covariate structure as each variable of $\mathbf{z}$ is considered independent. In the Gaussian case this means instead of optimizing $d^2$ variables of the covariance matrix we can instead limit optimization to only consider $d$ elements of a diagonal covariance matrix. An illustration of this for the case of two Gaussian distributions is presented in Figure~\ref{fig:mean_field_approximation}.
+which is referred to as the \textit{mean field approximation} in literature. The mean field approximation essentially removes from consideration all covariate structure as each variable of $\bz$ is considered independent. In the Gaussian case this means instead of optimizing $d^2$ variables of the covariance matrix we can instead limit optimization to only consider $d$ elements of a diagonal covariance matrix. An illustration of this for the case of two Gaussian distributions is presented in Figure~\ref{fig:mean_field_approximation}.
 
-Since Equation~\ref{eq:vi} cannot be directly optimized as it depends on evaluation of the intractable posterior. Instead an alternative objective is sought.
-
-\begin{equation}
-\begin{aligned}
-\dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \bx)} &= \mathbb{E}[\log q(\mathbf{z})] - \mathbb{E}[\log p(\mathbf{z} \vert \bx)] \\
-                                             &= \mathbb{E}[\log q(\mathbf{z})] - \mathbb{E}[\log p(\mathbf{z}, \bx)] + \log p(\bx),
-\end{aligned}
-\end{equation}
-
-and by rearranging, it follows that
+Seeing that Equation~\ref{eq:vi} cannot be directly optimized as it depends on evaluation of the intractable posterior, in variational inference one seeks to instead optimize an alternative objective that is tractable. To derive this alternative objective, we begin with the definition
 
 \begin{equation}
 \begin{aligned}
-\log p(\bx) &= \dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \bx)} - \mathbb{E}[\log q(\mathbf{z})] + \mathbb{E}[\log p(\mathbf{z}, \bx)] \\
-            &= \underbrace{\dkl{q(\mathbf{z})}{p(\mathbf{z} \vert \bx)}}_{\geq 0} + \underbrace{\mathbb{E}[\log p(\bx \vert \mathbf{z})] - \dkl{q(\mathbf{z})}{p(\mathbf{z})}}_{\text{ELBO}}
+\dkl{q(\bz)}{p(\bz \vert \bx)} &= \mathbb{E}[\log \frac{q(\bz)}{p(\bz \vert \bx)}] \\
+                               &= \mathbb{E}[\log q(\bz)] - \mathbb{E}[\log p(\bz \vert \bx)] \\
+                               &= \mathbb{E}[\log q(\bz)] - \mathbb{E}[\log p(\bz, \bx)] + \log p(\bx),
 \end{aligned}
 \end{equation}
+
+and by rearranging, it follows from the non-negativity property of KL-divergence that
+
+\begin{equation}
+\begin{aligned}
+\log p(\bx) &= \dkl{q(\bz)}{p(\bz \vert \bx)} - \mathbb{E}[\log q(\bz)] + \mathbb{E}[\log p(\bz, \bx)] \\
+            &= \underbrace{\dkl{q(\bz)}{p(\bz \vert \bx)}}_{\geq 0} + \mathbb{E}[\log p(\bx \vert \bz)] - \dkl{q(\bz)}{p(\bz)} \\
+\log p(\bx) &\geq \underbrace{\mathbb{E}[\log p(\bx \vert \bz)] - \dkl{q(\bz)}{p(\bz)}}_{\text{ELBO}}.
+\end{aligned}
+\end{equation}
+
+This bound is better known as the \textit{evidence lower bound}, or ELBO for short. By maximizing this bound the optimization indirectly minimizes the KL-divergence between $q(\bz)$ and $p(\bz \vert \bx)$, which corresponds to the original objective of variational inference.
 
 \note{It is possible to combine automatic differentiation with variational inference to further ease statistical model building and computational efficiency \cite{advi}. (Brief discussion on probabilistic programming)}
 
@@ -289,21 +301,21 @@ To optimize the parameters $\mathbf{\theta}$ and $\mathbf{\phi}$ of our neural n
 
 \tred{The reparameterization trick works by introducing an auxiliary noise variable as input to the network and a suitable differentiable function is used to transform the input noise into a sample of the distribution parameterized by the neural network and the original input data. As in \cite{aevb}, we shall denote this function by $g_{\bphi}$, the latent variable samples are then obtained by}
 
-$$\mathbf{z}^{(i,l)} = g_{\bphi}(\bxi, \eil), \eil \sim p(\mathbf{\epsilon}).$$
+$$\bz^{(i,l)} = g_{\bphi}(\bxi, \eil), \eil \sim p(\mathbf{\epsilon}).$$
 
 The choice of distribution from which $\eil$ is drawn from and the analytic form of $g_{\bphi}$ depends on the distribution that is being reparameterized. \tred{For location-scale distributions ...}
 
-$$\mathbb{E}_{\qphi(\bz \vert \bxi)}[f(\mathbf{z})] \simeq \frac{1}{L} \sum_{l=1}^{L} f(g_{\bphi}(\bxi, \eil))$$
+$$\mathbb{E}_{\qphi(\bz \vert \bxi)}[f(\bz)] \simeq \frac{1}{L} \sum_{l=1}^{L} f(g_{\bphi}(\bxi, \eil))$$
 
 \begin{equation}
-\mathcal{L}(\btheta, \bphi; \bxi) = -\dkl{\qphi(\bz \vert \bxi)}{\ptheta(\bz)} + \frac{1}{L} \sum_{l=1}^{L} \log \ptheta(\bxi \vert \mathbf{z}^{(i,l)})
+\mathcal{L}(\btheta, \bphi; \bxi) = -\dkl{\qphi(\bz \vert \bxi)}{\ptheta(\bz)} + \frac{1}{L} \sum_{l=1}^{L} \log \ptheta(\bxi \vert \bz^{(i,l)})
 \label{eq:vae_loss}
 \end{equation}
 
 In many cases the KL-divergence can be integrated analytically, for instance in the case of two Gaussian distributions. In cases where the KL term cannot be solved analytically a Monte Carlo estimate for the KL-divergence can be used:
 
 \begin{equation}
-\mathcal{L}(\btheta, \bphi; \bxi) = \frac{1}{L} \sum_{l=1}^{L} \Big[\qphi(\bz^{(i,l)} \vert \bxi) - p(\bz^{(i,l)}) + \log \ptheta(\bxi \vert \mathbf{z}^{(i,l)})\Big].
+\mathcal{L}(\btheta, \bphi; \bxi) = \frac{1}{L} \sum_{l=1}^{L} \Big[\qphi(\bz^{(i,l)} \vert \bxi) - p(\bz^{(i,l)}) + \log \ptheta(\bxi \vert \bz^{(i,l)})\Big].
 \label{eq:vae_loss_2}
 \end{equation}
 
@@ -322,7 +334,7 @@ It is important to note that the output $\hat{\bx}^{(i,l)}$ of the network in th
 
 \begin{figure}[!htb]
   \centering
-  \resizebox{\textwidth}{!}{\input{tikz/vae.tikz}\unskip}
+  \resizebox{0.8\textwidth}{!}{\input{tikz/vae.tikz}\unskip}
   \caption{Variational Autoencoder. Note that the hidden layer values $\mathbf{\mu}^{(i)}$, $\mathbf{\sigma}^{(i)}$ and the input noise variable $\mathbf{\epsilon}^{(l)}$ represent vectors instead of single values for a cleaner visual representation.}
   \label{fig:vae}
 \end{figure}
@@ -479,7 +491,7 @@ Using the notation introduced in Chapter~\ref{ch:background_and_related_work}, w
         \State $\widetilde{\bx}^{(i)} \gets \text{ Draw sample from } \ptheta(\bx \vert \bzil)$ \Comment{Obtain reconstruction from VAE}
         \State $\mathbf{y}^{(i)} \gets f_{\bW}(\widetilde{\bx}^{(i)})$
       \EndFor
-      \State $\bW \gets \text{ Update parameters by descending gradient } \nabla_{\bW} C_{\text{t-SNE}} \text{ using all computed } \widetilde{\bx}^{(i)} \text{ and } \mathbf{y}^{(i)}$
+      \State $\bW \gets \text{ Update parameters by descending gradient } \nabla_{\bW} C_{\text{t-SNE}} \text{ using } \widetilde{\bx}^{(i)} \text{ and } \mathbf{y}^{(i)}$
     \EndWhile
   \end{algorithmic}
 \end{algorithm}
@@ -517,9 +529,9 @@ When considering precomputed $P_{ij}$ matrices for each batch the gain in comput
 
 From the underlying generative model we can estimate the marginal likelihood $p(\bx)$ for each data point $\bx$. An estimation can be retrieved by importance sampling \cite{stochastic_backpropagation}:
 
-$$p(\bx) \simeq \frac{1}{N} \sum_{i=1}^{N} \frac{p(\bx \vert \mathbf{z}^{(i)}) p(\mathbf{z}^{(i)})}{q_{\theta}(\mathbf{z}^{(i)} \vert \bx)},$$
+$$p(\bx) \simeq \frac{1}{N} \sum_{i=1}^{N} \frac{p(\bx \vert \bz^{(i)}) p(\bz^{(i)})}{q_{\theta}(\bz^{(i)} \vert \bx)},$$
 
-where $\mathbf{z}^{(i)} \sim q_{\theta}(\mathbf{z} \vert \bx)$. Alternatively, one could directly use the ELBO to estimate $p(\bx)$; however, this gives generally worse estimates \cite{ais_vae}. For more accurate estimates than importance sampling, the usage of annealed importance sampling \cite{ais} has been suggested for VAEs in \cite{ais_vae}.
+where $\bz^{(i)} \sim q_{\theta}(\bz \vert \bx)$. Alternatively, one could directly use the ELBO to estimate $p(\bx)$; however, this gives generally worse estimates \cite{ais_vae}. For more accurate estimates than importance sampling, the usage of annealed importance sampling \cite{ais} has been suggested for VAEs in \cite{ais_vae}.
 
 Using the obtained marginals as feedback we can inform the user of potentially anomalous points in the data set. This feedback can then further be used in downstream analysis. From a data visualization perspective, points that do not fit the model well correspond to points that are likely to be mapped poorly, thus removing such outliers from the final mapping serves to highlight the natural clusters in the data more clearly.
 
@@ -527,7 +539,7 @@ Using the obtained marginals as feedback we can inform the user of potentially a
 \label{section:robustness}
 
 \note{The unknown intrinsic dimensionality of the data manifold is reduced to at most the dimensionality of the latent code. Data less sparsely distributed on this manifold.}
-\note{The stochastic model allows sampling infinitely many similar points.}
+\note{The stochastic model allows sampling infinitely many points on the learned manifold.}
 
 As real-world data is generally not perfectly clean, an important property for any machine learning method is its capability to handle data containing artifacts. Considering VAEs are inherently robust to corrupted data due to the regularization provided by the stochastic latent code (\textcolor{red}{[connection with VAE and Robust PCA \cite{rpca_1, rpca_2} shown in \citep{hidden_talents_of_the_vae}]}) it is reasonable to hypothesize that a training procedure for a low dimensional mapping taking advantage of this property would perform better on corrupted data.
 
@@ -573,7 +585,7 @@ The second mass cytometry data set (Cytometry B) contains data gathered from ova
 
 Single-cell RNA sequencing (scRNA-seq) enables the measurement of the transcriptional activity within single cells. By counting the number of RNA transcripts present in a given cell matching those of predetermined genes the expression profile of tens of thousands of genes can be measured simultaneously. As the number of genes for which the strength of expression can be quantified is far greater than the number of proteins that can be measured with mass cytometry the computational and analytical challenges are further exacerbated \cite{high_dimensional_data_spaces_gene_and_protein, computational_challenges_single_cell_transcriptomics}.
 
-We explore how our method applied to scRNA-seq data reveals biologically meaningful insights by applying it to the melanoma patient data set studied in \cite{tirosh}. The data set consists of tumor samples from $13$ different patients, altogether containing $4097$ cells for which the expression of $22462$ genes is measured. The data set additionally includes labels for each cell denoting their cell type and tumor of origin.
+We explore how our method applied to scRNA-seq data reveals biologically meaningful insights by applying it to the melanoma patient data set studied in \cite{tirosh}. The data set consists of tumor samples from $19$ different patients, altogether containing $4097$ cells for which the expression of $22462$ genes is measured. The data set additionally includes labels for each cell denoting their cell type and tumor of origin.
 
 \section{Evaluation Metrics}
 
@@ -605,6 +617,7 @@ $$T(k) = 1 - \frac{2}{nk (2n - 3k - 1)} \sum^{n}_{i=1} \sum_{j \in \mathcal{N}_{
 where $n$ is the total number of data points under consideration, $\mathcal{N}_{i}^{k}$ is the set of $k$ nearest neighbors in the output space of data point $i$, and $r(i, j)$ is a function giving the rank of node $j$ in the nearest neighbor ordering of node $i$. The possible values for trustworthiness range from 0 to 1, indicating complete loss of local structure and perfect preservation of local structure, respectively.
 
 \section{Network Structure and Parameters}
+\label{section:network_structure_and_parameters}
 
 To parameterize the embedding $f(\mathbf{\hat{x}})$ a feedforward neural network with layers of hidden units with dimensions $d - 500 - 500 - 2000 - 2$ were used, where $d$ is the input dimensionality and rectifier linear unit (ReLU) activations are applied to the hidden unit outputs to induce nonlinearity to the network. The hidden unit dimensions were chosen to match those of the final combined network used in \cite{parametric_tsne}, although we have substituted the sigmoid activations with ReLU activations. Furthermore, we do not perform stacked restricted Boltzmann machine pretraining on the hidden layer weights as in \cite{parametric_tsne}. However we do benchmark the performance of our network against the original parametric t-SNE implementation. Since we are not considering RBM pretraining and are instead relying on the property of ReLUs reducing the vanishing gradient problem \cite{relu} and better initialization \cite{xavier_initializer}. Running the original implementation shows little benefit in performing this costly initialization. We could instead reuse the trained encoder weights of the VAE as a starting point for the optimization of our embedding network.
 
@@ -612,7 +625,7 @@ For optimization of the neural network \cite{parametric_tsne} use nonlinear conj
 
 We applied batch normalization \cite{batch_normalization} to the hidden layers of the VAE networks, while omitting batch normalization from the embedding network. This is to validate the training procedure on as simple an embedding network as possible. We note that applying batch normalization to the embedding network improves the results marginally.
 
-To further emphasize the universality of our approach we restrict ourselves to use a simple VAE structure, without complicating the model architecture with more recently proposed advances, such as normalizing flows.\footnote{In preliminary results VAE models that achieve a lower ELBO do in fact contribute to improved embeddings.} Throughout all experiments, unless otherwise specified, the VAE architecture was fixed to $d - 256 - 128 - 32 - \mu, \log \sigma^2 - 32 - 128 - 256 - d$, where $\mu$ and $\sigma$ parameterize a normal distribution acting as the posterior $q_{\phi}(\mathbf{z} \vert \bx^{(i)})$ and the final layer output was used to parameterize a Bernoulli distribution for MNIST as well as Fashion-MNIST, and a Gaussian distribution with a fixed standard deviation of 0.1 for cytometry data. In all experiments, each VAE was trained with a batch size of 1000 for 10000 iterations and had a latent dimensionality of $3$, unless otherwise specified.
+To further emphasize the universality of our approach we restrict ourselves to use a simple VAE structure, without complicating the model architecture with more recently proposed advances, such as normalizing flows.\footnote{In preliminary results VAE models that achieve a lower ELBO do in fact contribute to improved embeddings.} Throughout all experiments, unless otherwise specified, the VAE architecture was fixed to $d - 256 - 128 - 32 - \mu, \log \sigma^2 - 32 - 128 - 256 - d$, where $\mu$ and $\sigma$ parameterize a normal distribution acting as the posterior $q_{\phi}(\bz \vert \bx^{(i)})$ and the final layer output was used to parameterize a Bernoulli distribution for MNIST as well as Fashion-MNIST, and a Gaussian distribution with a fixed standard deviation of 0.1 for cytometry data. In all experiments, each VAE was trained with a batch size of 1000 for 10000 iterations and had a latent dimensionality of $3$, unless otherwise specified.
 
 For MNIST and Fashion-MNIST perplexities were set to 30, which is in line with the value used by \cite{parametric_tsne}, whereas for the mass cytometry and scRNA-seq data sets a perplexity of 10 was chosen. It should be noted that a more correct way to choose perplexity would take into account the batch size, as perplexity controls the number of neighbors each point is considered to have. For example training VPTSNE on MNIST with batch size 200 and perplexity 10 gives far better results than with perplexity 30. However, with PTSNE the results are actually worse as the training fails to converge even with small learning rates. An example embedding of MNIST with low perplexity and small batch size has been included in Appendix~\ref{appendix:low_perp_small_bs}, which achieves better trustworthiness (0.935) and 1-NN (0.812) than the 600 batch size, 30 perplexity runs. Why PTSNE fails to converge and VPTSNE does not is an important question to explore in future work, as this demonstrates a clear advantage of the method being proposed.
 
@@ -669,11 +682,11 @@ For the comparisons we will be using the Cytometry A data set. As evaluation cri
 \subsubsection{Embedding Quality}
 \label{subsubsection:embedding_quality}
 
-The quantitative results for all methods under comparison are available in table \ref{table:comparison} and the corresponding scatter plots of the 2-D embeddings are presented in figure \ref{fig:comparison_figure}. Although VAE produces quantitatively better results for the chosen metrics, the spatial layout of clusters in the resulting embedding have less distinct separation and the global structure of the embedding is constrained by the chosen prior $p(\mathbf{z})$. From a data visualization standpoint these factors make the latent space embeddings qualitatively worse than what the corresponding quantitative metrics would suggest. Unsurprisingly, PCA performs the worst on both quantitative and qualitative results. Our method however is able to reach results on par with those of the chosen non-parametric methods.
-
-\noindent \textcolor{red}{[Note: The effect of choosing a suitable perplexity w.r.t. batch size mentioned in a previous note is highlighted in \ref{fig:comparison_figure}. With large perplexity the clusters in the t-SNE embedding begin to separate more distinctly like with VPTSNE/UMAP, but here the same perplexity is used for both VPTSNE and t-SNE optimization. As perplexity is increased t-SNE optimization becomes considerably slower (for example going from perplexity 10 to 100 increased the total computation time twofold).]}
+The quantitative results for all methods under comparison are available in table \ref{table:comparison} and the corresponding scatter plots of the 2-D embeddings are presented in figure \ref{fig:comparison_figure}. Although VAE produces quantitatively better results for the chosen metrics, the spatial layout of clusters in the resulting embedding have less distinct separation and the global structure of the embedding is constrained by the chosen prior $p(\bz)$. From a data visualization standpoint these factors make the latent space embeddings qualitatively worse than what the corresponding quantitative metrics would suggest. Unsurprisingly, PCA performs the worst on both quantitative and qualitative results. Our method however is able to reach results on par with those of the chosen non-parametric methods.
 
 It can also be observed that t-SNE, with the given perplexity, preserves global structure much more poorly. This can be observed by comparing with the PCA plot, which has three clearly distinct, spatially separated clusters of clusters that are not present in the t-SNE plot.
+
+The effect of choosing a suitable perplexity w.r.t. batch size mentioned in Section~\ref{section:network_structure_and_parameters} was noted in these experiments. With large perplexity the clusters in the t-SNE embedding begin to separate more distinctly like with VPTSNE and UMAP, but here the same perplexity is used for both VPTSNE and t-SNE optimization. As perplexity is increased t-SNE optimization becomes considerably slower, for example going from perplexity 10 to 100 increased the total computation time twofold.
 
 \subsubsection{Scalability}
 \label{subsubsection:scalability}
@@ -822,9 +835,9 @@ By combining two dimensionality reduction methods: a stochastic variant of autoe
 
 In addition, two applications of the method to single-cell data analysis were demonstrated in this work. The method was applied to both moderately high dimensional proteomic data and extremely high dimensional transcriptomic data. \note{.. recap more results ..}
 
-\note{.. Future work ..}
-
 \note{.. Why development of new methods is important [to better analyze ever more complex data, gathered with continuously developing technology] ..}
+
+\note{.. Future work ..}
 
 \ifnameyear
   \bibliographystyle{babapaliktutnat}
