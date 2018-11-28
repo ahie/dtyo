@@ -44,6 +44,8 @@ The final chapter presents discussion and conclusions for the work carried out i
 \chapter{Background and Related Work}
 \label{ch:background_and_related_work}
 
+\note{Some general background in more detail than the intro? Ideas listed below}
+
 \begin{itemize}
 \item main motivator for this work is to provide a tool to enhance exploratory analysis in cancer research
 \item on molecular data
@@ -117,30 +119,28 @@ Several difficulties still arise when attempting to utilize neural networks, e.g
 \subsection{Autoencoders}
 \label{subsection:autoencoders}
 
-First discussed in \cite{encoding_problem} as "the encoding problem", autoencoders are a class of neural network architectures designed for unsupervised learning.
+First discussed in \cite{encoding_problem} as "the encoding problem", autoencoders (AE) are a class of neural network architectures designed for unsupervised representation learning. In essence, unsupervised representation learning attempts to find relevant features of a given data set without additional input to guide the process. Development of such methods is of interest to bypass the need for manual feature engineering.
 
-The structure of autoencoders can be decomposed into two parts, namely the encoder and decoder. As the constituents' names suggest, part of the network performs encoding of the input and the other decoding of the encoded input, hence the name of the network as a whole refers to "self-encoding". An example autoencoder network has been visualized in Figure~\ref{fig:ae}.
+The structure of autoencoders can be decomposed into two parts, namely the encoder and decoder. As the constituents' names suggest, part of the network performs encoding of the input and the other decoding of the encoded input, hence the name of this neural network architecture as a whole referring to "self-encoding". An example autoencoder network has been visualized in Figure~\ref{fig:ae}.
 
-\tred{Through such encoding the network attempts to learn to produce an efficient code capable of capturing salient features of the data it has been trained to autoencode.}
-
-\tred{Trivial case, where the network has too much capacity the AE can simply learn an identity mapping. This is clearly not conducive to learning meaningful latent representations of the data.}
-
-\tred{Case where the latent code's dimensionality is smaller than the original data's dimensionality. This \textit{bottleneck} potentially discards data, leading to a \textit{lossy compressed} representation.}
-
-The learning objective of autoencoders is for the network to be able to reconstruct its inputs as faithfully as possible. A common objective function to train an autoencoder with is to have it minimize the mean squared error between its input and output:
+The learning objective of autoencoders is for the network to be able to reconstruct its inputs as faithfully as possible. A common objective function to train an autoencoder with is to have it minimize the mean squared error (MSE) between its input and output:
 
 \begin{equation}
   \mathcal{L}_{MSE} = \frac{1}{N} \sum_{i=1}^{N} \norm{\bxi - \hat{\bx}^{(i)}}^2,
   \label{eq:mse}
 \end{equation}
 
-where $\bxi$ is the original input and $\hat{\bx}^{(i)}$ the reconstruction.
+where $\bxi$ is the $i$th original input, $\hat{\bx}^{(i)}$ the reconstruction obtained by first encoding and then decoding the input and $N$ is the size of the data set. Through optimization of such reconstruction the network attempts to learn to produce an efficient encoding capable of capturing salient features of the data it has been trained on.
 
-Efficient training via stacking RBMs described in \cite{hinton_autoencoder}, as well as its capabilities for dimensionality reduction.
+In a trivial case, where the network has too much capacity for modeling the input data, the AE can simply learn an identity mapping. This is clearly not conducive to learning meaningful latent representations of the data.
+
+\tred{Case where the latent code's dimensionality is smaller than the original data's dimensionality. This \textit{bottleneck} potentially discards data, leading to a \textit{lossy compressed} representation.}
+
+Autoencoders with multiple hidden layers were historically hard to optimize, as often gradient descent would get stuck in poor local minima. A method for initializing weights via stacking RBMs and fine-tuning with gradient descent first described in \cite{hinton_autoencoder} showed the efficacy of deep learning for non-linear dimensionality reduction.
 
 A connection between PCA and autoencoders which are constrained to only have linear activation functions and are optimized with the MSE objective (see Equation~\ref{eq:mse}) has been shown in \cite{autoencoder_pca}. Additionally, it is shown that the optimization landscape of such an autoencoder is convex.
 
-\note{Elaborate the potential downsides of this approach (how to interpret the learned representation when nonlinearity is introduced? how does it generalize?). This is set up for why stochastic autoencoders are desireable. "Even though autoencoders provide a powerful and scalable non-metric approach to dimensionality reduction there are a few disadvantages inherent to how they function. ..."}
+Even though autoencoders provide a powerful and scalable non-metric approach to dimensionality reduction there are a few disadvantages inherent to how they learn representations. \note{Elaborate the potential downsides of this approach (how to interpret the learned representation when nonlinearity is introduced? how does it generalize? Regularization as ad-hoc additions to the objective).} To address these issues we will instead be considering a stochastic extension of the autoencoding framework in the upcoming parts of this work.
 
 \begin{figure}[!htb]
   \centering
@@ -163,7 +163,7 @@ The base of the logarithm determines the unit of information being considered, w
 
 Relative entropy, also known as the Kullback-Leibler divergence, or KL-divergence for short, is a measure of dissimilarity between two probability distributions. For continuous probability distributions $p$ and $q$, the Kullback-Leibler divergence is defined as
 
-\note{Add the more practical explanation, which relates back to compression: $\dkl{p}{q}$ determines the average additional bits needed for compression if $q$ is used as a surrogate for $p$.}
+\note{Add the more practical explanation, which relates back to compression: $\dkl{p}{q}$ determines the average additional bits (or whichever unit is in use) needed for compression if $q$ is used as a surrogate for $p$.}
 
 $$\dkl{p}{q} = \int p(\bx) \log \frac{p(\bx)}{q(\bx)} d\bx,$$
 
