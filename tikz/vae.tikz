@@ -11,10 +11,10 @@
     }
   }
   % Latent code
-  \node[draw, circle] (mu) at (12, 10) {$\mathbf{\mu}^{(i)}$};
-  \node[draw, circle] (sigma) at (12, 6) {$\mathbf{\sigma}^{(i)}$};
-  \node[draw, circle] (eps) at (12, 2) {$\mathbf{\epsilon}^{(l)}$};
-  \node[draw, circle] (z) at (18, 6) {$\mathbf{z}^{(i, l)}$};
+  \node[draw, circle] (mu) at (12, 10) {$\bmu^{(i)}$};
+  \node[draw, circle] (sigma) at (12, 6) {$\bsigma^{(i)}$};
+  \node[draw, circle] (eps) at (12, 2) {$\beps^{(l)}$};
+  \node[draw, circle] (z) at (18, 6) {$\bz^{(i, l)}$};
   \foreach \x in {mu,sigma,eps}{
     \draw [->] (\x) -- (z);
   }

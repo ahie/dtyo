@@ -1,8 +1,8 @@
 \begin{tikzpicture}
-  \node[obs]                (x) {$\mathbf{x}$};
-  \node[latent, left=of x]  (z) {$\mathbf{z}$};
-  \node[latent, above=of x] (t) {$\mathbf{\theta}$};
-  \node[latent, above=of z] (p) {$\mathbf{\phi}$};
+  \node[obs]                (x) {$\bx$};
+  \node[latent, left=of x]  (z) {$\bz$};
+  \node[latent, above=of x] (t) {$\btheta$};
+  \node[latent, above=of z] (p) {$\bphi$};
   
   \edge[bend left]          {z} {x};
   \edge[bend left, dashed]  {x} {z};

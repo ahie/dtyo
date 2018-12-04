@@ -51,6 +51,7 @@
 %\usepackage{siunitx} % nice formatting for combinations of number and unit
 \usepackage{amsopn} % For operator names; not necessary if amsmath is used
 \usepackage[fleqn]{amsmath} %Extensions to math handling; if you use this, you should use e.g. gather instead of equation due to a hyperref bug
+\usepackage{nicefrac}
 \usepackage{upgreek}
 \usepackage{listings} %Typesetting code
 \usepackage{color}
@@ -69,11 +70,13 @@
 \ifnum 0\ifxetex 1\fi\ifluatex 1\fi>0
   \usepackage[math-style=ISO]{unicode-math} %must not precede amsmath and most other math and font related packages
 \else
-  %\usepackage{bm} % The \bm command is used for bold italic variables used in some fields not to be used with unicode-math
+  \usepackage{bm} % The \bm command is used for bold italic variables used in some fields not to be used with unicode-math
   %\usepackage[helvratio=1]{newtxtext} \usepackage{newtxmath}% some recommend the newtx fonts
   \usepackage{textcomp} % symbols like \textdegree
 \fi
 
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
 \newcommand{\note}[1]{\textcolor{red}{[Note: #1]}}
 \newcommand{\tred}[1]{\textcolor{red}{#1}}
 \DeclarePairedDelimiterX{\infdivx}[2]{(}{)}{%
@@ -83,18 +86,20 @@
 \newcommand\norm[1]{\left\lVert#1\right\rVert}
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
-\newcommand{\ptheta}{p_{\mathbf{\theta}}}
-\newcommand{\qphi}{q_{\mathbf{\phi}}}
 \newcommand{\bxi}{\mathbf{x}^{(i)}}
 \newcommand{\bzil}{\mathbf{z}^{(i,l)}}
 \newcommand{\bz}{\mathbf{z}}
 \newcommand{\bx}{\mathbf{x}}
-\renewcommand{\algorithmicrequire}{\textbf{Input:}}
-\renewcommand{\algorithmicensure}{\textbf{Output:}}
-\newcommand{\btheta}{\mathbf{\theta}}
-\newcommand{\bphi}{\mathbf{\phi}}
 \newcommand{\bW}{\mathbf{W}}
-\newcommand{\eil}{\mathbf{\epsilon}^{(l)}}
+\newcommand{\btheta}{\theta} % no reason to bold these two?
+\newcommand{\bphi}{\phi} % ?
+\newcommand{\beps}{\pmb{\epsilon}}
+\newcommand{\bmu}{\pmb{\mu}}
+\newcommand{\bsigma}{\pmb{\sigma}}
+\newcommand{\bSigma}{\pmb{\Sigma}}
+\newcommand{\eil}{\pmb{\epsilon}^{(l)}}
+\newcommand{\ptheta}{p_{\btheta}}
+\newcommand{\qphi}{q_{\bphi}}
 
 % =========================
 % Bibliographic information
