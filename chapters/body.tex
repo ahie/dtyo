@@ -162,19 +162,21 @@ The fundamental quantity of interest in information theory, entropy, is the aver
 
 Entropy is defined as the expected value of the negative log-probability of a random variable $\mathbf{X}$
 
-$$H(p) = \mathbb{E}_{\bx \sim p}[-\log p(\bx)].$$
+$$H(p) = \mathbb{E}_{p(\bx)}[-\log p(\bx)].$$
 
 The base of the logarithm determines the unit of information being considered, where popular choices are $2$ for bits and $e$ for nats. Using the formula defined above we can determine that a coin flip carries only one bit of information, whereas a roll of a 6-sided die carries approximately $2.58$ bits of information.
+
+\note{Include cross entropy here, defined as:}
+
+$$H(p,q) = \mathbb{E}_{p(\bx)}[-\log q(\bx)]$$
 
 Relative entropy, also known as the Kullback-Leibler divergence, or KL-divergence for short, is a measure of dissimilarity between two probability distributions. For continuous probability distributions $p$ and $q$, the Kullback-Leibler divergence is defined as
 
 \note{Add the more practical explanation, which relates back to compression: $\dkl{p}{q}$ determines the average additional bits (or whichever unit is in use) needed for compression if $q$ is used as a surrogate for $p$.}
 
-$$\dkl{p}{q} = \int p(\bx) \log \frac{p(\bx)}{q(\bx)} d\bx,$$
+\note{define dkl in terms of entropy and cross entropy:}
 
-and likewise for discrete probability distributions as
-
-$$\dkl{p}{q} = \sum_{i} p(i) \log \frac{p(i)}{q(i)}.$$
+$$\dkl{p}{q} = H(p,q) - H(p) = \mathbb{E}_{p(\bx)}[-\log \frac{q(\bx)}{p(\bx)}]$$
 
 The following properties hold for KL-divergence:
 
@@ -308,7 +310,7 @@ To optimize the parameters $\btheta$ and $\bphi$ of our neural network using bac
 
 \tred{The reparameterization trick works by introducing an auxiliary noise variable as input to the network and a suitable differentiable function is used to transform the input noise into a sample of the distribution parameterized by the neural network and the original input data. As in \cite{aevb}, we shall denote this function by $g_{\bphi}$, the latent variable samples are then obtained by}
 
-$$\bz^{(i,l)} = g_{\bphi}(\bxi, \eil), \eil \sim p(\beps).$$
+$$\bz^{(i,l)} = g_{\bphi}(\bxi, \eil), \quad \eil \sim p(\beps).$$
 
 The choice of distribution from which $\eil$ is drawn from and the analytic form of $g_{\bphi}$ depends on the distribution that is being reparameterized. \tred{For location-scale distributions ...}
 
