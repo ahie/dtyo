@@ -112,9 +112,14 @@ Various optimization methods can be used in conjunction with the backpropagation
 
 \note{Is an example needed here or can we just defer the more concrete technicalities for the autoencoders chapter? Something along the lines of: As an example, and perhaps the most common task neural networks are applied to is statistical classification. The aim of classification is to assign observations to one of a set of predetermined categories. For instance, one might want to classify images of animals by species. The standard strategy for performing classification with neural networks is to construct a network whose input corresponds to a single observation being classified and the output layer having dimensions equal to the number of categories under consideration, where the activation function applied to the final layer is the softmax function. The purpose of the softmax activation is to have the output of the network correspond to the class assignment probabilities of each input, as it squashes the value of each output to the range $(0, 1)$ in a way that they sum to $1$. The objective...}
 
-Several difficulties still arise in the optimization of neural networks. \note{explain some of the recent research regarding convergence, vanishing gradients, adaptive momentum based methods, regularization, training deeper networks ... \cite{batch_normalization, dropout, relu, resnet}, and how there still isn't consensus on why some established methods seem to work (\cite{how_batch_norm_works}) (learning rate/batch size choice for optimization \cite{large_batch_size_generalization, learning_rate_vs_batch_size}) (potentially worse generalization of adaptive gradient methods, such as AdaGrad, RMSProp, Adam \cite{marginal_value_of_adaptive_gradient_methods}, even though empirical evidence suggests generally better performance on real-world data sets.)}
+Several difficulties still arise when attempting to utilize neural networks, e.g. how to avoid poor local minima, how to converge faster, and how to avoid overfitting. In recent years, both theoretical and empirical work has been conducted to better understand these phenomena as well as develop methods to combat the difficulties they impose on learning in neural networks. \note{explain some of the recent research regarding convergence, vanishing gradients, adaptive momentum based methods, regularization, training deeper networks ... \cite{batch_normalization, dropout, relu, resnet}, and how there still isn't consensus on why some established methods seem to work (\cite{how_batch_norm_works}) (learning rate/batch size choice for optimization \cite{large_batch_size_generalization, learning_rate_vs_batch_size}) (potentially worse generalization of adaptive gradient methods, such as AdaGrad, RMSProp, Adam \cite{marginal_value_of_adaptive_gradient_methods}, even though empirical evidence suggests generally better performance on real-world data sets.)}
 
-Several difficulties still arise when attempting to utilize neural networks, e.g. how to avoid poor local minima, how to converge faster, how to avoid overfitting. In recent years, both theoretical and empirical work has been conducted to better understand these phenomena as well as develop methods to combat the difficulties they impose on learning in neural networks.
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/function_approximation.png}
+  \caption{Approximating a non-linear function with a neural network.}
+  \label{fig:kl_divergence}
+\end{figure}
 
 \subsection{Autoencoders}
 \label{subsection:autoencoders}
@@ -149,7 +154,7 @@ Even though autoencoders provide a powerful and scalable non-metric approach to 
   \label{fig:ae}
 \end{figure}
 
-\subsection{Information Theory}
+\subsection{Information Entropy}
 
 As a primer to variational inference, the main quantities of interest in information theory will be covered here, as they play a central role in all the subsequently discussed methods.
 
@@ -196,13 +201,13 @@ $$p(\bz \vert \bx) = \frac{p(\bz, \bx)}{p(\bx)} = \frac{p(\bz, \bx)}{\int p(\bz,
 
 where the vector $\bx$ denotes the observed variables and $\bz$ the latent variables of the model. Even for only moderately complex models exact computation of the posterior is often intractable due to the required marginalization over all possible latent values $\bz$.
 
-To illustrate this problem we will consider the Bayesian mixture of Gaussians model as in \cite{variational_inference_review}. The model under consideration is univariate and consists of $K$ unit variance Gaussian mixture components. The full hierarchical model is given by the following
+To illustrate this problem we will consider the same Bayesian mixture of Gaussians model described in \cite{variational_inference_review}. The model under consideration is univariate and consists of $K$ unit variance Gaussian mixture components. The full hierarchical model is given by the following
 
-$$\mu_k \sim \mathcal{N}(0, \sigma^2),$$
-$$c_i \sim \text{Categorical}(\frac{1}{K}, \dotsc, \frac{1}{K}),$$
-$$x_i \vert c_i, \mathbf{\mu} \sim \mathcal{N}(c^{\top}_i \mathbf{\mu}, 1).$$
+$$\mu_k \sim \mathcal{N}(0, \sigma^2),                                      \quad k = 1, \dotsc, K,$$
+$$c_i \sim \text{Categorical}(\frac{1}{K}, \dotsc, \frac{1}{K}),            \quad i = 1, \dotsc, n,$$
+$$x_i \vert c_i, \mathbf{\mu} \sim \mathcal{N}(c^{\top}_i \mathbf{\mu}, 1), \quad i = 1, \dotsc, n,$$
 
-From these definitions, the joint distribution factorizes as
+where the latent \footnote{Note that $c_i$ is being encoded as an indicator $K$-vector, where all entries are zero except for the index that corresponds to the drawn categorical variable being $1$.}. In this model the latent variables are $\bz = {\mathbf{\mu}, \mathbf{c}}$. From these definitions, the joint distribution factorizes as
 
 $$p(\mathbf{\mu}, \mathbf{c}, \bx) = p(\mathbf{\mu}) \prod_{i=1}^{n} p(c_i) p(x_i \vert c_i \mathbf{\mu}).$$
 
@@ -245,7 +250,7 @@ and by rearranging, it follows from the non-negativity property of KL-divergence
 \begin{aligned}
 \log p(\bx) &= \dkl{q(\bz)}{p(\bz \vert \bx)} - \mathbb{E}[\log q(\bz)] + \mathbb{E}[\log p(\bz, \bx)] \\
             &= \underbrace{\dkl{q(\bz)}{p(\bz \vert \bx)}}_{\geq 0} + \mathbb{E}[\log p(\bx \vert \bz)] - \dkl{q(\bz)}{p(\bz)} \\
-\log p(\bx) &\geq \underbrace{\mathbb{E}[\log p(\bx \vert \bz)] - \dkl{q(\bz)}{p(\bz)}}_{\text{ELBO}}.
+            &\geq \underbrace{\mathbb{E}[\log p(\bx \vert \bz)] - \dkl{q(\bz)}{p(\bz)}}_{\text{ELBO}}.
 \end{aligned}
 \end{equation}
 
@@ -457,12 +462,12 @@ As the aim of the method is to take advantage of the strengths of both VAE and P
 
 Using the notation introduced in Chapter~\ref{ch:background_and_related_work}, we can summarize the learning procedure as Algorithm~\ref{alg:learning}. \tred{In essence, training the model is done in two phases...}
 
-%\begin{figure}[!htb]
-%  \centering
-%  \resizebox{0.7\textwidth}{!}{\input{tikz/vptsne.tikz}\unskip}
-%  \caption{Illustration of the general structure of a VPTSNE network.}
-%  \label{fig:vptsne}
-%\end{figure}
+\begin{figure}[!htb]
+  \centering
+  \resizebox{0.7\textwidth}{!}{\input{tikz/vptsne.tikz}\unskip}
+  \caption{Illustration of the general structure of a VPTSNE network.}
+  \label{fig:vptsne}
+\end{figure}
 
 \begin{algorithm}[H]
   \caption{Training of the neural networks.}
@@ -589,7 +594,7 @@ We explore how our method applied to scRNA-seq data reveals biologically meaning
 
 \section{Evaluation Metrics}
 
-To quantitatively evaluate the quality of embeddings two different measures are used in this work. By quality of the embeddings we are interested in how well the local structure of the data is preserved. The choice of the two metrics used in this work follows those used in the original parametric t-SNE paper \cite{parametric_tsne}. A short description for each is given below.
+To quantitatively evaluate the quality of embeddings two different measures are used in this work. By quality of the embeddings we are interested in how well the local structure of the data is preserved. The choice of the two metrics used in this work follows those used in the original work on parametric t-SNE \cite{parametric_tsne}. A short description for each is given below.
 
 \subsection{k-Nearest Neighbor Classifier}
 
@@ -627,7 +632,7 @@ We applied batch normalization \cite{batch_normalization} to the hidden layers o
 
 To further emphasize the universality of our approach we restrict ourselves to use a simple VAE structure, without complicating the model architecture with more recently proposed advances, such as normalizing flows.\footnote{In preliminary results VAE models that achieve a lower ELBO do in fact contribute to improved embeddings.} Throughout all experiments, unless otherwise specified, the VAE architecture was fixed to $d - 256 - 128 - 32 - \mu, \log \sigma^2 - 32 - 128 - 256 - d$, where $\mu$ and $\sigma$ parameterize a normal distribution acting as the posterior $q_{\phi}(\bz \vert \bx^{(i)})$ and the final layer output was used to parameterize a Bernoulli distribution for MNIST as well as Fashion-MNIST, and a Gaussian distribution with a fixed standard deviation of 0.1 for cytometry data. In all experiments, each VAE was trained with a batch size of 1000 for 10000 iterations and had a latent dimensionality of $3$, unless otherwise specified.
 
-For MNIST and Fashion-MNIST perplexities were set to 30, which is in line with the value used by \cite{parametric_tsne}, whereas for the mass cytometry and scRNA-seq data sets a perplexity of 10 was chosen. It should be noted that a more correct way to choose perplexity would take into account the batch size, as perplexity controls the number of neighbors each point is considered to have. For example training VPTSNE on MNIST with batch size 200 and perplexity 10 gives far better results than with perplexity 30. However, with PTSNE the results are actually worse as the training fails to converge even with small learning rates. An example embedding of MNIST with low perplexity and small batch size has been included in Appendix~\ref{appendix:low_perp_small_bs}, which achieves better trustworthiness (0.935) and 1-NN (0.812) than the 600 batch size, 30 perplexity runs. Why PTSNE fails to converge and VPTSNE does not is an important question to explore in future work, as this demonstrates a clear advantage of the method being proposed.
+For MNIST and Fashion-MNIST perplexities were set to 30, which is in line with the value used by \cite{parametric_tsne}, whereas for the mass cytometry and scRNA-seq data sets a perplexity of 10 was chosen. It should be noted that a more correct way to choose perplexity would take into account the batch size, as perplexity controls the number of neighbors each point is considered to have. For example training VPTSNE on MNIST with batch size 200 and perplexity 10 gives better results than with perplexity 30. However, with PTSNE the results are actually worse as the training fails to converge even with small learning rates. An example embedding of MNIST with low perplexity and small batch size has been included in Appendix~\ref{appendix:low_perp_small_bs}, which achieves better trustworthiness (0.935) and 1-NN (0.812) than the 600 batch size, 30 perplexity runs. Why PTSNE fails to converge and VPTSNE does not is an important question to explore in future work, as this demonstrates a clear advantage of the method being proposed.
 
 Degrees of freedom of the t-Distribution for the PTSNE objective was set to 1 throughout all experiments, as all embeddings performed were two-dimensional.
 
@@ -639,14 +644,14 @@ Degrees of freedom of the t-Distribution for the PTSNE objective was set to 1 th
 
 In this section we compare the effect of training on VAE reconstructions to training on the original MNIST data set. To quantitatively evaluate the quality of the embeddings produced we employed the trustworthiness metric \cite{trustworthiness} on the MNIST test set. Additionally, we compared the 1-NN classification errors by fitting the classifiers on the produced embeddings of the training set and finding the mean accuracies of the classifiers on the test set.
 
-In figure \ref{fig:mnist_knn_trustworthiness} we have plotted the 1-NN scores and trustworthiness of the embeddings obtained after each iteration of training for two different batch sizes. The runs for each batch size were repeated 20 times, plotting the means and 95\% confidence intervals. Training with VAE reconstructions shows a clear improvement both qualitatively and quantitatively over training on the original data when small training batches are used to approximate the t-SNE loss gradient. Higher trustworthiness, as well as 1-NN scores are obtained consistently and convergence is reached with far fewer iterations. Moreover, the results are in favor of training on reconstructions by exhibiting more stable results during training.
+In figure \ref{fig:mnist_knn_trustworthiness} we have plotted the 1-NN scores and trustworthiness of the embeddings obtained after each iteration of training for two different batch sizes. The runs for each batch size were repeated 20 times, plotting the means and 95\% confidence intervals of the means. Training with VAE reconstructions shows a clear improvement both qualitatively and quantitatively over training on the original data when small training batches are used to approximate the t-SNE loss gradient. Higher trustworthiness, as well as 1-NN scores are obtained consistently and convergence is reached in fewer iterations. Moreover, the results are in favor of training on reconstructions by exhibiting more stable results during training.
 
-Qualitatively the embeddings trained on the original data remain noisier than the embeddings trained on the reconstructed data points. This can be seen in figure \ref{fig:mnist_comparison}, where the separation of true clusters in the embedding is far less evident, with several classes overlapping and a large number of outlier points for each class. We further compare the qualitative differences of the embeddings produced with the Fashion-MNIST dataset. In figure \ref{fig:fashion_mnist_comparison} similar deficiencies in the embedding can be noted as in the embedding comparisons for the MNIST data set. In particular, the visible clusters of classes are less distinct, as well as the global layout of the classes is considerably worse, e.g. the cluster of footwear related images has been pulled closer to the cluster of upper body garments and the images of bags have been split into two seemingly unrelated clusters.
+Qualitatively the embeddings trained on the original data remain noisier than the embeddings trained on the reconstructed data points. This can be seen in figure \ref{fig:mnist_comparison}, where the separation of true clusters in the embedding is less evident, with several classes overlapping and a large number of outlier points for each class. We further compare the qualitative differences of the embeddings produced with the Fashion-MNIST dataset. In figure \ref{fig:fashion_mnist_comparison} similar deficiencies in the embedding can be noted as in the embedding comparisons for the MNIST data set. In particular, the visible clusters of classes are less distinct, as well as the global layout of the classes is considerably worse, e.g. the cluster of footwear related images has been pulled closer to the cluster of upper body garments and the images of bags have been split into two seemingly unrelated clusters.
 
 \begin{figure}[!htb]
   \centering
   \includegraphics[width=\textwidth]{images/learning_curves.png}
-  \caption{Plots of 1-NN and trustworthiness scores obtained after a given number of iterations for different batch sizes. The means and 95\% confidence intervals have been plotted from 20 repeated runs for each parameter setting.}
+  \caption{Plots of 1-NN and trustworthiness scores obtained after a given number of iterations for different batch sizes. The means and 95\% confidence intervals of the means have been plotted from 20 repeated runs for each parameter setting.}
   \label{fig:mnist_knn_trustworthiness}
 \end{figure}
 
@@ -753,7 +758,7 @@ As discussed in Section~\ref{section:robustness} the probabilistic model is adva
 
 \subsection{Robustness to Noisy Data}
 
-We aim to back up the hypothesis of Section~\ref{section:robustness} by running experiments on artificially corrupted MNIST data sets. As the corruption process in our experiments we consider \textit{masking noise} as in \cite{stacked_denoising_ae}, where a predetermined fraction of randomly chosen elements of a data point are set to 0. We test robustness by applying masking noise to 10\%, 20\%, 30\% and 40\% fractions of the training and test sets. The results of our experiments presented in Figure~\ref{fig:corrupted_data} show a clear advantage to using our method when dealing with noisy data as both evaluation metrics can be observed to decrease considerably for PTSNE as the training data is progressively corrupted, whereas the performance of VPTSNE suffers far less throughout the experiments.
+We aim to back up the hypothesis of Section~\ref{section:robustness} by running experiments on artificially corrupted MNIST data sets. As the corruption process in our experiments we consider \textit{masking noise} as in \cite{stacked_denoising_ae}, where a predetermined fraction of randomly chosen elements of a data point are set to 0. We test robustness by applying masking noise to 10\%, 20\%, 30\% and 40\% fractions of the training and test sets. The results of our experiments presented in Figure~\ref{fig:corrupted_data} show a clear advantage to using our method when dealing with noisy data as both evaluation metrics can be observed to decrease considerably for PTSNE as the training data is progressively corrupted, whereas the performance of VPTSNE suffers less throughout the experiments.
 
 As an example of real-world data corrupted in this fashion, in scRNA-seq so-called \textit{dropout events} \cite{sc_dropout}, which cause incomplete sequence data to be captured due to technical and biological noise, can be viewed as a form of masking noise. The results presented here would indicate that the proposed method is potentially a good fit for exploratory analysis of scRNA-seq data, even without attempting to explicitly correct for the present technical noise, as in e.g. \cite{zifa} where factor analysis is extended to additionally model dropouts.
 
@@ -768,7 +773,7 @@ Even with the standard VAE structure, the obtained results are encouraging. As f
 
 \subsection{Obtaining Reconstructions from Hidden Layers}
 
-To show the efficacy of this modification to the learning procedure we train an embedding using the latent code directly. As we choose the dimensionality of the latent code to be more than two orders of magnitude smaller than that of the original data's it is possible for us to use batches of far greater size to train the embedding network, without incurring additional computation cost over training with smaller batches on data of the original dimensionality. The latent dimensionality of the VAE was chosen to be $7$ and the batch size for training the embedding was set to $5000$, as in the original parametric t-SNE paper \cite{parametric_tsne}. The choice of $7$ as the VAE latent dimensionality was deliberately made so that it would correspond to the largest number which is two orders of magnitude smaller than the original dimensionality. We have additionally included the embedding of data points obtained with the original implementation of parametric t-SNE for comparison in figure \ref{fig:hidden_layer}. Qualitatively and quantitatively an overall better embedding is achieved with less computation using our method.
+To show the efficacy of this modification to the learning procedure we train an embedding using the latent code directly. As we choose the dimensionality of the latent code to be more than two orders of magnitude smaller than that of the original data's it is possible for us to use batches of greater size to train the embedding network, without incurring additional computation cost over training with smaller batches on data of the original dimensionality. The latent dimensionality of the VAE was chosen to be $7$ and the batch size for training the embedding was set to $5000$, as in the original work on parametric t-SNE \cite{parametric_tsne}. The choice of $7$ as the VAE latent dimensionality was deliberately made so that it would correspond to the largest number which is two orders of magnitude smaller than the original dimensionality. We have additionally included the embedding of data points obtained with the original implementation of parametric t-SNE for comparison in figure \ref{fig:hidden_layer}. Qualitatively and quantitatively an overall better embedding is achieved with less computation using our method.
 
 \begin{figure}[!htb]
   \centering
@@ -783,7 +788,7 @@ To show the efficacy of this modification to the learning procedure we train an 
 \subsection{Inference with the Generative Model}
 \label{section:inference_with_the_generative_model}
 
-As an example of inference with the generative model discussed in \ref{section:inference_with_the_generative_model} we use the Cytometry B data set to train our combined model with two patients' data held out. The protein expression profile of Patient A's cells closely match that of other patients' in the training set, whereas Patient B's sample is from advanced cancer making it an outlier in relation to the data available during training.
+As an example of inference with the generative model discussed in \ref{section:inference_with_the_generative_model} we use the Cytometry B data set to train our combined model with two patients' data held out. The protein expression profile of Patient A's cells closely match that of other patients' in the training set, whereas Patient B's sample is from advanced cancer making it an outlier in relation to the data available during training. As these cells feature a distinct phenotype associated with a poor response to treatment, they might confer resistance to chemotherapy.
 
 To distinguish between outlier and inlier points in the obtained mapping we set a hard threshold of $\log p(\bx) < -150$ to separate between the two. In figure \ref{fig:cytometry_outliers} embeddings with both patient specific labeling and labeling obtained by thresholding are shown side by side. The high tumor purity sample of Patient B has almost completely been mapped to a small region corresponding to protein expression levels of cancer cells, whereas Patient A's mapping contains several distinct clusters of various cell types. Further, the labels obtained through thresholding indicate that the majority of cells in Patient B's sample are indeed considered as outliers by the model, in addition to a handful of visually poorly mapped points.
 
@@ -793,7 +798,7 @@ To distinguish between outlier and inlier points in the obtained mapping we set 
     \includegraphics[width=\textwidth]{images/scored.png} \\
     \includegraphics[width=\textwidth]{images/scored_zoomed.png}
   \end{tabular}
-  \caption{Detecting outliers in cytometry data. \textcolor{red}{[Rename patients to match text.]}}
+  \caption{Detecting outliers in cytometry data.}
   \label{fig:cytometry_outliers}
 \end{figure}
 
@@ -808,7 +813,7 @@ In Figure~\ref{fig:tirosh} we have visualized the data of \cite{tirosh} using ou
 
 From the results we can see that different tumor samples and cell types cluster well in the embedding. The separation of malignant cells from different patients to separate clusters reveals the heterogeneity of melanoma present in the different tumor samples.
 
-For each cell in the data set so called MITF- and AXL-program scores were computed from the relative expression levels of their corresponding gene sets. These scores aim to provide insight into the potential drug resistance mechanisms of malignant cells. In our embedding a clear gradient from high to low MITF- and AXL-program scores can be seen within the cluster of tumor cell clusters, further indicating that our method is able to highlight biologically meaningful variations in the data.
+For each cell in the data set so called MITF- and AXL-program scores were computed from the relative expression levels of their corresponding gene sets, as in \cite{tirosh}. These scores aim to provide insight into the potential drug resistance mechanisms of malignant cells \cite{mitf, mitf_axl}. In our embedding a clear gradient from high to low MITF- and AXL-program scores can be seen within the cluster of tumor cell clusters, further indicating that our method is able to highlight biologically meaningful variations in the data.
 
 Cell cycle analysis also reveals the presence of subclusters of cycling cells in our embedding. Cycling cells being cells which are undergoing cell division. The color gradient in the projection for cycling cells corresponds to the strength of the signal indicating cell cycling. Below a given threshold value for this signal, cells were classified as non-cycling.
 
