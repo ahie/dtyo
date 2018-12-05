@@ -85,7 +85,7 @@ The development of ever faster hardware for accelerating the computations needed
 
 Neural networks can be thought of as being large function compositions. Each neuron that is part of the network acts as a single function, taking as input the weighted output of other neurons connected to it and outputting the value of the neuron's \textit{activation function}. Neural networks can be classified into two main categories: feedforward and recurrent neural networks. Thinking of neurons and their connections in terms of graphs, where neurons represent vertices and edges represent the flow of data from one neuron to another, these two categories correspond to acyclic directed graphs and directed graphs that may contain cycles. In this work we will limit our focus to feedforward neural networks as the methods discussed do not make use of recurrent neural network structures.
 
-As an example, Figure~\ref{fig:nn} depicts a feedforward neural network\footnote{Note that bias neurons are omitted from the figure for simplicity.} taking input vectors $\bx$ of length $3$ and outputting vectors $\mathbf{y}$ of length $2$. The network can be seen to be split into three functionally distinct parts: an input layer, hidden layers, and an output layer. The input layer is directly fed the values to be run through the network. The hidden layers are formed by neurons connecting the input to the output layer. The output layer represents the result of the computation performed by the network. What this depicted neural network computes can be expressed with the equation
+As an example, Figure~\ref{fig:nn} depicts a feedforward neural network taking input vectors $\bx$ of length $3$ and outputting vectors $\mathbf{y}$ of length $2$.\footnote{Note that bias neurons have been omitted from the figure for simplicity.} The network can be seen to be split into three functionally distinct parts: an input layer, hidden layers, and an output layer. The input layer is directly fed the values to be run through the network. The hidden layers are formed by neurons connecting the input to the output layer. The output layer represents the result of the computation performed by the network. What this depicted neural network computes can be expressed with the equation
 
 $$\mathbf{y} = f_3(\bW_3 f_2(\bW_2 f_1(\bW_1 \bx + \mathbf{b}_1) + \mathbf{b}_2) + \mathbf{b}_3),$$
 
@@ -154,29 +154,35 @@ Even though autoencoders provide a powerful and scalable non-metric approach to 
   \label{fig:ae}
 \end{figure}
 
-\subsection{Information Entropy}
+\subsection{Information Theory}
 
 As a primer to variational inference, the main quantities of interest in information theory will be covered here, as they play a central role in all the subsequently discussed methods.
 
-The fundamental quantity of interest in information theory, entropy, is the average amount of information produced by a stochastic source. \note{In more concrete terms ... talk about relation to compression}
+Information theory is the study of quantifying the information produced by a stochastic source.
 
-Entropy is defined as the expected value of the negative log-probability of a random variable $\mathbf{X}$
+\note{Start from definition of self-information}
 
-$$H(p) = \mathbb{E}_{p(\bx)}[-\log p(\bx)].$$
+$$I_{p(\bx)}(\bx) = -\log p(\bx)$$
 
-The base of the logarithm determines the unit of information being considered, where popular choices are $2$ for bits and $e$ for nats. Using the formula defined above we can determine that a coin flip carries only one bit of information, whereas a roll of a 6-sided die carries approximately $2.58$ bits of information.
+The base of the logarithm determines the unit of information being considered, where popular choices are $2$ for bits and $e$ for nats. For convenience, we shall refer to bits as the unit of choice for the remainder of this section.
 
-\note{Include cross entropy here, defined as:}
+\note{Entropy, as the expectation of self-information of a stochastic source.}
+
+$$H(p) = \mathbb{E}_{p(\bx)}[I_{p(\bx)}(\bx)] = \mathbb{E}_{p(\bx)}[-\log p(\bx)].$$
+
+Using the formula defined above we can determine that the information entropy of a coin flip is $1$ bit, whereas the entropy of a 6-sided die roll is approximately $2.58$ bits.
+
+\note{Give encoding interpretation of entropy and include cross-entropy defined as:}
 
 $$H(p,q) = \mathbb{E}_{p(\bx)}[-\log q(\bx)]$$
 
 Relative entropy, also known as the Kullback-Leibler divergence, or KL-divergence for short, is a measure of dissimilarity between two probability distributions. For continuous probability distributions $p$ and $q$, the Kullback-Leibler divergence is defined as
 
-\note{Add the more practical explanation, which relates back to compression: $\dkl{p}{q}$ determines the average additional bits (or whichever unit is in use) needed for compression if $q$ is used as a surrogate for $p$.}
-
 \note{define dkl in terms of entropy and cross entropy:}
 
 $$\dkl{p}{q} = H(p,q) - H(p) = \mathbb{E}_{p(\bx)}[-\log \frac{q(\bx)}{p(\bx)}]$$
+
+\note{Add the more practical explanation, which relates back to compression: $\dkl{p}{q}$ determines the average additional bits (or whichever unit is in use) needed for compression if $q$ is used as a surrogate for $p$.}
 
 The following properties hold for KL-divergence:
 
@@ -271,7 +277,7 @@ This bound is better known as the \textit{evidence lower bound}, or ELBO for sho
 
 \subsection{Autoencoding Variational Bayes}
 
-VAEs extend autoencoders into probabilistic generative models. Instead of the deterministic encoding and decoding networks of traditional autoencoders, VAE encoders and decoders parameterize probability distributions. The encoder network parameterizes the distribution of the latent variable conditioned on its data, whereas the decoder parameterizes the data distribution conditioned on a latent variable.
+VAEs extend autoencoders into probabilistic generative models. Instead of the deterministic encoding and decoding networks of traditional autoencoders, VAE encoders and decoders parameterize probability distributions. The encoder network parameterizes the distribution of the latent variable $\bz$ conditioned on its data $\bx$, whereas the decoder parameterizes the data distribution conditioned on a latent variable.
 
 \note{Explain the relationship between latent variables, their distributions and why variational bayes is needed here. ... In terms of probability distributions the generative model $\ptheta(\bz) \ptheta(\bx \vert \bz)$ is parameterized by $\btheta$.}
 
