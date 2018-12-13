@@ -113,7 +113,7 @@ The backpropagation algorithm consists of two steps, the forward pass and the ba
 
 Various optimization methods can be used in conjunction with the backpropagation algorithm to perform the weight updates w.r.t. the computed gradients. The gradients themselves give the direction and magnitude the weights of the network should be updated to maximize the value of the value of the objective function for the given input. \note{On different optimization methods. Online/batch/stochastic GD, adaptive gradient methods, mention second order methods like \cite{kfac}?}
 
-As a simple example, we will consider the learning task of approximating a non-linear function with a neural network on a bounded domain. The function we aim to approximate is $f(x) = \sin x$ on the bounded domain $[0, 2\pi]$. As both the domain and range of the function being approximated are 1-dimensional, both the input and output layer are chosen to contain one node each, while 3 hidden layers of 10 nodes each with the $\tanh$ activation function applied to them are used. We train the neural network using standard SGD to optimize the \textit{mean squared error} (MSE) objective:
+As a simple example, we will consider the learning task of approximating a non-linear function with a neural network on a bounded domain. The function we aim to approximate is $f(x) = \sin x$ on the bounded domain $x \in [0, 2\pi]$. As both the domain and range of the function being approximated are 1-dimensional, both the input and output layer are chosen to contain one node each, while 3 hidden layers of 10 nodes each with the $\tanh$ activation function applied to them are used. We train the neural network using standard SGD to optimize the \textit{mean squared error} (MSE) objective:
 
 $$\mathcal{L}_{MSE} = \frac{1}{N} \sum_{i=1}^{N} \norm{\sin x^{(i)} - y^{(i)}}^2,$$
 
@@ -126,7 +126,7 @@ Several difficulties still arise when attempting to utilize neural networks, e.g
 \begin{figure}[!htb]
   \centering
   \includegraphics[width=0.8\textwidth]{images/function_approximation.png}
-  \caption{Approximating $\sin x$ on the bounded domain $[0, 2\pi]$ with a neural network.}
+  \caption{Approximating $\sin x$ on the bounded domain $x \in [0, 2\pi]$ with a neural network.}
   \label{fig:function_approximation}
 \end{figure}
 
@@ -165,7 +165,7 @@ Even though AEs provide a powerful and scalable non-metric\footnote{Unlike most 
 
 As a primer to variational inference, the main quantities of interest in information theory will be covered here, as they play a central role in all the subsequently discussed methods.
 
-Information theory is the study of quantifying the information produced by a stochastic source.
+\note{Information theory is the study of quantifying the information produced by a stochastic source.}
 
 \note{Start from definition of self-information}
 
@@ -179,17 +179,17 @@ $$H(p) = \mathbb{E}_{p(\bx)}[I_{p(\bx)}(\bx)] = \mathbb{E}_{p(\bx)}[-\log p(\bx)
 
 Using the formula defined above we can determine that the information entropy of a coin flip is $1$ bit, whereas the entropy of a 6-sided die roll is approximately $2.58$ bits.
 
-\note{Give encoding interpretation of entropy and include cross-entropy defined as:}
+\note{Give encoding interpretation of entropy and include cross-entropy, defined as:}
 
 $$H(p,q) = \mathbb{E}_{p(\bx)}[-\log q(\bx)]$$
 
-Relative entropy, also known as the Kullback-Leibler divergence, or KL-divergence for short, ties together the concepts of entropy and cross-entropy. \note{Add the more practical explanation, which relates back to compression: $\dkl{p}{q}$ determines the average additional bits (or whichever unit is in use) needed for compression if $q$ is used as a surrogate for $p$.}
+Relative entropy, also known as the Kullback-Leibler divergence, or KL-divergence for short, ties together the concepts of entropy and cross-entropy. \note{Add the more practical explanation, which relates back to encoding: $\dkl{p}{q}$ determines the average additional bits (or whichever unit is in use) needed for encoding if $q$ is used as a surrogate for $p$.}
 
 \note{define dkl in terms of entropy and cross entropy:}
 
 $$\dkl{p}{q} = H(p,q) - H(p) = \mathbb{E}_{p(\bx)}[-\log \frac{q(\bx)}{p(\bx)}]$$
 
-A second interpretation for KL-divergence is that of a measure of dissimilarity between two probability distributions. As such, \tred{...}
+A second interpretation for KL-divergence is that of a measure of dissimilarity between two probability distributions. As such, \tred{...used as optimization objective to match distributions...}
 
 The following properties hold for KL-divergence:
 
@@ -466,7 +466,7 @@ As $f_{\bW}(\bx_i) = \mathbf{y}_i$, Equation~\ref{eq:c_tsne_grad} is used to com
 \chapter{Method}
 \label{ch:method}
 
-Scalable, non-linear dimensionality reduction methods that are robust to the curse of dimensionality while being able to produce meaningful visualizations for exploratory data analysis \note{".. don't really exist .."}. Even though VAEs address issues with scalability and reliance on distance metrics, the resulting latent space representations do not allow for as good separation of clusters as other methods, such as t-SNE or UMAP \cite{umap}, which will later be demonstrated in Section~\ref{section:comparisons}. On the other hand, PTSNE is in theory capable of achieving embeddings that are comparable to t-SNE, but in practice, the optimization often results in much noisier embeddings, where for instance cluster boundaries are not as clearly visible.
+Scalable, non-linear dimensionality reduction methods that are robust to the curse of dimensionality while being able to produce meaningful visualizations for exploratory data analysis \note{".. don't really exist .."}. Even though VAEs address issues with scalability and reliance on distance metrics, the resulting latent space representations do not allow for as good separation of clusters as other methods, such as t-SNE or UMAP \cite{umap}, which will later be demonstrated in Section~\ref{section:comparisons}. On the other hand, PTSNE is in theory capable of achieving embeddings that are comparable to t-SNE, but in practice, the optimization often results in noisier embeddings, where for instance cluster boundaries are not as clearly visible.
 
 The method proposed in this work involves combining the VAE model with PTSNE to produce a general framework for improved parametric dimensionality reduction for data visualization. By combining the two models in a way where the strengths of both methods compliment each other the weaknesses of each individual method are diminished.
 
@@ -701,7 +701,7 @@ Qualitatively the embeddings trained on the original data remain noisier than th
 \subsection{Comparisons}
 \label{section:comparisons}
 
-We now compare the proposed method to other parametric dimensionality reduction methods, namely PCA and VAE. In addition we also consider two non-parametric dimensionality reduction methods, t-SNE and the recently proposed method UMAP \cite{umap}, which had been demonstrated to be able to produce embeddings comparable to t-SNE while being more efficient to optimize in practice.
+We now compare the proposed method to other parametric dimensionality reduction methods, namely PCA and VAE. In addition we also consider two non-parametric dimensionality reduction methods, t-SNE and the recently proposed method UMAP \cite{umap}, which had been demonstrated to be able to produce embeddings comparable to t-SNE while being more efficient to optimize in practice. Notably, the use of UMAP in single-cell data analysis has recently garnered great interest as an alternative to t-SNE \cite{umap_single_cell}.
 
 For the comparisons we will be using the Cytometry A data set. As evaluation criteria, similarly to the previous section, both trustworthiness and 1-NN classification accuracy are used. In addition to comparing the quality of the embeddings, the runtime performance of the different methods are studied. Our goal is to demonstrate that our method produces competitive embeddings as well as has superior scalability.
 
