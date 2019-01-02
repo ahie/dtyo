@@ -1,8 +1,6 @@
 \chapter{Introduction}
 \label{ch:introduction}
 
-\note{Most of this chapter is probably going to be rewritten}
-
 At present, ever larger sets of increasingly higher dimensional data are being produced, gathered and analyzed. As a consequence, several challenges arise when analyses are carried out on these vast amounts of high dimensional data. This recent surge of data prompts not only for the development of methods for data analysis capable of scaling to massive data sets but ones which are simultaneously capable of dealing with challenges inherent to high dimensional data.
 
 In literature, problems arising from high dimensionality are collectively referred to as the \textit{curse of dimensionality}. Particularly in machine learning the following aspects of high dimensionality are problematic
@@ -100,9 +98,7 @@ The gradients themselves give the direction and magnitude the weights of the net
 
 Various optimization methods in addition to standard gradient descent can be used in conjunction with the backpropagation algorithm to perform the weight updates w.r.t. the computed gradients. Computing the gradient for the whole data set available during training can become very costly as the size of the data set increases. Instead, it is possible to make a trade off between the accuracy of the gradient update and computation time by using a single data point to compute an approximate of the entire batch gradient. Running gradient descent on single random samples from the entire data set has been termed stochastic gradient descent (SGD). An alternative tradeoff is to perform so called mini-batch SGD, where random subsets of the entire data set are used instead of single samples to approximate the gradient. The SGD and mini-batch SGD terminology is often conflated in literature, and as mini-batch SGD is the dominant method used, we will therefore refer to it as simply SGD.
 
-In addition to how the gradient is computed, methods that adapt how the gradient is applied when performing updates, aptly named adaptive gradient methods, are in common use presently. By incorporating past gradient values to the SGD procedure \tred{...}
-
-Other methods include adapting the learning rate for each weight of the network separately according to their past gradient values, some commonly used variants of this are AdaGrad \cite{adagrad}, RMSProp \cite{rmsprop} and Adam \cite{rmsprop}. 
+In addition to how the gradient is computed, methods that adapt how the gradient is applied when performing updates, aptly named adaptive gradient methods, are in common use presently. By incorporating past gradient values to the SGD procedure, the approximation error at each step is diminished. These methods include adapting the learning rate for each weight of the network separately according to their past gradient values, some commonly used variants of this are AdaGrad \cite{adagrad}, RMSProp \cite{rmsprop} and Adam \cite{rmsprop}.
 
 As a simple example of learning in neural networks, we will consider the learning task of approximating a nonlinear function with a neural network on a bounded domain. The function we aim to approximate is $f(x) = \sin x$ on the bounded domain $x \in [0, 2\pi]$. As both the domain and range of the function being approximated are 1-dimensional, both the input and output layer are chosen to contain one neuron each, while 3 hidden layers of 10 neurons each with the $\tanh$ activation function applied to them are used. We train the neural network using standard SGD to optimize the \textit{mean squared error} (MSE) objective:
 
@@ -116,13 +112,9 @@ Several difficulties still arise when attempting to utilize neural networks, e.g
 
 A problem that has plagued neural network training is the \textit{vanishing gradient problem}, where neural network training essentially halts as gradients become vanishingly small during training. Through the use of better network initialization methods \cite{xavier_initializer}, the use of non-saturating non-linearities, such as \cite{relu}, and special network structures, such as ResNet \cite{resnet}, the vanishing gradient problem has been mitigated in practice.
 
-The aforementioned adaptive gradient methods are an example of methods developed with the aim to improve the speed of convergence. Others include batch normalization \cite{batch_normalization}.
+The aforementioned adaptive gradient methods are an example of methods developed with the aim to improve the speed of convergence. Others methods aimed to improve the speed of convergence includes batch normalization \cite{batch_normalization}, which in addition has a regularizing effect on the network being trained. Another commonly applied, general method developed for the regularization of neural networks is dropout \cite{dropout}, where during training of the network random neurons are dropped from the network to reduce their co-adaptation to the training data, and in turn improving generalization to unseen data.
 
-General methods developed for the regularization of neural networks include dropout \cite{dropout}, where by during training of the network random neurons are dropped from the network 
-
-\note{regularization, \cite{dropout, batch_normalization}}
-
-As an active area of research, several open problems still remain to be solved. For instance, how the choice of batch size and learning rate affect the results of the optimization \cite{large_batch_size_generalization, learning_rate_vs_batch_size}, how adaptive gradient methods are potentially detrimental to generalization in certain settings \cite{marginal_value_of_adaptive_gradient_methods}, and how little rigorous theoretical insight there is into even established methods like batch normalization \cite{how_batch_norm_works}.
+As neural networks are an active area of research, several open problems still remain to be solved. For instance, how the choice of batch size and learning rate affect the results of the optimization \cite{large_batch_size_generalization, learning_rate_vs_batch_size}, how adaptive gradient methods are potentially detrimental to generalization in certain settings \cite{marginal_value_of_adaptive_gradient_methods}, and how little rigorous theoretical insight there is into even established methods like batch normalization \cite{how_batch_norm_works}.
 
 \begin{figure}[!htb]
   \centering
