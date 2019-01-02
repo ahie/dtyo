@@ -3,14 +3,15 @@
 
 At present, ever larger sets of increasingly higher dimensional data are being produced, gathered and analyzed. As a consequence, several challenges arise when analyses are carried out on these vast amounts of high dimensional data. This recent surge of data prompts not only for the development of methods for data analysis capable of scaling to massive data sets but ones which are simultaneously capable of dealing with challenges inherent to high dimensional data.
 
+\note{Single-cell measurement technologies as example to previous paragraph.}
+
 In literature, problems arising from high dimensionality are collectively referred to as the \textit{curse of dimensionality}. Particularly in machine learning the following aspects of high dimensionality are problematic
 
 \begin{itemize}
-\item distances between pairs of points become less distinguished as dimensionality of the space increases \cite{on_the_surprising_behavior_of_distance_metrics}, rendering methods based on distance metrics at a disadvantage.
-\item The volume of a space grows exponentially along with the number of dimensions. This leads to even large data sets appearing sparse in the feature space. Efficient sampling requires a lot of points
-\item need for more training data, k-means example \cite[p.~263]{understanding_machine_learning}
-\item algorithm complexity depends on the dimensionality of data being processed
-\item from a more practical perspective, high dimensional data by itself is hard to directly reason about and difficult to visualize in any meaningful sense, as simple statistics will often not be able to capture adequate information of the data distribution.
+\item Distances between pairs of points become less distinguished as dimensionality of the space increases \cite{on_the_surprising_behavior_of_distance_metrics}, rendering methods based on distance metrics at a disadvantage.
+\item The volume of a space grows exponentially along with the number of dimensions. This leads to even large data sets appearing sparse in the feature space. Efficient sampling requires a lot of points and in machine learning applications this translates into a need for more training data. For instance, in the general case a k-NN classifier requires a training set that grows exponentially with its dimensionality \cite[p.~263]{understanding_machine_learning}.
+\item Algorithmic complexity depends on the dimensionality of data being processed.
+\item From a more practical perspective, high dimensional data by itself is hard to directly reason about and difficult to visualize in any meaningful sense, as simple statistics will often not be able to capture adequate information of the data distribution.
 \end{itemize}
 
 The given listing is not exhaustive, but rather serves as an illustration for the variety of issues that can be encountered when working with high dimensional data.
@@ -18,6 +19,8 @@ The given listing is not exhaustive, but rather serves as an illustration for th
 To tackle problems associated with high dimensional data a common approach is to seek for a lower dimensional representation of the data which retains its salient features. This process, known as dimensionality reduction, can be split into two different approaches, namely \textit{feature selection} and \textit{feature extraction}.
 
 The so-called manifold hypothesis \cite{manifold_hypothesis} often holds for real-world data sets. The manifold hypothesis posits that the high dimensional data in question lies near a much lower dimensional manifold. As an example, take ... . This in turn implies that if it is possible to learn this manifold, the original data could be described in far fewer dimensions with minimal loss of information. This, together with the classical Johnson-Lindenstrauss lemma \cite{johnson_lindenstrauss}, which provides general bounds to the error associated with dimensionality reduction between points of two Euclidean spaces, give a strong indication that for many data sets substantial dimensionality reduction is not only feasible, but that most of the information within the data can be captured with fewer parameters.
+
+\note{in addition to large volume and being high dimensional, single-cell data..}
 
 Several different methods for dimensionality reduction have been developed over the years. Arguably the most well known and applied dimensionality reduction method in practice is Principal Component Analysis (PCA), developed independently by Karl Pearson \cite{pca_1} and Harold Hotelling \cite{pca_2} in the early 1900s. Although very efficient to compute and providing easily interpretable results, PCA however suffers from the fact that it only takes into account linear relationships in the data it is given, making it nonideal for ... . The fact that PCA only aims to find an orthogonal projection that maximizes the variance... local structure of the data is poorly preserved. On the other hand, methods that aim to preserve local structure of data typically suffer from poor scalability to large data sets and the curse of dimensionality in several ways, such as ... .
 
