@@ -4,6 +4,9 @@
 At present, ever larger sets of increasingly higher dimensional data are being produced, gathered and analyzed. As a consequence, several challenges arise when analyses are carried out on these vast amounts of high dimensional data. This recent surge of data prompts not only for the development of methods for data analysis capable of scaling to massive data sets but ones which are simultaneously capable of dealing with challenges inherent to high dimensional data.
 
 \note{Single-cell measurement technologies as example to previous paragraph.}
+Particularly in research pertaining to biological phenomena, the development of high throughput measurement technologies enabling the genome-wide quantification of ...
+
+These technologies generate massive high dimensional data sets, e.g. modern cytometry technologies can produce measurements of nearly 100 surface protein markers for hunreds of thousands of cells for a single tissue sample while the transcriptome of single cells can be measured for 50000 genes for 10000 cells for a given sample. As medical studies typically involve hundreds of different samples, tools to effectively analyze and interpret these data remains a limiting factor in current research.
 
 In literature, problems arising from high dimensionality are collectively referred to as the \textit{curse of dimensionality}. Particularly in machine learning the following aspects of high dimensionality are problematic
 
@@ -18,11 +21,11 @@ The given listing is not exhaustive, but rather serves as an illustration for th
 
 To tackle problems associated with high dimensional data a common approach is to seek for a lower dimensional representation of the data which retains its salient features. This process, known as dimensionality reduction, can be split into two different approaches, namely \textit{feature selection} and \textit{feature extraction}.
 
-The so-called manifold hypothesis \cite{manifold_hypothesis} often holds for real-world data sets. The manifold hypothesis posits that the high dimensional data in question lies near a much lower dimensional manifold. As an example, take ... . This in turn implies that if it is possible to learn this manifold, the original data could be described in far fewer dimensions with minimal loss of information. This, together with the classical Johnson-Lindenstrauss lemma \cite{johnson_lindenstrauss}, which provides general bounds to the error associated with dimensionality reduction between points of two Euclidean spaces, give a strong indication that for many data sets substantial dimensionality reduction is not only feasible, but that most of the information within the data can be captured with fewer parameters.
+The so-called manifold hypothesis \cite{manifold_hypothesis} often holds for real-world data sets. The manifold hypothesis posits that the high dimensional data in question lies near a much lower dimensional manifold. As an example, take ... . This in turn implies that if it is possible to learn this manifold, the original data could be described in far fewer dimensions with minimal loss of information. This, together with the classical Johnson-Lindenstrauss lemma \cite{johnson_lindenstrauss}, which provides general bounds to the error associated with dimensionality reduction between points of two Euclidean spaces, give a strong indication that for many data sets substantial dimensionality reduction is not only feasible, but that most of the information within high dimensional data sets can be captured with fewer parameters.
 
 \note{in addition to large volume and being high dimensional, single-cell data..}
 
-Several different methods for dimensionality reduction have been developed over the years. Arguably the most well known and applied dimensionality reduction method in practice is Principal Component Analysis (PCA), developed independently by Karl Pearson \cite{pca_1} and Harold Hotelling \cite{pca_2} in the early 1900s. Although very efficient to compute and providing easily interpretable results, PCA however suffers from the fact that it only takes into account linear relationships in the data it is given, making it nonideal for ... . The fact that PCA only aims to find an orthogonal projection that maximizes the variance... local structure of the data is poorly preserved. On the other hand, methods that aim to preserve local structure of data typically suffer from poor scalability to large data sets and the curse of dimensionality in several ways, such as ... .
+Several different methods for dimensionality reduction have been developed over the years. Arguably the most well known and applied dimensionality reduction method in practice is Principal Component Analysis (PCA), developed independently by Karl Pearson \cite{pca_1} and Harold Hotelling \cite{pca_2} in the early 1900s. Although very efficient to compute and providing easily interpretable results, PCA suffers from the fact that it only takes into account linear relationships in the data it is given, making it nonideal for ... . The fact that PCA only aims to find an orthogonal projection that maximizes the variance... local structure of the data is poorly preserved. On the other hand, methods that aim to preserve local structure of data typically suffer from poor scalability to large data sets and the curse of dimensionality in several ways, such as ... .
 
 \section{Scope and Objective}
 
@@ -460,7 +463,7 @@ As $f_{\bW}(\bx_i) = \mathbf{y}_i$, Equation~\ref{eq:c_tsne_grad} is used to com
 \chapter{Method}
 \label{ch:method}
 
-Scalable, nonlinear dimensionality reduction methods that are robust to the curse of dimensionality while being able to produce meaningful visualizations for exploratory data analysis \tred{".. don't really exist .."}. Even though VAEs address issues with scalability and reliance on distance metrics, the resulting latent space representations do not allow for as good separation of clusters as other methods, such as t-SNE or UMAP \cite{umap}, which will later be demonstrated in Section~\ref{section:comparisons}. On the other hand, PTSNE is in theory capable of achieving embeddings that are comparable to t-SNE, but in practice, the optimization often results in noisier embeddings, where for instance cluster boundaries are not as clearly visible.
+Methods for parametric nonlinear dimensionality reduction that are both scalable to large data sets and robust to the curse of dimensionality while being able to produce meaningful visualizations for exploratory data analysis do not currently exist, but rather each currently prominent method makes tradeoffs between the properties mentioned. Even though VAEs address issues with scalability and reliance on distance metrics, the resulting latent space representations do not allow for as good separation of clusters as other methods, such as t-SNE or UMAP \cite{umap}, which will later be demonstrated in Section~\ref{section:comparisons}. On the other hand, PTSNE is in theory capable of achieving embeddings that are comparable to t-SNE, but in practice, the optimization often results in noisier embeddings, where for instance cluster boundaries are not as clearly visible.
 
 The method proposed in this work involves combining the VAE model with PTSNE to produce a general framework for improved parametric dimensionality reduction for data visualization. By combining the two models in a way where the strengths of both methods compliment each other the weaknesses of each individual method are diminished.
 
@@ -473,7 +476,7 @@ As the aim of the method is to take advantage of the strengths of both VAE and P
 \note{Pros of VAE: generative model, stochasticity brings robustness, scalable parametric nonlinear dimensionality reduction}
 \note{Pros of PTSNE: theoretically capable of learning as good projections as t-SNE, which is widely considered as the best option for data visualization. Also scalable and parametric, if trainable with smaller batch sizes.}
 
-Using the notation introduced in Chapter~\ref{ch:background_and_related_work}, we can summarize the learning procedure as Algorithm~\ref{alg:learning}. \tred{In essence, training the model is done in two phases...}
+Using the notation introduced in Chapter~\ref{ch:background_and_related_work}, we can summarize the learning procedure as Algorithm~\ref{alg:learning}. \tred{In essence, training the model is done in two phases:}
 
 \begin{figure}[!htb]
   \centering
@@ -499,7 +502,7 @@ Using the notation introduced in Chapter~\ref{ch:background_and_related_work}, w
         \EndFor
         \State $\mathcal{L}(\btheta, \bphi; \bxi) \gets \text{ Compute estimate with either equation \ref{eq:vae_loss} or \ref{eq:vae_loss_2} }$
       \EndFor
-      \State $\btheta, \bphi \gets \text{ Updata parameters by ascending gradient } \nabla_{\btheta, \bphi} \frac{N}{M_{\mathsf{VAE}}} \sum_{i=1}^{M_{\mathsf{VAE}}} \mathcal{L}(\btheta, \bphi; \bxi)$
+      \State $\btheta, \bphi \gets \text{ Update parameters by ascending gradient } \nabla_{\btheta, \bphi} \frac{N}{M_{\mathsf{VAE}}} \sum_{i=1}^{M_{\mathsf{VAE}}} \mathcal{L}(\btheta, \bphi; \bxi)$
     \EndWhile
     \While{PTSNE not converged}
       \State $\mathbf{X} \gets \text{ Random minibatch of size } M_{\mathsf{PTSNE}} \text{ from } \mathbf{D}$
@@ -516,7 +519,7 @@ Using the notation introduced in Chapter~\ref{ch:background_and_related_work}, w
 
 \note{As we can draw infinite samples from the continuous distribution $p_{\bphi}(\bz \vert \bxi)$ with $g_{\bphi}(\bxi, \eil)$ ...}
 
-After training, a deterministic projection for all subsequent points can be obtained with Algorithm~\ref{alg:projection}. For encoder and decoder network pairs that both directly parameterize the mean of a distribution, computing the expectation can be done exactly with zero overhead.
+After training, a deterministic projection for all subsequent points can be obtained with Algorithm~\ref{alg:projection}. For encoder and decoder network pairs that both directly parameterize the mean of a distribution, computing the expectation can be done exactly and with zero overhead.
 
 \begin{algorithm}[H]
   \caption{Deterministic projection.}
@@ -851,11 +854,11 @@ With such a high dimensional data set, the effect of the curse of dimensionality
 
 By combining two dimensionality reduction methods: a stochastic variant of autoencoders and a neural network parameterized variant of t-SNE, we demonstrated a method for parametric dimensionality reduction exhibiting various advantageous properties in comparison to either method applied by itself. \note{.. recap results ..}
 
-In addition, two applications of the method to single-cell data analysis were demonstrated in this work. The method was applied to both moderately high dimensional proteomic data and extremely high dimensional transcriptomic data. \note{.. recap more results ..}
+In addition, two applications of the method to single-cell data analysis were demonstrated in this work. The method was applied to both moderately high dimensional proteomic data and extremely high dimensional transcriptomic data sets. \note{.. recap more results ..}
 
-\note{.. Why development of new methods is important [to better analyze ever more complex data, gathered with continuously developing technology] ..}
+\note{.. Why development of new methods is important [to better analyze ever more complex data, gathered with continuously developing technology] .. [from notes: we believe that through such improvements in methodology, molecular data can be more efficiently translated into biological insights that benefit cancer research and consequently improve patient survival in cancers with poor current survival odds]}
 
-\note{.. Future work .. [Employing different VAE architectures (e.g. normalizing flows and denoising VAE), more rigorous analysis of the method to support the empirical evidence, test on data sets with higher intrinsic dimensionality]}
+\note{.. Future work .. [Employing different VAE architectures (e.g. $\beta$-VAE, normalizing flows and denoising VAE), more rigorous analysis of the method to support the empirical evidence, test on data sets with higher intrinsic dimensionality]}
 
 \ifnameyear
   \bibliographystyle{babapaliktutnat}
