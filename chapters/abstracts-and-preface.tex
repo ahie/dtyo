@@ -1,7 +1,22 @@
 \thesisdescription{Master of Science Thesis}
 \begin{abstract}
 
-\textcolor{red}{TODO}
+\textcolor{red}{TODO, incomplete}
+
+Current generation biological measurement technologies enable quantifying cellular characteristics and processes at great resolution. [some concrete numbers?]
+
+Dimensionality reduction is commonly employed in the analysis of such high dimensional molecular data, either as a preprocessing step for further downstream analysis or for purposes of exploratory data analysis by visualizing the data in very low dimensions.
+
+However, these vast amounts of high dimensional data pose several challenges to dimensionality reduction methods in common use today.
+\begin{itemize}
+\item Linear methods like PCA are incapable of capturing the nonlinear, heteroscedastic nature of the data
+\item The computational complexity of nonlinear methods such as t-SNE becomes an obstacle
+\item In addition, the prevailing nonlinear methods are based on distances, rendering them prone to the curse of dimensionality
+\end{itemize}
+
+In this work a method for nonlinear dimensionality reduction is proposed which aims to address these issues. By building on top of a stochastic variant of autoencoder neural networks [... benefits stemming from the stochastic model ...]
+
+The proposed method is compared to existing methods with favorable results in terms of its scalability to large data sets, robustness to sparse and corrupt data as well as its ability to combat the curse of dimensionality. Additionally, the practical application of the proposed method to two single-cell data sets is demonstrated.
 
 \end{abstract}
 
